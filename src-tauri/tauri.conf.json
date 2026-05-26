@@ -23,12 +23,15 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self' ipc: http://ipc.localhost; connect-src 'self' http://localhost:1420 http://127.0.0.1:1420 https://celestrak.org https://www.celestrak.org https://*.celestrak.org https://tle.ivanstanojevic.me https://raw.githubusercontent.com https://retlector.eu ipc: http://ipc.localhost; img-src 'self' asset: http://asset.localhost blob: data:; style-src 'self' 'unsafe-inline'"
+      "csp": "default-src 'self' ipc: http://ipc.localhost; connect-src 'self' http://localhost:1420 http://127.0.0.1:1420 http://192.168.100.1 https://celestrak.org https://www.celestrak.org https://*.celestrak.org https://tle.ivanstanojevic.me https://raw.githubusercontent.com https://retlector.eu ipc: http://ipc.localhost; img-src 'self' asset: http://asset.localhost blob: data:; style-src 'self' 'unsafe-inline'"
     }
   },
   "bundle": {
     "active": true,
     "targets": "all",
+    "iOS": {
+      "infoPlist": "Info.ios.plist"
+    },
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

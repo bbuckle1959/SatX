@@ -519,3 +519,249 @@
   color: #6d7f9f;
   font-size: 0.82rem;
 }
+
+.search-wrap {
+  padding: 0.5rem 1.25rem 0.35rem;
+}
+
+.search-label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.4rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #7f91b0;
+}
+
+.search-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #243049;
+  background: #0d1420;
+  color: #e8edf5;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.search-input::placeholder {
+  color: #5a6d8f;
+}
+
+.search-input:hover,
+.search-input:focus {
+  border-color: #3d6cf5;
+}
+
+/* —— Mobile: full-viewport globe + bottom sheet —— */
+
+@media (max-width: 767px) {
+  .app--mobile {
+    position: relative;
+    flex-direction: column;
+    height: 100dvh;
+    width: 100vw;
+  }
+
+  .app--mobile .visualizer {
+    position: absolute;
+    inset: 0;
+    flex: none;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+
+  .app--mobile .visualizer-overlay {
+    top: max(0.5rem, env(safe-area-inset-top, 0px));
+    left: 0.5rem;
+    right: auto;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+  }
+
+  .app--mobile .overlay-pill {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.55rem;
+  }
+}
+
+.mobile-sheet-host {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+}
+
+.mobile-sheet-host > * {
+  pointer-events: auto;
+}
+
+.bottom-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 28;
+  border: none;
+  padding: 0;
+  margin: 0;
+  background: rgba(4, 8, 14, 0.45);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.32s cubic-bezier(0.32, 0.72, 0, 1),
+    visibility 0.32s;
+  pointer-events: none;
+}
+
+.bottom-sheet-backdrop--visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.bottom-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 32;
+  display: flex;
+  flex-direction: column;
+  max-width: 100vw;
+  border-radius: 16px 16px 0 0;
+  border: 1px solid #243049;
+  border-bottom: none;
+  background: linear-gradient(180deg, #0e1522 0%, #090e16 100%);
+  box-shadow:
+    0 -12px 40px rgba(0, 0, 0, 0.45),
+    0 -2px 0 rgba(61, 108, 245, 0.12);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  transition:
+    height 0.36s cubic-bezier(0.32, 0.72, 0, 1),
+    transform 0.36s cubic-bezier(0.32, 0.72, 0, 1);
+  will-change: height, transform;
+  touch-action: none;
+}
+
+.bottom-sheet--dragging {
+  transition: none;
+}
+
+.bottom-sheet-handle {
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.75rem 0.55rem;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.bottom-sheet-handle:active {
+  cursor: grabbing;
+}
+
+.bottom-sheet-grabber {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 4px;
+  border-radius: 999px;
+  background: #3d4f6f;
+}
+
+.bottom-sheet-handle-metrics {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+  min-width: 0;
+}
+
+.sheet-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.sheet-metric-label {
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6d7f9f;
+}
+
+.sheet-metric-value {
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #e8edf5;
+}
+
+.sheet-metric-value--truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sheet-metric--servicing .sheet-metric-value {
+  color: #fbbf24;
+}
+
+.bottom-sheet-chevron {
+  flex-shrink: 0;
+  color: #7f91b0;
+  transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.bottom-sheet-chevron--up {
+  transform: rotate(180deg);
+}
+
+.bottom-sheet-body {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar--sheet {
+  flex: 1;
+  min-height: 0;
+  max-width: none;
+  min-width: 0;
+  width: 100%;
+  border: none;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar--sheet .metrics {
+  display: none;
+}
+
+.sidebar--sheet .sidebar-header {
+  padding-top: 0.35rem;
+}
+
+.sidebar--sheet .sidebar-header h1 {
+  font-size: 1rem;
+}
+
+.sidebar--sheet .satellite-details {
+  max-height: min(36vh, 14rem);
+}

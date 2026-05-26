@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:host": "vite --host --port 1420 --strictPort",
     "build": "node scripts/ensure-tauri2.mjs && tsc && vite build",
     "preview": "vite preview",
     "ensure:tauri2": "node scripts/ensure-tauri2.mjs",
@@ -13,7 +14,9 @@
     "pretauri:build": "node scripts/ensure-tauri2.mjs",
     "tauri": "tauri",
     "tauri:dev": "scripts\\tauri-dev.cmd",
-    "tauri:build": "scripts\\tauri-dev.cmd build"
+    "tauri:build": "scripts\\tauri-dev.cmd build",
+    "tauri:android:dev": "scripts\\tauri-android-dev.cmd",
+    "tauri:android:build": "scripts\\tauri-android-build.cmd"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",

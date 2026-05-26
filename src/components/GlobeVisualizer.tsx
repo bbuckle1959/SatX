@@ -25,9 +25,7 @@ import {
 } from '../lib/satelliteMarkerGeometry';
 import earthTextureUrl from '../assets/earth_day.jpg';
 
-import { GLOBE_MAX_INSTANCES } from '../lib/globeLimits';
-
-const MAX_INSTANCES = GLOBE_MAX_INSTANCES;
+import { getMobileGlobeRenderProfile } from '../lib/mobileGlobe';
 const MARKER_UP = new THREE.Vector3(0, 1, 0);
 const MARKER_DIRECTION = new THREE.Vector3();
 const MARKER_RADIAL_BIAS = GLOBE_RADIAL_BIAS;
@@ -78,9 +76,6 @@ function applyMarkerOrientation(
 
   dummy.quaternion.identity();
 }
-/** Sphere radius used only during pointer raycast (not rendered). */
-const PICK_RADIUS = SATELLITE_MARKER_RADIUS * 4;
-
 /** Bundled by Vite (`src/assets`) so path works in dev, preview, and Tauri. */
 const EARTH_TEXTURE_URL = earthTextureUrl;
 
@@ -99,6 +94,7 @@ interface GlobeSceneProps {
   userLocation: UserLocation | null;
   onSelectSatelliteRef: RefObject<(id: string | null) => void>;
   onRenderFps: (fps: number) => void;
+  isMobile: boolean;
 }
 
 interface SatelliteInstancesProps {
@@ -112,12 +108,30 @@ interface SatelliteInstancesProps {
   visibleInstanceIdsRef: RefObject<string[]>;
   selectedScenePosRef: RefObject<{ x: number; y: number; z: number } | null>;
   onSelectSatelliteRef: RefObject<(id: string | null) => void>;
+  maxInstances: number;
+  pickRadius: number;
 }
 
-function EarthPlaceholder() {
+function MobileRaycasterTuning({
+  pointsThreshold,
+}: {
+  pointsThreshold: number;
+}) {
+  const { raycaster } = useThree();
+
+  useEffect(() => {
+    raycaster.params.Points.threshold = pointsThreshold;
+    raycaster.params.Line.threshold = pointsThreshold * 0.65;
+    raycaster.params.Mesh.threshold = pointsThreshold * 0.5;
+  }, [raycaster, pointsThreshold]);
+
+  return null;
+}
+
+function EarthPlaceholder({ segments }: { segments: number }) {
   return (
     <mesh>
-      <sphereGeometry args={[GLOBE_RADIUS, 48, 48]} />
+      <sphereGeometry args={[GLOBE_RADIUS, segments, segments]} />
       <meshBasicMaterial color="#1a4a7a" toneMapped={false} />
     </mesh>
   );
@@ -126,8 +140,10 @@ function EarthPlaceholder() {
 /** Texture + meshBasicMaterial so the map is always visible (not washed out by lights). */
 function EarthGlobeTextured({
   onSelectSatelliteRef,
+  segments,
 }: {
   onSelectSatelliteRef: RefObject<(id: string | null) => void>;
+  segments: number;
 }) {
   const { gl } = useThree();
   const earthMap = useTexture(EARTH_TEXTURE_URL);
@@ -145,7 +161,7 @@ function EarthGlobeTextured({
         onSelectSatelliteRef.current(null);
       }}
     >
-      <sphereGeometry args={[GLOBE_RADIUS, 48, 48]} />
+      <sphereGeometry args={[GLOBE_RADIUS, segments, segments]} />
       <meshBasicMaterial map={earthMap} toneMapped={false} />
     </mesh>
   );
@@ -153,12 +169,17 @@ function EarthGlobeTextured({
 
 function EarthGlobe({
   onSelectSatelliteRef,
+  segments,
 }: {
   onSelectSatelliteRef: RefObject<(id: string | null) => void>;
+  segments: number;
 }) {
   return (
-    <Suspense fallback={<EarthPlaceholder />}>
-      <EarthGlobeTextured onSelectSatelliteRef={onSelectSatelliteRef} />
+    <Suspense fallback={<EarthPlaceholder segments={segments} />}>
+      <EarthGlobeTextured
+        onSelectSatelliteRef={onSelectSatelliteRef}
+        segments={segments}
+      />
     </Suspense>
   );
 }
@@ -174,9 +195,12 @@ function SatelliteInstances({
   visibleInstanceIdsRef,
   selectedScenePosRef,
   onSelectSatelliteRef,
+  maxInstances,
+  pickRadius,
 }: SatelliteInstancesProps) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const meshSetupRef = useRef(false);
+  const detachRaycastRef = useRef<(() => void) | null>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
   const color = useMemo(() => new THREE.Color(), []);
   const markerStateRef = useRef(new Map<string, MarkerFrameState>());
@@ -200,6 +224,18 @@ function SatelliteInstances({
     if (satId) onSelectSatelliteRef.current(satId);
   };
 
+  useEffect(() => {
+    const mesh = meshRef.current;
+    if (!mesh) return undefined;
+    detachRaycastRef.current?.();
+    detachRaycastRef.current = attachInstanceSphereRaycast(mesh, pickRadius);
+    meshSetupRef.current = true;
+    return () => {
+      detachRaycastRef.current?.();
+      detachRaycastRef.current = null;
+    };
+  }, [pickRadius]);
+
   useFrame(() => {
     const mesh = meshRef.current;
     if (!mesh) return;
@@ -222,11 +258,12 @@ function SatelliteInstances({
     if (!meshSetupRef.current) {
       if (!mesh.instanceColor) {
         mesh.instanceColor = new THREE.InstancedBufferAttribute(
-          new Float32Array(MAX_INSTANCES * 3),
+          new Float32Array(maxInstances * 3),
           3,
         );
       }
-      attachInstanceSphereRaycast(mesh, PICK_RADIUS);
+      detachRaycastRef.current?.();
+      detachRaycastRef.current = attachInstanceSphereRaycast(mesh, pickRadius);
       meshSetupRef.current = true;
     }
 
@@ -238,7 +275,7 @@ function SatelliteInstances({
 
     for (
       let i = 0;
-      i < satellites.length && instanceIndex < MAX_INSTANCES;
+      i < satellites.length && instanceIndex < maxInstances;
       i += 1
     ) {
       const sat = satellites[i];
@@ -315,7 +352,7 @@ function SatelliteInstances({
   return (
     <instancedMesh
       ref={meshRef}
-      args={[geometry, material, MAX_INSTANCES]}
+      args={[geometry, material, maxInstances]}
       frustumCulled={false}
       renderOrder={2}
       onClick={selectInstance}
@@ -489,7 +526,12 @@ function GlobeScene({
   userLocation,
   onSelectSatelliteRef,
   onRenderFps,
+  isMobile,
 }: GlobeSceneProps) {
+  const renderProfile = useMemo(
+    () => getMobileGlobeRenderProfile(isMobile),
+    [isMobile],
+  );
   const visibleInstanceIdsRef = useRef<string[]>([]);
   const selectedScenePosRef = useRef<{ x: number; y: number; z: number } | null>(
     null,
@@ -507,17 +549,24 @@ function GlobeScene({
       <directionalLight position={[5, 2, 4]} intensity={0.85} />
       <directionalLight position={[-4, -1, -3]} intensity={0.18} />
 
+      <MobileRaycasterTuning
+        pointsThreshold={renderProfile.pointsRaycastThreshold}
+      />
+
       <Stars
         radius={80}
         depth={40}
-        count={800}
+        count={renderProfile.starsCount}
         factor={2}
         saturation={0}
         fade
         speed={0}
       />
 
-      <EarthGlobe onSelectSatelliteRef={onSelectSatelliteRef} />
+      <EarthGlobe
+        onSelectSatelliteRef={onSelectSatelliteRef}
+        segments={renderProfile.earthSegments}
+      />
       <SatelliteInstances
         positionsRef={positionsRef}
         targetPositionsRef={targetPositionsRef}
@@ -529,6 +578,8 @@ function GlobeScene({
         visibleInstanceIdsRef={visibleInstanceIdsRef}
         selectedScenePosRef={selectedScenePosRef}
         onSelectSatelliteRef={onSelectSatelliteRef}
+        maxInstances={renderProfile.maxInstances}
+        pickRadius={renderProfile.pickRadius}
       />
       <SelectedMarker
         selectedIdRef={selectedIdRef}
@@ -576,6 +627,7 @@ interface GlobeVisualizerProps {
   userLocation: UserLocation | null;
   onSelectSatellite: (id: string | null) => void;
   onRenderFps: (fps: number) => void;
+  isMobile: boolean;
 }
 
 export function GlobeVisualizer({
@@ -593,9 +645,14 @@ export function GlobeVisualizer({
   userLocation,
   onSelectSatellite,
   onRenderFps,
+  isMobile,
 }: GlobeVisualizerProps) {
   const onSelectSatelliteRef = useRef(onSelectSatellite);
   onSelectSatelliteRef.current = onSelectSatellite;
+  const renderProfile = useMemo(
+    () => getMobileGlobeRenderProfile(isMobile),
+    [isMobile],
+  );
   return (
     <div className="globe-wrap">
       <Canvas
@@ -606,11 +663,12 @@ export function GlobeVisualizer({
           far: 200,
         }}
         gl={{
-          antialias: true,
+          antialias: renderProfile.antialias,
           powerPreference: 'high-performance',
           alpha: false,
           logarithmicDepthBuffer: true,
         }}
+        dpr={isMobile ? [1, 1.5] : undefined}
         onCreated={({ gl }) => {
           gl.outputColorSpace = THREE.SRGBColorSpace;
           gl.toneMapping = THREE.NoToneMapping;
@@ -632,6 +690,7 @@ export function GlobeVisualizer({
           userLocation={userLocation}
           onSelectSatelliteRef={onSelectSatelliteRef}
           onRenderFps={onRenderFps}
+          isMobile={isMobile}
         />
       </Canvas>
     </div>

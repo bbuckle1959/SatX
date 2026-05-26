@@ -32,3 +32,69 @@ npm run dev
 ```
 
 Opens the Vite frontend at `http://localhost:1420` without the Tauri shell.
+
+## Mobile (iOS / Android) and Starlink dish HTTP
+
+Dish alignment uses native Rust HTTP to `http://192.168.100.1:9201` (not HTTPS). Mobile OS policies must allow cleartext / local network access.
+
+- **iOS:** `src-tauri/Info.ios.plist` (merged via `bundle.iOS.infoPlist` in `tauri.conf.json`). Grants local network usage text and App Transport Security exceptions.
+- **Android:** After `npm run tauri android init`, follow `src-tauri/mobile/android/AndroidManifest.patch.md` and run `scripts/sync-android-network-config.ps1` to install `network_security_config.xml`.
+
+See `src-tauri/mobile/android/AndroidManifest.patch.md` for exact `AndroidManifest.xml` edits.
+
+### Android prerequisites (Windows)
+
+`tauri android init` needs a **JDK** on `PATH` / `JAVA_HOME`. If you see `Java not found in PATH`:
+
+1. Install [Android Studio](https://developer.android.com/studio) (recommended; includes JDK under `jbr` and the SDK), **or** JDK 17 only:
+   ```powershell
+   winget install Microsoft.OpenJDK.17
+   ```
+2. In the **same** PowerShell session (or set user env vars permanently):
+   ```powershell
+   .\scripts\setup-android-java.ps1
+   npm run tauri android init
+   ```
+3. To persist `JAVA_HOME` after Android Studio install (adjust path if needed):
+   ```powershell
+   [Environment]::SetEnvironmentVariable(
+     'JAVA_HOME',
+     "$env:LOCALAPPDATA\Programs\Android\Android Studio\jbr",
+     'User'
+   )
+   ```
+   Restart the terminal, then run `npm run tauri android init` again.
+
+Full checklist: [Tauri Android prerequisites](https://v2.tauri.app/start/prerequisites/#android).
+
+### Full SatX + Starlink on your phone (Android)
+
+The browser (`vite --host`) cannot call the dish API. Use the **native Android app** so Rust can reach `http://192.168.100.1:9201`.
+
+**One-time**
+
+1. Android Studio + JDK (`setup-android-java.ps1`)
+2. `npm run tauri android init` (already done if `src-tauri/gen/android` exists)
+3. Enable **USB debugging** on the phone; install via USB or wireless ADB
+
+**A — Live dev (UI from your PC over Wi‑Fi)**
+
+Phone and PC on the **same Wi‑Fi** (home LAN). Dish alignment still requires the **phone on Starlink Wi‑Fi** (see B).
+
+```powershell
+npm run tauri:android:dev
+```
+
+This runs `tauri android dev --host`, starts Vite on your LAN IP, and installs a debug build on the device.
+
+**B — Release APK (no PC; best for Starlink-only use)**
+
+Build and install the APK; open SatX while the phone is on **Starlink Wi‑Fi**:
+
+```powershell
+npm run tauri:android:build
+```
+
+Install the APK from `src-tauri/gen/android/app/build/outputs/apk/`. Allow **location** and **local network** if prompted. Tap **Fetch** in the Starlink strip.
+
+**iOS:** Requires macOS + Xcode: `npm run tauri -- ios dev --host` (same Starlink-on-phone rule for dish).

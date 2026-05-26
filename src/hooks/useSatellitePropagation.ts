@@ -12,6 +12,11 @@ import {
   ORBIT_LERP_MS,
 } from '../lib/lerpGeodetic';
 import {
+  filterCatalogIdsForMobileWorker,
+  filterPositionsForMobileDisplay,
+} from '../lib/mobileGlobe';
+import type { UserLocation } from './useUserLocation';
+import {
   matchesObjectTypeFilter,
   type ObjectType,
   type ObjectTypeFilter,
@@ -95,11 +100,22 @@ export interface UseSatellitePropagationResult {
   isParsing: boolean;
 }
 
+export interface MobilePropagationOptions {
+  isMobile: boolean;
+  userLocation: UserLocation | null;
+  /** Selection / servicing ids always kept on globe when throttling. */
+  getPinIds?: () => ReadonlyArray<string | null | undefined>;
+}
+
 export function useSatellitePropagation(
   satellites: TleRecord[],
   objectTypeFilter: ObjectTypeFilter,
   typeById: ReadonlyMap<string, ObjectType>,
+  mobileOptions?: MobilePropagationOptions,
 ): UseSatellitePropagationResult {
+  const isMobile = mobileOptions?.isMobile ?? false;
+  const userLocation = mobileOptions?.userLocation ?? null;
+  const getPinIds = mobileOptions?.getPinIds;
   const [positions, setPositions] = useState<SatelliteCoordinates[]>([]);
   const [propagationFps, setPropagationFps] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -123,10 +139,16 @@ export function useSatellitePropagation(
   const nameByIdRef = useRef(nameById);
   nameByIdRef.current = nameById;
 
-  const activeIds = useMemo(
-    () => filterActiveIds(satellites, objectTypeFilter, typeById),
-    [satellites, objectTypeFilter, typeById],
-  );
+  const activeIds = useMemo(() => {
+    if (isMobile) {
+      return filterCatalogIdsForMobileWorker(
+        satellites,
+        objectTypeFilter,
+        typeById,
+      );
+    }
+    return filterActiveIds(satellites, objectTypeFilter, typeById);
+  }, [satellites, objectTypeFilter, typeById, isMobile]);
 
   const activeCount = activeIds.length;
   const activeIdsRef = useRef(activeIds);
@@ -142,23 +164,31 @@ export function useSatellitePropagation(
 
   const applyWorkerTargets = useCallback(
     (next: SatelliteCoordinates[]) => {
+      const throttled = isMobile
+        ? filterPositionsForMobileDisplay(
+            next,
+            userLocation,
+            getPinIds?.() ?? [],
+          )
+        : next;
+
       const display = positionsRef.current;
       const sameLength =
-        display.length === next.length &&
-        display.every((sat, index) => sat.id === next[index]?.id);
+        display.length === throttled.length &&
+        display.every((sat, index) => sat.id === throttled[index]?.id);
 
       if (sameLength && display.length > 0) {
         lerpFromRef.current = copySatelliteCoordinates(display);
       } else {
-        lerpFromRef.current = copySatelliteCoordinates(next);
-        positionsRef.current = copySatelliteCoordinates(next);
+        lerpFromRef.current = copySatelliteCoordinates(throttled);
+        positionsRef.current = copySatelliteCoordinates(throttled);
       }
 
-      targetPositionsRef.current = next;
+      targetPositionsRef.current = throttled;
       lerpStartAtRef.current = performance.now();
-      setPositions(next);
+      setPositions(throttled);
     },
-    [],
+    [isMobile, userLocation, getPinIds],
   );
 
   useEffect(() => {

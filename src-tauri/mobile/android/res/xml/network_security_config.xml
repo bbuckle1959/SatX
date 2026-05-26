@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copy to: src-tauri/gen/android/app/src/main/res/xml/network_security_config.xml
+  after `npm run tauri android init`, then reference from AndroidManifest.xml.
+-->
+<network-security-config>
+	<!-- Starlink dish gRPC-web (HTTP) on the dish LAN -->
+	<domain-config cleartextTrafficPermitted="true">
+		<domain includeSubdomains="false">192.168.100.1</domain>
+	</domain-config>
+	<!-- Vite dev server / localhost during `tauri android dev` -->
+	<domain-config cleartextTrafficPermitted="true">
+		<domain includeSubdomains="true">localhost</domain>
+		<domain includeSubdomains="true">127.0.0.1</domain>
+		<domain includeSubdomains="true">10.0.2.2</domain>
+	</domain-config>
+</network-security-config>

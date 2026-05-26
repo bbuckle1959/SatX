@@ -1,42 +1,29 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  Activity,
-  Filter,
-  Pause,
-  Play,
-  Radio,
-  Satellite,
-} from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import './App.css';
+import { AppSidebar } from './components/AppSidebar';
 import { GlobeVisualizer } from './components/GlobeVisualizer';
-import { SatelliteDetails } from './components/SatelliteDetails';
-import {
-  StarlinkPanel,
-  type StarlinkAlignment,
-} from './components/StarlinkPanel';
+import { MobileBottomSheet } from './components/MobileBottomSheet';
+import type { StarlinkAlignment } from './components/StarlinkPanel';
 import { dishObserverSite } from './lib/dishSite';
 import { findServicingStarlinkId } from './lib/starlinkPointing';
 import { GLOBE_MAX_INSTANCES } from './lib/globeLimits';
+import { getGlobeMaxInstances } from './lib/mobileGlobe';
 import { nearestBySlantRange } from './lib/nearestSatellites';
 import {
   useSatellitePropagation,
   type SatelliteCoordinates,
 } from './hooks/useSatellitePropagation';
 import { useUserLocation } from './hooks/useUserLocation';
+import { useIsMobileViewport } from './hooks/useMediaQuery';
 import {
   buildTypeById,
   getObjectTypeLabel,
-  OBJECT_TYPE_OPTIONS,
   type ObjectTypeFilter,
 } from './lib/objectTypes';
 import { fetchActiveSatcat, type SatcatEntry } from './services/satcat';
 import { fetchActiveTles, type TleRecord } from './services/spaceTrack';
-import {
-  formatDistanceKm,
-  formatHeightKm,
-  viewRelativeMetrics,
-} from './lib/viewMetrics';
+import { viewRelativeMetrics } from './lib/viewMetrics';
 
 const LIST_LIMIT = 120;
 
@@ -55,6 +42,7 @@ function App() {
   const [starlinkAlignment, setStarlinkAlignment] =
     useState<StarlinkAlignment | null>(null);
   const userLocation = useUserLocation();
+  const isMobile = useIsMobileViewport();
   const servicingStarlinkIdRef = useRef<string | null>(null);
 
   const selectedIdRef = useRef<string | null>(null);
@@ -66,6 +54,11 @@ function App() {
     for (const tle of tles) map.set(tle.id, tle);
     return map;
   }, [tles]);
+
+  const getMobilePinIds = useCallback(
+    () => [selectedId, servicingStarlinkIdRef.current],
+    [selectedId],
+  );
 
   const {
     positions,
@@ -80,7 +73,11 @@ function App() {
     catalogParsedCount,
     activeCount,
     isParsing,
-  } = useSatellitePropagation(tles, objectTypeFilter, typeById);
+  } = useSatellitePropagation(tles, objectTypeFilter, typeById, {
+    isMobile,
+    userLocation,
+    getPinIds: getMobilePinIds,
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -95,7 +92,6 @@ function App() {
           setCatalogSource(source);
         }
 
-        // SATCAT is optional metadata; skip on startup to avoid CelesTrak timeouts on Starlink.
         window.setTimeout(() => {
           if (cancelled) return;
           fetchActiveSatcat()
@@ -151,8 +147,9 @@ function App() {
 
   const filteredPositions = positions;
   const propagatedCount = positions.length;
-  const onGlobeRendered = Math.min(propagatedCount, GLOBE_MAX_INSTANCES);
-  const globeCapActive = propagatedCount > GLOBE_MAX_INSTANCES;
+  const globeMaxInstances = getGlobeMaxInstances(isMobile);
+  const onGlobeRendered = Math.min(propagatedCount, globeMaxInstances);
+  const globeCapActive = !isMobile && propagatedCount > GLOBE_MAX_INSTANCES;
 
   const listItems = useMemo(() => {
     if (!userLocation) {
@@ -206,182 +203,44 @@ function App() {
     return tleById.get(servicingStarlinkId)?.name ?? null;
   }, [servicingStarlinkId, positions, tleById]);
 
+  const servicingLabel =
+    servicingSatelliteName ??
+    (servicingStarlinkId ? `NORAD ${servicingStarlinkId}` : null);
+
+  const sidebarProps = {
+    propagationFps,
+    renderFps,
+    activeCount,
+    onGlobeRendered,
+    catalogParsedCount,
+    objectTypeFilter,
+    catalogSource,
+    globeCapActive,
+    tlesCount: tles.length,
+    onAlignmentChange: setStarlinkAlignment,
+    servicingSatelliteName,
+    dishSite,
+    loading,
+    isParsing,
+    error,
+    selectedSatellite,
+    userLocation,
+    tleById,
+    satcatById,
+    typeById,
+    onCloseDetails: () => setSelectedId(null),
+    objectTypeFilterValue: objectTypeFilter,
+    onObjectTypeFilterChange: setObjectTypeFilter,
+    listItems,
+    filteredCount: filteredPositions.length,
+    selectedId,
+    onSelectSatellite: setSelectedId,
+    isPaused,
+    onTogglePropagation: togglePropagation,
+  };
+
   return (
-    <div className="app">
-      <aside className="sidebar">
-        <div className="sidebar-header">
-          <h1>SatX Tracker</h1>
-          <p>Live orbital propagation & debris map</p>
-        </div>
-
-        <div className="metrics">
-          <div className="metric-card">
-            <div className="metric-label">
-              <Activity size={14} aria-hidden />
-              Calc FPS
-            </div>
-            <div className="metric-value">{propagationFps}</div>
-          </div>
-          <div className="metric-card">
-            <div className="metric-label">
-              <Satellite size={14} aria-hidden />
-              Active
-            </div>
-            <div className="metric-value">{activeCount.toLocaleString()}</div>
-          </div>
-          <div className="metric-card">
-            <div className="metric-label">
-              <Radio size={14} aria-hidden />
-              Render FPS
-            </div>
-            <div className="metric-value">{renderFps}</div>
-          </div>
-          <div className="metric-card">
-            <div className="metric-label">
-              <Satellite size={14} aria-hidden />
-              On Globe
-            </div>
-            <div className="metric-value">
-              {onGlobeRendered.toLocaleString()}
-            </div>
-          </div>
-        </div>
-        {tles.length > 0 && (
-          <p className="catalog-meta">
-            Catalog {catalogParsedCount.toLocaleString()} parsed
-            {objectTypeFilter !== 'all'
-              ? ` · filter: ${selectedTypeLabel}`
-              : ''}
-            {catalogSource ? ` · ${catalogSource}` : ''}
-            {globeCapActive
-              ? ` · globe draws first ${GLOBE_MAX_INSTANCES.toLocaleString()}`
-              : ''}
-          </p>
-        )}
-
-        <StarlinkPanel
-          onAlignmentChange={setStarlinkAlignment}
-          servicingSatelliteName={servicingSatelliteName}
-          hasDishSite={dishSite !== null}
-          dishSite={dishSite}
-        />
-
-        {(loading || isParsing) && (
-          <div className="status-banner loading">
-            {loading
-              ? 'Loading satellite catalog… (first browser load may take ~20s)'
-              : 'Parsing orbital data…'}
-          </div>
-        )}
-        {error && <div className="status-banner error">{error}</div>}
-
-        {selectedSatellite && (
-          <SatelliteDetails
-            satellite={selectedSatellite}
-            userLocation={userLocation}
-            tle={tleById.get(selectedSatellite.id)}
-            satcat={satcatById.get(selectedSatellite.id)}
-            objectType={typeById.get(selectedSatellite.id)}
-            onClose={() => setSelectedId(null)}
-          />
-        )}
-
-        <div className="filter-wrap">
-          <label className="filter-label" htmlFor="object-type-filter">
-            <Filter size={14} aria-hidden />
-            Object type
-          </label>
-          <select
-            id="object-type-filter"
-            className="filter-select"
-            value={objectTypeFilter}
-            onChange={(e) =>
-              setObjectTypeFilter(e.target.value as ObjectTypeFilter)
-            }
-            aria-label="Filter by object type"
-          >
-            {OBJECT_TYPE_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="list-meta">
-          Showing {listItems.length.toLocaleString()} of{' '}
-          {filteredPositions.length.toLocaleString()} matches
-          {objectTypeFilter !== 'all' ? ` · ${selectedTypeLabel}` : ''}
-          <span className="list-meta-sub">
-            {userLocation
-              ? 'Sorted by slant range from your location'
-              : 'Allow location access to sort by slant range from you'}
-          </span>
-        </div>
-
-        <ul className="satellite-list">
-          {listItems.length === 0 ? (
-            <li className="empty-state">
-              {loading ? 'Waiting for catalog…' : 'No satellites match this filter.'}
-            </li>
-          ) : (
-            listItems.map(({ sat, metrics }) => (
-              <li
-                key={sat.id}
-                className={selectedId === sat.id ? 'selected' : undefined}
-                onClick={() => setSelectedId(sat.id)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    setSelectedId(sat.id);
-                  }
-                }}
-                role="button"
-                tabIndex={0}
-                aria-pressed={selectedId === sat.id}
-              >
-                <div className="satellite-name" title={sat.name}>
-                  {sat.name}
-                </div>
-                <div className="satellite-meta">
-                  {metrics ? (
-                    <>
-                      <span className="satellite-meta-primary">
-                        {formatDistanceKm(metrics.slantRangeKm)} slant range ·{' '}
-                        {formatHeightKm(metrics.heightKm)} height
-                      </span>
-                      <span className="satellite-meta-secondary">
-                        NORAD {sat.id}
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="satellite-meta-primary">
-                        {sat.latitude.toFixed(2)}°, {sat.longitude.toFixed(2)}°
-                      </span>
-                      <span className="satellite-meta-secondary">
-                        {sat.altitude.toFixed(0)} km alt · NORAD {sat.id}
-                      </span>
-                    </>
-                  )}
-                </div>
-              </li>
-            ))
-          )}
-        </ul>
-
-        <div className="sidebar-footer">
-          <button
-            type="button"
-            className={`toggle-btn${isPaused ? ' paused' : ''}`}
-            onClick={togglePropagation}
-          >
-            {isPaused ? <Play size={16} /> : <Pause size={16} />}
-            {isPaused ? 'Resume propagation' : 'Pause propagation'}
-          </button>
-        </div>
-      </aside>
-
+    <div className={`app${isMobile ? ' app--mobile' : ''}`}>
       <main className="visualizer">
         <GlobeVisualizer
           positionsRef={positionsRef}
@@ -398,21 +257,45 @@ function App() {
           userLocation={userLocation}
           onSelectSatellite={setSelectedId}
           onRenderFps={setRenderFps}
+          isMobile={isMobile}
         />
         <div className="visualizer-overlay">
           <span className="overlay-pill">
             {isPaused ? 'Paused' : 'Live'} · {onGlobeRendered.toLocaleString()}{' '}
-            {objectTypeFilter === 'all' ? 'objects' : selectedTypeLabel.toLowerCase()}
+            {objectTypeFilter === 'all'
+              ? 'objects'
+              : selectedTypeLabel.toLowerCase()}
           </span>
-          {userLocation && (
+          {!isMobile && userLocation && (
             <span className="overlay-pill">
               Your location {userLocation.latitude.toFixed(1)}°,{' '}
               {userLocation.longitude.toFixed(1)}°
             </span>
           )}
-          <span className="overlay-pill">Click object for details</span>
+          {!isMobile && (
+            <span className="overlay-pill">Click object for details</span>
+          )}
         </div>
       </main>
+
+      <aside className="sidebar hidden md:flex">
+        <AppSidebar {...sidebarProps} />
+      </aside>
+
+      <div className="mobile-sheet-host md:hidden">
+        <MobileBottomSheet
+          metrics={{
+            calcFps: propagationFps,
+            renderFps,
+            activeCount,
+            servicingLabel,
+          }}
+        >
+          <aside className="sidebar sidebar--sheet">
+            <AppSidebar {...sidebarProps} />
+          </aside>
+        </MobileBottomSheet>
+      </div>
     </div>
   );
 }
