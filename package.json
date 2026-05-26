@@ -1,0 +1,39 @@
+{
+  "name": "satx",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "node scripts/ensure-tauri2.mjs && tsc && vite build",
+    "preview": "vite preview",
+    "ensure:tauri2": "node scripts/ensure-tauri2.mjs",
+    "pretauri": "node scripts/ensure-tauri2.mjs",
+    "pretauri:dev": "node scripts/ensure-tauri2.mjs",
+    "pretauri:build": "node scripts/ensure-tauri2.mjs",
+    "tauri": "tauri",
+    "tauri:dev": "scripts\\tauri-dev.cmd",
+    "tauri:build": "scripts\\tauri-dev.cmd build"
+  },
+  "dependencies": {
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.1",
+    "@tailwindcss/vite": "^4.3.0",
+    "@tauri-apps/api": ">=2.0.0 <3.0.0",
+    "lucide-react": "^0.511.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "satellite.js": "^6.0.0",
+    "tailwindcss": "^4.3.0",
+    "three": "^0.184.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": ">=2.0.0 <3.0.0",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@types/three": "^0.184.1",
+    "@vitejs/plugin-react": "^4.6.0",
+    "typescript": "~5.8.3",
+    "vite": "^7.0.4"
+  }
+}

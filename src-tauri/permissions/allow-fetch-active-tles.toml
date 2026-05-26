@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-fetch-active-tles"
+description = "Allows the frontend to load the active TLE catalog via Rust HTTP."
+commands.allow = ["fetch_active_tles"]

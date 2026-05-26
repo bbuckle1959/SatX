@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-get-dish-alignment"
+description = "Allows the frontend to call get_dish_alignment for Starlink dish status."
+commands.allow = ["get_dish_alignment"]
