@@ -33,7 +33,14 @@ git push origin main
 
 ## 4. Create a fresh release
 
-**Option A — CI (all platforms):**
+### See the workflow on GitHub
+
+1. Open [https://github.com/bbuckle1959/SatX/tree/main/.github/workflows](https://github.com/bbuckle1959/SatX/tree/main/.github/workflows) — you should see **`release.yml`** on the **main** branch.
+2. Open **Actions** → left sidebar **release** (under “All workflows”). If the list is empty, push the workflow file to `main` first (step 3 below).
+3. The workflow **only runs automatically** when you push a tag matching `v*` (e.g. `v0.1.0`). Pushes to `main` alone do not start it.
+4. After the workflow includes **workflow_dispatch**, you can also use **Actions → release → Run workflow** to test without pushing a tag.
+
+**Option A — CI (all platforms, tag):**
 
 ```bash
 git tag v0.1.0
@@ -41,6 +48,8 @@ git push origin v0.1.0
 ```
 
 Watch **Actions → release**. When it finishes, check Releases for up to five named installers and the download table in the description.
+
+**Option A2 — CI (manual run):** Actions → **release** → **Run workflow** → enter `v0.1.0` → Run.
 
 **Option B — Windows only (local build):**
 

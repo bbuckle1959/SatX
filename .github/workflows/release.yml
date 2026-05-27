@@ -6,6 +6,13 @@ on:
   push:
     tags:
       - 'v*'
+  # Run manually from Actions → release → Run workflow (no tag push required).
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release tag name (e.g. v0.1.0)'
+        required: true
+        default: 'v0.1.0'
 
 permissions:
   contents: write
@@ -141,10 +148,20 @@ jobs:
           path: artifacts
           merge-multiple: true
 
+      - name: Resolve release tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "name=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Stage release assets (flat, consistent names)
         run: |
           set -euo pipefail
-          VERSION="${GITHUB_REF_NAME#v}"
+          REF="${{ steps.tag.outputs.name }}"
+          VERSION="${REF#v}"
           OUT="release-upload"
           rm -rf "$OUT"
           mkdir -p "$OUT"
@@ -181,9 +198,10 @@ jobs:
 
       - name: Write release notes
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
+          REF="${{ steps.tag.outputs.name }}"
+          VERSION="${REF#v}"
           cat > release-notes.md <<EOF
-          ## SatX Tracker ${GITHUB_REF_NAME}
+          ## SatX Tracker ${REF}
 
           Desktop satellite tracker — live 3D globe, filters, nearest list, optional Starlink dish mode.
 
@@ -212,7 +230,9 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          name: SatX Tracker ${{ github.ref_name }}
+          tag_name: ${{ steps.tag.outputs.name }}
+          target_commitish: ${{ github.sha }}
+          name: SatX Tracker ${{ steps.tag.outputs.name }}
           body_path: release-notes.md
           generate_release_notes: false
           files: release-upload/*
