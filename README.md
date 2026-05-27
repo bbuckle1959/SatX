@@ -23,33 +23,25 @@ This project targets **Tauri 2.0+ only** (npm `>=2.0.0 <3.0.0`, Rust `>=2.0.0, <
   - Match to a servicing satellite; pin it at the top of the list (red outline)
   - Orange rod from your location to that satellite on the globe
 
-## Prerequisites
+## Running the app
 
-- [Node.js](https://nodejs.org/) (LTS recommended)
-- [Rust](https://www.rust-lang.org/learn/get-started#installing-rust)
-- [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/) for your OS  
-  - Windows: WebView2 and Visual Studio Build Tools (C++ workload)  
-  - macOS: Xcode command-line tools  
-  - Linux: webkit2gtk and related packages per Tauri docs
+Platform-specific install, dev, build, and troubleshooting:
 
-## Development (desktop app)
+- **[Windows](docs/running/windows.md)**
+- **[macOS](docs/running/macos.md)**
+- **[Linux](docs/running/linux.md)**
+- [Overview](docs/running/README.md)
 
-```bash
-npm install
-npm run tauri:dev
-```
+**Quick start:** `npm install`, then:
 
-On Windows, use `npm run tauri:dev` (not `tauri dev` directly). `scripts/tauri-dev.cmd` loads the MSVC environment before compiling Rust.
+| Platform | Development | Production build |
+|----------|-------------|------------------|
+| Windows | `npm run tauri:dev` | `npm run tauri:build` |
+| macOS / Linux | `npm run tauri -- dev` | `npm run tauri -- build` |
 
-The app opens as a native window with the Vite dev server on `http://localhost:1420`.
+Windows uses `scripts/tauri-dev.cmd` to load MSVC before Rust compiles. The app opens as a native window with the Vite dev server on `http://localhost:1420`. Installers and binaries are under `src-tauri/target/release/bundle/`.
 
-## Production build
-
-```bash
-npm run tauri:build
-```
-
-Installers and binaries are under `src-tauri/target/release/` (exact bundles depend on OS and Tauri bundle settings).
+Prerequisites: [Node.js](https://nodejs.org/) LTS, [Rust](https://www.rust-lang.org/tools/install), and [Tauri 2 system deps](https://v2.tauri.app/start/prerequisites/) for your OS.
 
 ## Browser-only dev (limited)
 
@@ -100,6 +92,7 @@ If fetch fails, confirm you are in the native app (not browser-only dev) and con
 | `src/lib/features.ts` | Feature flags (e.g. mobile UI) |
 | `src/workers/orbitCalc.worker.ts` | SGP4 propagation off the main thread |
 | `src-tauri/` | Rust: TLE catalog, Starlink HTTP (`get_dish_alignment`) |
+| `docs/running/` | Windows, macOS, and Linux run guides |
 | `scripts/tauri-dev.cmd` | Windows desktop dev/build wrapper |
 | `scripts/ensure-tauri2.mjs` | Enforces Tauri 2.x dependency range |
 
