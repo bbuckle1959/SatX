@@ -183,31 +183,31 @@ jobs:
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
           cat > release-notes.md <<EOF
-## SatX Tracker ${GITHUB_REF_NAME}
+          ## SatX Tracker ${GITHUB_REF_NAME}
 
-Desktop satellite tracker — live 3D globe, filters, nearest list, optional Starlink dish mode.
+          Desktop satellite tracker — live 3D globe, filters, nearest list, optional Starlink dish mode.
 
-### Downloads (pick your platform)
+          ### Downloads (pick your platform)
 
-| Platform | File | Notes |
-|----------|------|--------|
-| **Windows** | \`SatX-${VERSION}-Windows-x64.msi\` | Recommended — Windows Installer |
-| **Windows** | \`SatX-${VERSION}-Windows-x64-Setup.exe\` | Alternative NSIS setup |
-| **macOS** | \`SatX-${VERSION}-macOS.dmg\` | Open disk image, drag app to Applications |
-| **Linux** | \`SatX-${VERSION}-Linux-x64.deb\` | Debian / Ubuntu-style systems |
-| **Linux** | \`SatX-${VERSION}-Linux-x64.AppImage\` | Portable AppImage (if built) |
+          | Platform | File | Notes |
+          |----------|------|--------|
+          | **Windows** | \`SatX-${VERSION}-Windows-x64.msi\` | Recommended — Windows Installer |
+          | **Windows** | \`SatX-${VERSION}-Windows-x64-Setup.exe\` | Alternative NSIS setup |
+          | **macOS** | \`SatX-${VERSION}-macOS.dmg\` | Open disk image, drag app to Applications |
+          | **Linux** | \`SatX-${VERSION}-Linux-x64.deb\` | Debian / Ubuntu-style systems |
+          | **Linux** | \`SatX-${VERSION}-Linux-x64.AppImage\` | Portable AppImage (if built) |
 
-### Requirements
+          ### Requirements
 
-- Internet for the first catalog download
-- Location permission optional (nearest list & Starlink matching)
-- **Starlink Fetch:** installed app on Starlink Wi‑Fi — see [user guide](https://github.com/bbuckle1959/SatX/blob/main/docs/user-guide.md)
+          - Internet for the first catalog download
+          - Location permission optional (nearest list & Starlink matching)
+          - **Starlink Fetch:** installed app on Starlink Wi‑Fi — see [user guide](https://github.com/bbuckle1959/SatX/blob/main/docs/user-guide.md)
 
-### Documentation
+          ### Documentation
 
-- [User guide](https://github.com/bbuckle1959/SatX/blob/main/docs/user-guide.md)
-- [Application overview](https://github.com/bbuckle1959/SatX/blob/main/docs/application-overview.md)
-EOF
+          - [User guide](https://github.com/bbuckle1959/SatX/blob/main/docs/user-guide.md)
+          - [Application overview](https://github.com/bbuckle1959/SatX/blob/main/docs/application-overview.md)
+          EOF
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
