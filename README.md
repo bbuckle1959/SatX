@@ -30,6 +30,7 @@ Platform-specific install, dev, build, and troubleshooting:
 - **[Windows](docs/running/windows.md)**
 - **[macOS](docs/running/macos.md)**
 - **[Linux](docs/running/linux.md)**
+- **[Release builds](docs/running/release-builds.md)** — installers for all three OS targets
 - [Overview](docs/running/README.md)
 
 **Quick start:** `npm install`, then:
@@ -82,6 +83,8 @@ If fetch fails, confirm you are in the native app (not browser-only dev) and con
 | `npm run build` | Typecheck + production frontend bundle |
 | `npm run ensure:tauri2` | Verify Tauri 2.x pins |
 | `npm run tauri:android:dev` | Experimental; not a supported product path |
+
+Tagged releases (`v*`) build Windows, macOS, and Linux installers via [GitHub Actions](.github/workflows/release.yml). See [Release builds](docs/running/release-builds.md).
 
 ## Project layout
 

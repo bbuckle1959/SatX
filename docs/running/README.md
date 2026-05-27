@@ -7,6 +7,7 @@ SatX is a **Tauri 2** desktop app. Use the native shell for full features (inclu
 | [Windows](windows.md) | Windows 10/11 |
 | [macOS](macos.md) | macOS 10.15 (Catalina) and later |
 | [Linux](linux.md) | Debian, Ubuntu, Fedora, Arch, and derivatives |
+| [Release builds](release-builds.md) | Installers for all three OS targets |
 
 ## Quick start (all desktop platforms)
 
