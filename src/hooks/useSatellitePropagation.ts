@@ -8,17 +8,21 @@ import {
 } from 'react';
 
 import {
-  copySatelliteCoordinates,
-  ORBIT_LERP_MS,
-} from '../lib/lerpGeodetic';
+  countMatchingCatalog,
+  filterCatalogIdsForWorker,
+  getDisplayOptions,
+  getWorkerOptions,
+  resolveGlobeDisplayPositions,
+  type GlobePopulationMode,
+} from '../lib/globeCatalog';
+import { ORBIT_LERP_MS, syncSatelliteCoordinates } from '../lib/lerpGeodetic';
+import { getGlobeMaxInstances } from '../lib/mobileGlobe';
 import {
-  filterCatalogIdsForMobileWorker,
-  filterPositionsForMobileDisplay,
-  prioritizePinnedPositions,
-} from '../lib/mobileGlobe';
+  buildPositionsById,
+  mergePositionsById,
+} from '../lib/satelliteLookup';
 import type { UserLocation } from './useUserLocation';
 import {
-  matchesObjectTypeFilter,
   type ObjectType,
   type ObjectTypeFilter,
 } from '../lib/objectTypes';
@@ -31,30 +35,6 @@ export interface SatelliteCoordinates {
   latitude: number;
   longitude: number;
   altitude: number;
-  /** Reserved; globe orients markers from frame-to-frame position delta. */
-  velocityX: number;
-  velocityY: number;
-  velocityZ: number;
-}
-
-const DEFAULT_VELOCITY_Y = 1;
-
-function filterActiveIds(
-  satellites: TleRecord[],
-  objectTypeFilter: ObjectTypeFilter,
-  typeById: ReadonlyMap<string, ObjectType>,
-): string[] {
-  if (objectTypeFilter === 'all') {
-    return satellites.map((sat) => sat.id);
-  }
-
-  const ids: string[] = [];
-  for (const sat of satellites) {
-    if (matchesObjectTypeFilter(sat.id, objectTypeFilter, typeById)) {
-      ids.push(sat.id);
-    }
-  }
-  return ids;
 }
 
 function buildCoordinatesFromWorker(
@@ -74,9 +54,6 @@ function buildCoordinatesFromWorker(
       latitude: coords[base],
       longitude: coords[base + 1],
       altitude: coords[base + 2],
-      velocityX: 0,
-      velocityY: DEFAULT_VELOCITY_Y,
-      velocityZ: 0,
     });
   }
 
@@ -86,9 +63,13 @@ function buildCoordinatesFromWorker(
 export interface UseSatellitePropagationResult {
   /** Throttled snapshot for React UI (sidebar list); worker targets at 4 Hz. */
   positions: SatelliteCoordinates[];
+  /** Id → latest display/catalog coordinates for O(1) lookup. */
+  positionsById: ReadonlyMap<string, SatelliteCoordinates>;
+  /** Increments each worker display update (servicing / selection refresh). */
+  positionEpoch: number;
   /** Lerped coordinates for the globe (updated every render frame). */
   positionsRef: RefObject<SatelliteCoordinates[]>;
-  /** Full worker catalog before mobile/display throttling (servicing link lookup). */
+  /** Worker output before display throttling. */
   catalogPositionsRef: RefObject<SatelliteCoordinates[]>;
   /** Latest worker sample; globe lerps from `lerpFromRef` → this. */
   targetPositionsRef: RefObject<SatelliteCoordinates[]>;
@@ -99,27 +80,40 @@ export interface UseSatellitePropagationResult {
   togglePropagation: () => void;
   propagationFps: number;
   catalogParsedCount: number;
+  /** Active ids sent to the worker (capped). */
   activeCount: number;
+  /** Matching catalog size before worker cap. */
+  matchingCatalogCount: number;
   isParsing: boolean;
 }
 
-export interface MobilePropagationOptions {
+export interface PropagationDisplayOptions {
   isMobile: boolean;
   userLocation: UserLocation | null;
+  globePopulation: GlobePopulationMode;
   /** Selection / servicing ids always kept on globe when throttling. */
-  getPinIds?: () => ReadonlyArray<string | null | undefined>;
+  pinIds?: ReadonlyArray<string | null | undefined>;
 }
+
+export type { GlobePopulationMode };
 
 export function useSatellitePropagation(
   satellites: TleRecord[],
   objectTypeFilter: ObjectTypeFilter,
   typeById: ReadonlyMap<string, ObjectType>,
-  mobileOptions?: MobilePropagationOptions,
+  displayOptions?: PropagationDisplayOptions,
 ): UseSatellitePropagationResult {
-  const isMobile = mobileOptions?.isMobile ?? false;
-  const userLocation = mobileOptions?.userLocation ?? null;
-  const getPinIds = mobileOptions?.getPinIds;
+  const isMobile = displayOptions?.isMobile ?? false;
+  const userLocation = displayOptions?.userLocation ?? null;
+  const globePopulation = displayOptions?.globePopulation ?? 'capped';
+  const pinIds = displayOptions?.pinIds ?? [];
+  const maxInstances = getGlobeMaxInstances(isMobile);
+
   const [positions, setPositions] = useState<SatelliteCoordinates[]>([]);
+  const [positionsById, setPositionsById] = useState<
+    ReadonlyMap<string, SatelliteCoordinates>
+  >(() => new Map());
+  const [positionEpoch, setPositionEpoch] = useState(0);
   const [propagationFps, setPropagationFps] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [catalogParsedCount, setCatalogParsedCount] = useState(0);
@@ -130,6 +124,7 @@ export function useSatellitePropagation(
   const targetPositionsRef = useRef<SatelliteCoordinates[]>([]);
   const lerpFromRef = useRef<SatelliteCoordinates[]>([]);
   const lerpStartAtRef = useRef(0);
+  const catalogByIdRef = useRef<Map<string, SatelliteCoordinates>>(new Map());
 
   const workerRef = useRef<Worker | null>(null);
   const tickCountRef = useRef(0);
@@ -143,16 +138,21 @@ export function useSatellitePropagation(
   const nameByIdRef = useRef(nameById);
   nameByIdRef.current = nameById;
 
-  const activeIds = useMemo(() => {
-    if (isMobile) {
-      return filterCatalogIdsForMobileWorker(
+  const matchingCatalogCount = useMemo(
+    () => countMatchingCatalog(satellites, objectTypeFilter, typeById),
+    [satellites, objectTypeFilter, typeById],
+  );
+
+  const activeIds = useMemo(
+    () =>
+      filterCatalogIdsForWorker(
         satellites,
         objectTypeFilter,
         typeById,
-      );
-    }
-    return filterActiveIds(satellites, objectTypeFilter, typeById);
-  }, [satellites, objectTypeFilter, typeById, isMobile]);
+        getWorkerOptions(isMobile, maxInstances, globePopulation),
+      ),
+    [satellites, objectTypeFilter, typeById, isMobile, maxInstances, globePopulation],
+  );
 
   const activeCount = activeIds.length;
   const activeIdsRef = useRef(activeIds);
@@ -169,32 +169,48 @@ export function useSatellitePropagation(
   const applyWorkerTargets = useCallback(
     (next: SatelliteCoordinates[]) => {
       catalogPositionsRef.current = next;
-      const pinIds = getPinIds?.() ?? [];
-      let throttled = isMobile
-        ? filterPositionsForMobileDisplay(next, userLocation, pinIds)
-        : next;
-      if (pinIds.length > 0) {
-        throttled = prioritizePinnedPositions(throttled, pinIds);
-      }
+      mergePositionsById(catalogByIdRef.current, next);
+
+      const throttled = resolveGlobeDisplayPositions(
+        next,
+        globePopulation,
+        userLocation,
+        pinIds,
+        maxInstances,
+        typeById,
+        getDisplayOptions(isMobile),
+      );
 
       const display = positionsRef.current;
-      const sameLength =
+      const sameOrder =
         display.length === throttled.length &&
         display.every((sat, index) => sat.id === throttled[index]?.id);
 
-      if (sameLength && display.length > 0) {
-        lerpFromRef.current = copySatelliteCoordinates(display);
+      if (sameOrder && display.length > 0) {
+        syncSatelliteCoordinates(lerpFromRef.current, display);
       } else {
-        lerpFromRef.current = copySatelliteCoordinates(throttled);
-        positionsRef.current = copySatelliteCoordinates(throttled);
+        syncSatelliteCoordinates(lerpFromRef.current, throttled);
+        syncSatelliteCoordinates(positionsRef.current, throttled);
       }
 
       targetPositionsRef.current = throttled;
       lerpStartAtRef.current = performance.now();
       setPositions(throttled);
+      setPositionsById(buildPositionsById(throttled));
+      setPositionEpoch((epoch) => epoch + 1);
     },
-    [isMobile, userLocation, getPinIds],
+    [isMobile, userLocation, pinIds, maxInstances, typeById, globePopulation],
   );
+
+  const pinKey = pinIds
+    .filter((id): id is string => typeof id === 'string' && id.length > 0)
+    .join('\0');
+
+  useEffect(() => {
+    const catalog = catalogPositionsRef.current;
+    if (catalog.length === 0) return;
+    applyWorkerTargets(catalog);
+  }, [pinKey, globePopulation, applyWorkerTargets]);
 
   useEffect(() => {
     const worker = new Worker(
@@ -278,7 +294,9 @@ export function useSatellitePropagation(
       catalogPositionsRef.current = [];
       targetPositionsRef.current = [];
       lerpFromRef.current = [];
+      catalogByIdRef.current.clear();
       setPositions([]);
+      setPositionsById(new Map());
       setCatalogParsedCount(0);
       setIsParsing(false);
     }
@@ -290,6 +308,8 @@ export function useSatellitePropagation(
 
   return {
     positions,
+    positionsById,
+    positionEpoch,
     positionsRef,
     catalogPositionsRef,
     targetPositionsRef,
@@ -301,6 +321,7 @@ export function useSatellitePropagation(
     propagationFps,
     catalogParsedCount,
     activeCount,
+    matchingCatalogCount,
     isParsing,
   };
 }

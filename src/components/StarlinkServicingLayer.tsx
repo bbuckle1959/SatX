@@ -10,6 +10,7 @@ import {
   GLOBE_SURFACE_BIAS,
   geodeticToCartesian,
 } from '../lib/geo';
+import { findSatelliteById } from '../lib/satelliteLookup';
 
 /** Servicing link: your location → active Starlink satellite. */
 const LINK_COLOR = '#ff9500';
@@ -35,34 +36,17 @@ interface StarlinkServicingLayerProps {
   userLocation: UserLocation;
   servicingStarlink: SatelliteLookTarget;
   servicingStarlinkId: string;
+  positionsById: ReadonlyMap<string, SatelliteCoordinates>;
   positionsRef: RefObject<SatelliteCoordinates[]>;
   targetPositionsRef: RefObject<SatelliteCoordinates[]>;
   catalogPositionsRef: RefObject<SatelliteCoordinates[]>;
-}
-
-function findSatelliteById(
-  id: string,
-  positionsRef: RefObject<SatelliteCoordinates[]>,
-  targetPositionsRef: RefObject<SatelliteCoordinates[]>,
-  catalogPositionsRef: RefObject<SatelliteCoordinates[]>,
-): SatelliteCoordinates | undefined {
-  const sources = [
-    positionsRef.current,
-    targetPositionsRef.current,
-    catalogPositionsRef.current,
-  ];
-  for (const list of sources) {
-    for (let i = 0; i < list.length; i += 1) {
-      if (list[i].id === id) return list[i];
-    }
-  }
-  return undefined;
 }
 
 function ServicingLink({
   userLocation,
   servicingStarlink,
   servicingStarlinkId,
+  positionsById,
   positionsRef,
   targetPositionsRef,
   catalogPositionsRef,
@@ -88,6 +72,7 @@ function ServicingLink({
     const live =
       findSatelliteById(
         servicingStarlinkId,
+        positionsById,
         positionsRef,
         targetPositionsRef,
         catalogPositionsRef,
@@ -104,34 +89,32 @@ function ServicingLink({
     start.set(hx * GLOBE_SURFACE_BIAS, hy * GLOBE_SURFACE_BIAS, hz * GLOBE_SURFACE_BIAS);
     end.set(sx * GLOBE_RADIAL_BIAS, sy * GLOBE_RADIAL_BIAS, sz * GLOBE_RADIAL_BIAS);
 
-    direction.copy(end).sub(start);
+    direction.subVectors(end, start);
     const length = direction.length();
-    if (length < 1e-5) {
+    if (length < 1e-6) {
       mesh.visible = false;
       return;
     }
 
-    direction.normalize();
-    midpoint.copy(start).add(end).multiplyScalar(0.5);
-
-    mesh.position.copy(midpoint);
-    const crossRadius =
-      worldUnitsPerPixel(camera, size.height, midpoint) * (LINK_WIDTH_PX / 2);
-    mesh.scale.set(crossRadius, length, crossRadius);
-    mesh.quaternion.setFromUnitVectors(axisUp, direction);
     mesh.visible = true;
+    midpoint.copy(start).add(end).multiplyScalar(0.5);
+    mesh.position.copy(midpoint);
+    mesh.scale.set(
+      worldUnitsPerPixel(camera, size.height, midpoint) * LINK_WIDTH_PX,
+      length,
+      worldUnitsPerPixel(camera, size.height, midpoint) * LINK_WIDTH_PX,
+    );
+    mesh.quaternion.setFromUnitVectors(axisUp, direction.normalize());
   });
 
   return (
-    <mesh ref={meshRef} visible={false} renderOrder={12} frustumCulled={false}>
-      <cylinderGeometry args={[1, 1, 1, 8]} />
+    <mesh ref={meshRef} renderOrder={10}>
+      <cylinderGeometry args={[0.5, 0.5, 1, 8]} />
       <meshBasicMaterial
         color={LINK_COLOR}
-        transparent
-        opacity={0.92}
+        toneMapped={false}
         depthTest={false}
         depthWrite={false}
-        toneMapped={false}
       />
     </mesh>
   );

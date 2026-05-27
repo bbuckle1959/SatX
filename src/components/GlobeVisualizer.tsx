@@ -9,20 +9,18 @@ import { lerpSatelliteCoordinates } from '../lib/lerpGeodetic';
 import type { UserLocation } from '../hooks/useUserLocation';
 import type { SatelliteLookTarget } from '../lib/starlinkPointing';
 import {
-  DEFAULT_CAMERA_DISTANCE,
   GLOBE_RADIUS,
   GLOBE_RADIAL_BIAS,
   geodeticToCartesian,
 } from '../lib/geo';
 import { StarlinkServicingLayer } from './StarlinkServicingLayer';
 import { attachInstanceSphereRaycast } from '../lib/instanceSphereRaycast';
-import {
-  createSatelliteMarkerGeometry,
-  SATELLITE_MARKER_RADIUS,
-} from '../lib/satelliteMarkerGeometry';
+import { createSatelliteMarkerGeometry } from '../lib/satelliteMarkerGeometry';
 import earthTextureUrl from '../assets/earth_day.jpg';
 
+import { frameGlobeCameraOnDirection } from '../lib/cameraFocus';
 import { getMobileGlobeRenderProfile } from '../lib/mobileGlobe';
+import { findSatelliteById } from '../lib/satelliteLookup';
 import {
   isStarlinkObject,
   type ObjectType,
@@ -80,27 +78,9 @@ function applyMarkerOrientation(
 /** Bundled by Vite (`src/assets`) so path works in dev, preview, and Tauri. */
 const EARTH_TEXTURE_URL = earthTextureUrl;
 
-function findSatelliteById(
-  id: string,
-  positionsRef: RefObject<SatelliteCoordinates[]>,
-  targetPositionsRef: RefObject<SatelliteCoordinates[]>,
-  catalogPositionsRef: RefObject<SatelliteCoordinates[]>,
-): SatelliteCoordinates | undefined {
-  const sources = [
-    positionsRef.current,
-    targetPositionsRef.current,
-    catalogPositionsRef.current,
-  ];
-  for (const list of sources) {
-    for (let i = 0; i < list.length; i += 1) {
-      if (list[i].id === id) return list[i];
-    }
-  }
-  return undefined;
-}
-
 interface GlobeSceneProps {
   positionsRef: RefObject<SatelliteCoordinates[]>;
+  positionsById: ReadonlyMap<string, SatelliteCoordinates>;
   targetPositionsRef: RefObject<SatelliteCoordinates[]>;
   lerpFromRef: RefObject<SatelliteCoordinates[]>;
   lerpStartAtRef: RefObject<number>;
@@ -108,7 +88,6 @@ interface GlobeSceneProps {
   selectedId: string | null;
   selectedIdRef: RefObject<string | null>;
   typeById: ReadonlyMap<string, ObjectType>;
-  servicingStarlinkIdRef: RefObject<string | null>;
   servicingStarlinkId: string | null;
   servicingStarlink: SatelliteLookTarget | null;
   catalogPositionsRef: RefObject<SatelliteCoordinates[]>;
@@ -125,7 +104,7 @@ interface SatelliteInstancesProps {
   lerpStartAtRef: RefObject<number>;
   lerpDurationMs: number;
   selectedIdRef: RefObject<string | null>;
-  servicingStarlinkIdRef: RefObject<string | null>;
+  servicingStarlinkId: string | null;
   visibleInstanceIdsRef: RefObject<string[]>;
   selectedScenePosRef: RefObject<{ x: number; y: number; z: number } | null>;
   onSelectSatelliteRef: RefObject<(id: string | null) => void>;
@@ -212,7 +191,7 @@ function SatelliteInstances({
   lerpStartAtRef,
   lerpDurationMs,
   selectedIdRef,
-  servicingStarlinkIdRef,
+  servicingStarlinkId,
   visibleInstanceIdsRef,
   selectedScenePosRef,
   onSelectSatelliteRef,
@@ -289,7 +268,7 @@ function SatelliteInstances({
     }
 
     const selectedId = selectedIdRef.current;
-    const servicingId = servicingStarlinkIdRef.current;
+    const servicingId = servicingStarlinkId;
     const visibleIds: string[] = [];
     let instanceIndex = 0;
     let selectedScenePos: { x: number; y: number; z: number } | null = null;
@@ -391,52 +370,6 @@ function SatelliteInstances({
   );
 }
 
-function SelectedMarker({
-  selectedIdRef,
-  selectedScenePosRef,
-}: {
-  selectedIdRef: RefObject<string | null>;
-  selectedScenePosRef: RefObject<{ x: number; y: number; z: number } | null>;
-}) {
-  const meshRef = useRef<THREE.Mesh>(null);
-
-  useFrame(() => {
-    const mesh = meshRef.current;
-    if (!mesh) return;
-
-    if (!selectedIdRef.current) {
-      mesh.visible = false;
-      return;
-    }
-
-    const pos = selectedScenePosRef.current;
-    if (!pos) {
-      mesh.visible = false;
-      return;
-    }
-
-    mesh.position.set(
-      pos.x * MARKER_RADIAL_BIAS,
-      pos.y * MARKER_RADIAL_BIAS,
-      pos.z * MARKER_RADIAL_BIAS,
-    );
-    mesh.visible = true;
-  });
-
-  return (
-    <mesh ref={meshRef} visible={false}>
-      <sphereGeometry args={[SATELLITE_MARKER_RADIUS * 2, 10, 10]} />
-      <meshBasicMaterial
-        color="#fbbf24"
-        transparent
-        opacity={0.35}
-        toneMapped={false}
-        depthWrite={false}
-      />
-    </mesh>
-  );
-}
-
 function UserLocationMarker({
   location,
   isMobile,
@@ -489,16 +422,14 @@ function CameraFocusOnUser({
       userLocation.longitude,
       0,
     );
-    direction.set(x, y, z).normalize();
-    camera.position.copy(direction.multiplyScalar(DEFAULT_CAMERA_DISTANCE));
-    camera.lookAt(0, 0, 0);
-
-    const controls = controlsRef.current;
-    if (controls) {
-      controls.target.set(0, 0, 0);
-      controls.update();
-    }
-
+    frameGlobeCameraOnDirection(
+      camera,
+      controlsRef.current,
+      direction,
+      x,
+      y,
+      z,
+    );
     hasCenteredRef.current = true;
   }, [userLocation, camera, controlsRef, direction]);
 
@@ -509,6 +440,7 @@ function CameraFocusOnSelection({
   selectedId,
   selectedIdRef,
   selectedScenePosRef,
+  positionsById,
   positionsRef,
   targetPositionsRef,
   catalogPositionsRef,
@@ -518,6 +450,7 @@ function CameraFocusOnSelection({
   selectedId: string | null;
   selectedIdRef: RefObject<string | null>;
   selectedScenePosRef: RefObject<{ x: number; y: number; z: number } | null>;
+  positionsById: ReadonlyMap<string, SatelliteCoordinates>;
   positionsRef: RefObject<SatelliteCoordinates[]>;
   targetPositionsRef: RefObject<SatelliteCoordinates[]>;
   catalogPositionsRef: RefObject<SatelliteCoordinates[]>;
@@ -528,17 +461,6 @@ function CameraFocusOnSelection({
   const pendingFocusIdRef = useRef<string | null>(null);
   const direction = useMemo(() => new THREE.Vector3(), []);
 
-  const frameCamera = (x: number, y: number, z: number) => {
-    direction.set(x, y, z).normalize();
-    camera.position.copy(direction.multiplyScalar(DEFAULT_CAMERA_DISTANCE));
-    camera.lookAt(0, 0, 0);
-    const controls = controlsRef.current;
-    if (controls) {
-      controls.target.set(0, 0, 0);
-      controls.update();
-    }
-  };
-
   useEffect(() => {
     if (!selectedId) {
       pendingFocusIdRef.current = null;
@@ -547,6 +469,7 @@ function CameraFocusOnSelection({
 
     const sat = findSatelliteById(
       selectedId,
+      positionsById,
       positionsRef,
       targetPositionsRef,
       catalogPositionsRef,
@@ -561,6 +484,7 @@ function CameraFocusOnSelection({
   }, [
     selectedId,
     typeById,
+    positionsById,
     positionsRef,
     targetPositionsRef,
     catalogPositionsRef,
@@ -572,10 +496,14 @@ function CameraFocusOnSelection({
 
     const scenePos = selectedScenePosRef.current;
     if (scenePos) {
-      frameCamera(
-        scenePos.x * MARKER_RADIAL_BIAS,
-        scenePos.y * MARKER_RADIAL_BIAS,
-        scenePos.z * MARKER_RADIAL_BIAS,
+      frameGlobeCameraOnDirection(
+        camera,
+        controlsRef.current,
+        direction,
+        scenePos.x,
+        scenePos.y,
+        scenePos.z,
+        MARKER_RADIAL_BIAS,
       );
       pendingFocusIdRef.current = null;
       return;
@@ -583,6 +511,7 @@ function CameraFocusOnSelection({
 
     const sat = findSatelliteById(
       pendingId,
+      positionsById,
       positionsRef,
       targetPositionsRef,
       catalogPositionsRef,
@@ -594,7 +523,15 @@ function CameraFocusOnSelection({
       sat.longitude,
       sat.altitude,
     );
-    frameCamera(x * GLOBE_RADIAL_BIAS, y * GLOBE_RADIAL_BIAS, z * GLOBE_RADIAL_BIAS);
+    frameGlobeCameraOnDirection(
+      camera,
+      controlsRef.current,
+      direction,
+      x,
+      y,
+      z,
+      GLOBE_RADIAL_BIAS,
+    );
     pendingFocusIdRef.current = null;
   });
 
@@ -607,6 +544,7 @@ function GlobeOrbitControls({
   selectedId,
   selectedIdRef,
   selectedScenePosRef,
+  positionsById,
   positionsRef,
   targetPositionsRef,
   catalogPositionsRef,
@@ -617,6 +555,7 @@ function GlobeOrbitControls({
   selectedId: string | null;
   selectedIdRef: RefObject<string | null>;
   selectedScenePosRef: RefObject<{ x: number; y: number; z: number } | null>;
+  positionsById: ReadonlyMap<string, SatelliteCoordinates>;
   positionsRef: RefObject<SatelliteCoordinates[]>;
   targetPositionsRef: RefObject<SatelliteCoordinates[]>;
   catalogPositionsRef: RefObject<SatelliteCoordinates[]>;
@@ -642,6 +581,7 @@ function GlobeOrbitControls({
         selectedId={selectedId}
         selectedIdRef={selectedIdRef}
         selectedScenePosRef={selectedScenePosRef}
+        positionsById={positionsById}
         positionsRef={positionsRef}
         targetPositionsRef={targetPositionsRef}
         catalogPositionsRef={catalogPositionsRef}
@@ -676,6 +616,7 @@ function RenderFpsTracker({ onRenderFps }: { onRenderFps: (fps: number) => void 
 
 function GlobeScene({
   positionsRef,
+  positionsById,
   targetPositionsRef,
   lerpFromRef,
   lerpStartAtRef,
@@ -683,7 +624,6 @@ function GlobeScene({
   selectedId,
   selectedIdRef,
   typeById,
-  servicingStarlinkIdRef,
   servicingStarlinkId,
   servicingStarlink,
   catalogPositionsRef,
@@ -738,18 +678,13 @@ function GlobeScene({
         lerpStartAtRef={lerpStartAtRef}
         lerpDurationMs={lerpDurationMs}
         selectedIdRef={selectedIdRef}
-        servicingStarlinkIdRef={servicingStarlinkIdRef}
+        servicingStarlinkId={servicingStarlinkId}
         visibleInstanceIdsRef={visibleInstanceIdsRef}
         selectedScenePosRef={selectedScenePosRef}
         onSelectSatelliteRef={onSelectSatelliteRef}
         maxInstances={renderProfile.maxInstances}
         pickRadius={renderProfile.pickRadius}
       />
-      <SelectedMarker
-        selectedIdRef={selectedIdRef}
-        selectedScenePosRef={selectedScenePosRef}
-      />
-
       {userLocation && (
         <UserLocationMarker location={userLocation} isMobile={isMobile} />
       )}
@@ -759,6 +694,7 @@ function GlobeScene({
           userLocation={userLocation}
           servicingStarlink={servicingStarlink}
           servicingStarlinkId={servicingStarlinkId}
+          positionsById={positionsById}
           positionsRef={positionsRef}
           targetPositionsRef={targetPositionsRef}
           catalogPositionsRef={catalogPositionsRef}
@@ -771,6 +707,7 @@ function GlobeScene({
         selectedId={selectedId}
         selectedIdRef={selectedIdRef}
         selectedScenePosRef={selectedScenePosRef}
+        positionsById={positionsById}
         positionsRef={positionsRef}
         targetPositionsRef={targetPositionsRef}
         catalogPositionsRef={catalogPositionsRef}
@@ -784,6 +721,7 @@ function GlobeScene({
 
 interface GlobeVisualizerProps {
   positionsRef: RefObject<SatelliteCoordinates[]>;
+  positionsById: ReadonlyMap<string, SatelliteCoordinates>;
   targetPositionsRef: RefObject<SatelliteCoordinates[]>;
   lerpFromRef: RefObject<SatelliteCoordinates[]>;
   lerpStartAtRef: RefObject<number>;
@@ -791,7 +729,6 @@ interface GlobeVisualizerProps {
   selectedId: string | null;
   selectedIdRef: RefObject<string | null>;
   typeById: ReadonlyMap<string, ObjectType>;
-  servicingStarlinkIdRef: RefObject<string | null>;
   servicingStarlinkId: string | null;
   servicingStarlink: SatelliteLookTarget | null;
   catalogPositionsRef: RefObject<SatelliteCoordinates[]>;
@@ -803,6 +740,7 @@ interface GlobeVisualizerProps {
 
 export function GlobeVisualizer({
   positionsRef,
+  positionsById,
   targetPositionsRef,
   lerpFromRef,
   lerpStartAtRef,
@@ -810,7 +748,6 @@ export function GlobeVisualizer({
   selectedId,
   selectedIdRef,
   typeById,
-  servicingStarlinkIdRef,
   servicingStarlinkId,
   servicingStarlink,
   catalogPositionsRef,
@@ -849,6 +786,7 @@ export function GlobeVisualizer({
         <color attach="background" args={['#050810']} />
         <GlobeScene
           positionsRef={positionsRef}
+          positionsById={positionsById}
           targetPositionsRef={targetPositionsRef}
           lerpFromRef={lerpFromRef}
           lerpStartAtRef={lerpStartAtRef}
@@ -856,7 +794,6 @@ export function GlobeVisualizer({
           selectedId={selectedId}
           selectedIdRef={selectedIdRef}
           typeById={typeById}
-          servicingStarlinkIdRef={servicingStarlinkIdRef}
           servicingStarlinkId={servicingStarlinkId}
           servicingStarlink={servicingStarlink}
           catalogPositionsRef={catalogPositionsRef}

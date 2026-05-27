@@ -13,19 +13,60 @@ function lerpLongitude(from: number, to: number, alpha: number): number {
   return lng;
 }
 
-export function copySatelliteCoordinates(
+function assignSlot(
+  slot: SatelliteCoordinates | undefined,
+  source: Pick<
+    SatelliteCoordinates,
+    'id' | 'name' | 'latitude' | 'longitude' | 'altitude'
+  >,
+): SatelliteCoordinates {
+  if (!slot) {
+    return {
+      id: source.id,
+      name: source.name,
+      latitude: source.latitude,
+      longitude: source.longitude,
+      altitude: source.altitude,
+    };
+  }
+  slot.id = source.id;
+  slot.name = source.name;
+  slot.latitude = source.latitude;
+  slot.longitude = source.longitude;
+  slot.altitude = source.altitude;
+  return slot;
+}
+
+/** True when `dest` already matches `source` id order and values. */
+export function positionsMatchSource(
+  dest: ReadonlyArray<SatelliteCoordinates>,
   source: ReadonlyArray<SatelliteCoordinates>,
-): SatelliteCoordinates[] {
-  return source.map((sat) => ({
-    id: sat.id,
-    name: sat.name,
-    latitude: sat.latitude,
-    longitude: sat.longitude,
-    altitude: sat.altitude,
-    velocityX: sat.velocityX,
-    velocityY: sat.velocityY,
-    velocityZ: sat.velocityZ,
-  }));
+): boolean {
+  if (dest.length !== source.length) return false;
+  for (let i = 0; i < source.length; i += 1) {
+    const a = dest[i];
+    const b = source[i];
+    if (!a || a.id !== b.id) return false;
+    if (
+      a.latitude !== b.latitude ||
+      a.longitude !== b.longitude ||
+      a.altitude !== b.altitude
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/** Reuse or grow `dest` slots from `source` without allocating a new array. */
+export function syncSatelliteCoordinates(
+  dest: SatelliteCoordinates[],
+  source: ReadonlyArray<SatelliteCoordinates>,
+): void {
+  dest.length = source.length;
+  for (let i = 0; i < source.length; i += 1) {
+    dest[i] = assignSlot(dest[i], source[i]);
+  }
 }
 
 /**
@@ -47,17 +88,8 @@ export function lerpSatelliteCoordinates(
     const prev = from[i];
     let slot = out[i];
 
-    if (!slot) {
-      slot = {
-        id: target.id,
-        name: target.name,
-        latitude: target.latitude,
-        longitude: target.longitude,
-        altitude: target.altitude,
-        velocityX: 0,
-        velocityY: 1,
-        velocityZ: 0,
-      };
+    if (!slot || slot.id !== target.id) {
+      slot = assignSlot(slot, target);
       out[i] = slot;
     } else {
       slot.id = target.id;

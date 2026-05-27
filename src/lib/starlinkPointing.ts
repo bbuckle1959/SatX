@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 
 import { geodeticToCartesian } from './geo';
+import { isStarlinkObject, type ObjectType } from './objectTypes';
 
 const DEG2RAD = Math.PI / 180;
 
@@ -69,10 +70,6 @@ export function dishPointingUnitVector(
     .normalize();
 }
 
-function isStarlinkName(name: string): boolean {
-  return /STARLINK/i.test(name);
-}
-
 /**
  * Pick the Starlink satellite whose direction from the observer best aligns with
  * the dish boresight (smallest angular separation).
@@ -82,6 +79,7 @@ export function findServicingStarlink(
   azimuthDeg: number,
   elevationDeg: number,
   satellites: ReadonlyArray<SatelliteLookTarget>,
+  typeById: ReadonlyMap<string, ObjectType>,
 ): SatelliteLookTarget | null {
   const pointing = dishPointingUnitVector(observer, azimuthDeg, elevationDeg);
   const [ox, oy, oz] = geodeticToCartesian(observer.latitude, observer.longitude, 0);
@@ -91,7 +89,7 @@ export function findServicingStarlink(
   let bestAngleRad = Infinity;
 
   for (const sat of satellites) {
-    if (!isStarlinkName(sat.name)) continue;
+    if (!isStarlinkObject(sat.id, sat.name, typeById)) continue;
 
     const [sx, sy, sz] = geodeticToCartesian(
       sat.latitude,
@@ -113,13 +111,4 @@ export function findServicingStarlink(
   }
 
   return best;
-}
-
-export function findServicingStarlinkId(
-  observer: GeodeticObserver,
-  azimuthDeg: number,
-  elevationDeg: number,
-  satellites: ReadonlyArray<SatelliteLookTarget>,
-): string | null {
-  return findServicingStarlink(observer, azimuthDeg, elevationDeg, satellites)?.id ?? null;
 }

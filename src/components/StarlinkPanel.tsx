@@ -13,17 +13,18 @@ function formatDegrees(value: number): string {
 }
 
 interface StarlinkPanelProps {
-  onAlignmentChange?: (data: StarlinkAlignment | null) => void;
+  alignment: StarlinkAlignment | null;
+  onAlignmentChange: (data: StarlinkAlignment | null) => void;
   servicingSatelliteName?: string | null;
   servicingStarlinkId?: string | null;
   onSelectServicing?: (id: string) => void;
   selectedId?: string | null;
   hasDishSite?: boolean;
-  /** Browser geolocation used for boresight matching (same as red globe marker). */
   dishSite?: { latitude: number; longitude: number } | null;
 }
 
 export function StarlinkPanel({
+  alignment,
   onAlignmentChange,
   servicingSatelliteName,
   servicingStarlinkId = null,
@@ -31,12 +32,9 @@ export function StarlinkPanel({
   selectedId = null,
   hasDishSite = false,
   dishSite = null,
-}: StarlinkPanelProps = {}) {
+}: StarlinkPanelProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [alignmentData, setAlignmentData] = useState<StarlinkAlignment | null>(
-    null,
-  );
 
   const fetchAlignment = useCallback(async () => {
     if (!isTauri()) return;
@@ -46,11 +44,9 @@ export function StarlinkPanel({
 
     try {
       const data = await invoke<StarlinkAlignment>('get_dish_alignment');
-      setAlignmentData(data);
-      onAlignmentChange?.(data);
+      onAlignmentChange(data);
     } catch (err) {
-      setAlignmentData(null);
-      onAlignmentChange?.(null);
+      onAlignmentChange(null);
       const message =
         typeof err === 'string'
           ? err
@@ -61,7 +57,7 @@ export function StarlinkPanel({
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [onAlignmentChange]);
 
   const desktopOnly = !isTauri();
 
@@ -83,7 +79,7 @@ export function StarlinkPanel({
           title={
             desktopOnly
               ? 'Requires SatX desktop app on Starlink LAN'
-              : alignmentData
+              : alignment
                 ? 'Refresh alignment'
                 : 'Fetch alignment'
           }
@@ -93,37 +89,37 @@ export function StarlinkPanel({
           ) : (
             <RefreshCw size={12} aria-hidden />
           )}
-          <span>{loading ? '…' : alignmentData ? 'Refresh' : 'Fetch'}</span>
+          <span>{loading ? '…' : alignment ? 'Refresh' : 'Fetch'}</span>
         </button>
       </div>
 
-      {alignmentData && (
+      {alignment && (
         <p className="starlink-strip-data">
           <span className="starlink-strip-mono">
-            Az {formatDegrees(alignmentData.azimuth_deg)}
+            Az {formatDegrees(alignment.azimuth_deg)}
           </span>
           <span className="starlink-strip-sep" aria-hidden>
             ·
           </span>
           <span className="starlink-strip-mono">
-            El {formatDegrees(alignmentData.elevation_deg)}
+            El {formatDegrees(alignment.elevation_deg)}
           </span>
           <span className="starlink-strip-sep" aria-hidden>
             ·
           </span>
           <span
             className={
-              alignmentData.is_aligned
+              alignment.is_aligned
                 ? 'starlink-strip-ok'
                 : 'starlink-strip-warn'
             }
           >
-            {alignmentData.is_aligned ? 'Aligned' : 'Adjusting'}
+            {alignment.is_aligned ? 'Aligned' : 'Adjusting'}
           </span>
         </p>
       )}
 
-      {alignmentData && !alignmentData.is_aligned && (
+      {alignment && !alignment.is_aligned && (
         <p className="starlink-strip-hint" role="status">
           <AlertTriangle size={11} aria-hidden />
           Dish is still adjusting boresight.
@@ -143,34 +139,39 @@ export function StarlinkPanel({
         </p>
       )}
 
-      {!desktopOnly && !alignmentData && !error && !loading && (
+      {!desktopOnly && !alignment && !error && !loading && (
         <p className="starlink-strip-hint">On Starlink LAN — fetch boresight.</p>
       )}
 
-      {alignmentData && !hasDishSite && (
+      {alignment && !hasDishSite && (
         <p className="starlink-strip-hint">
           Allow location access (red marker) to link dish boresight to a
           satellite.
         </p>
       )}
 
-      {alignmentData && hasDishSite && dishSite && (
+      {alignment && hasDishSite && dishSite && (
         <p className="starlink-strip-hint">
           Dish site {dishSite.latitude.toFixed(2)}°, {dishSite.longitude.toFixed(2)}°
           (your location)
         </p>
       )}
 
-      {alignmentData && hasDishSite && servicingSatelliteName && servicingStarlinkId && (
-        <button
-          type="button"
-          className={`starlink-strip-hint starlink-strip-servicing starlink-strip-servicing-btn${selectedId === servicingStarlinkId ? ' starlink-strip-servicing-btn--selected' : ''}`}
-          onClick={() => onSelectServicing?.(servicingStarlinkId)}
-        >
-          Servicing: {servicingSatelliteName}
-          {selectedId === servicingStarlinkId ? ' · selected' : ' · tap to select'}
-        </button>
-      )}
+      {alignment &&
+        hasDishSite &&
+        servicingSatelliteName &&
+        servicingStarlinkId && (
+          <button
+            type="button"
+            className={`starlink-strip-hint starlink-strip-servicing starlink-strip-servicing-btn${selectedId === servicingStarlinkId ? ' starlink-strip-servicing-btn--selected' : ''}`}
+            onClick={() => onSelectServicing?.(servicingStarlinkId)}
+          >
+            Servicing: {servicingSatelliteName}
+            {selectedId === servicingStarlinkId
+              ? ' · selected'
+              : ' · tap to select'}
+          </button>
+        )}
     </section>
   );
 }

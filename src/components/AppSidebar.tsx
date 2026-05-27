@@ -22,6 +22,10 @@ import {
   viewRelativeMetrics,
 } from '../lib/viewMetrics';
 import type { DishSite } from '../lib/dishSite';
+import {
+  GLOBE_POPULATION_OPTIONS,
+  type GlobePopulationMode,
+} from '../lib/globeCatalog';
 
 export interface SidebarListItem {
   sat: SatelliteCoordinates;
@@ -37,9 +41,13 @@ export interface AppSidebarProps {
   objectTypeFilter: ObjectTypeFilter;
   catalogSource: string | null;
   globeCapActive: boolean;
+  globePopulation: GlobePopulationMode;
+  globeMaxInstances: number;
+  globeDrawLimited: boolean;
+  onGlobePopulationChange: (mode: GlobePopulationMode) => void;
   tlesCount: number;
+  starlinkAlignment: StarlinkAlignment | null;
   onAlignmentChange: (data: StarlinkAlignment | null) => void;
-  servicingSatelliteName: string | null;
   servicingStarlinkId: string | null;
   dishSite: DishSite | null;
   loading: boolean;
@@ -51,7 +59,6 @@ export interface AppSidebarProps {
   satcatById: Map<string, SatcatEntry>;
   typeById: Map<string, ObjectType>;
   onCloseDetails: () => void;
-  objectTypeFilterValue: ObjectTypeFilter;
   onObjectTypeFilterChange: (value: ObjectTypeFilter) => void;
   listItems: SidebarListItem[];
   filteredCount: number;
@@ -70,9 +77,13 @@ export function AppSidebar({
   objectTypeFilter,
   catalogSource,
   globeCapActive,
+  globePopulation,
+  globeMaxInstances,
+  globeDrawLimited,
+  onGlobePopulationChange,
   tlesCount,
+  starlinkAlignment,
   onAlignmentChange,
-  servicingSatelliteName,
   servicingStarlinkId,
   dishSite,
   loading,
@@ -84,7 +95,6 @@ export function AppSidebar({
   satcatById,
   typeById,
   onCloseDetails,
-  objectTypeFilterValue,
   onObjectTypeFilterChange,
   listItems,
   filteredCount,
@@ -149,15 +159,21 @@ export function AppSidebar({
           {objectTypeFilter !== 'all' ? ` · filter: ${selectedTypeLabel}` : ''}
           {catalogSource ? ` · ${catalogSource}` : ''}
           {globeCapActive
-            ? ` · globe draws first ${onGlobeRendered.toLocaleString()}`
+            ? globePopulation === 'capped'
+              ? ` · globe capped at ${globeMaxInstances.toLocaleString()}`
+              : ` · globe draws first ${onGlobeRendered.toLocaleString()} of ${activeCount.toLocaleString()}`
             : ''}
         </p>
       )}
 
       {objectTypeFilter === 'starlink' && (
         <StarlinkPanel
+          alignment={starlinkAlignment}
           onAlignmentChange={onAlignmentChange}
-          servicingSatelliteName={servicingSatelliteName}
+          servicingSatelliteName={
+            listItems.find((item) => item.sat.id === servicingStarlinkId)?.sat
+              .name ?? null
+          }
           servicingStarlinkId={servicingStarlinkId}
           onSelectServicing={onSelectSatellite}
           selectedId={selectedId}
@@ -211,7 +227,7 @@ export function AppSidebar({
         <select
           id="object-type-filter"
           className="filter-select"
-          value={objectTypeFilterValue}
+          value={objectTypeFilter}
           onChange={(e) =>
             onObjectTypeFilterChange(e.target.value as ObjectTypeFilter)
           }
@@ -223,6 +239,33 @@ export function AppSidebar({
             </option>
           ))}
         </select>
+      </div>
+
+      <div className="filter-wrap">
+        <label className="filter-label" htmlFor="globe-population-filter">
+          <Satellite size={14} aria-hidden />
+          Globe set
+        </label>
+        <select
+          id="globe-population-filter"
+          className="filter-select"
+          value={globePopulation}
+          onChange={(e) =>
+            onGlobePopulationChange(e.target.value as GlobePopulationMode)
+          }
+          aria-label="Globe object population"
+        >
+          {GLOBE_POPULATION_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <p className="filter-hint">
+          {globePopulation === 'full'
+            ? `Propagates all matching objects${globeDrawLimited ? `; globe still draws up to ${globeMaxInstances.toLocaleString()}` : ''}.`
+            : `Propagates and prioritizes up to ${globeMaxInstances.toLocaleString()} objects for performance.`}
+        </p>
       </div>
 
       <div className="list-meta">

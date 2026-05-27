@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import './App.css';
 import { AppSidebar } from './components/AppSidebar';
@@ -6,10 +6,12 @@ import { GlobeVisualizer } from './components/GlobeVisualizer';
 import { MobileBottomSheet } from './components/MobileBottomSheet';
 import type { StarlinkAlignment } from './components/StarlinkPanel';
 import { dishObserverSite } from './lib/dishSite';
+import { MOBILE_UI_ENABLED } from './lib/features';
 import { findServicingStarlink } from './lib/starlinkPointing';
-import { GLOBE_MAX_INSTANCES } from './lib/globeLimits';
+import type { GlobePopulationMode } from './lib/globeCatalog';
 import { getGlobeMaxInstances } from './lib/mobileGlobe';
 import { nearestBySlantRange } from './lib/nearestSatellites';
+import { getSatelliteFromMap } from './lib/satelliteLookup';
 import {
   useSatellitePropagation,
   type SatelliteCoordinates,
@@ -19,6 +21,7 @@ import { useIsMobileViewport } from './hooks/useMediaQuery';
 import {
   buildTypeById,
   getObjectTypeLabel,
+  isStarlinkObject,
   type ObjectTypeFilter,
 } from './lib/objectTypes';
 import { fetchActiveSatcat, type SatcatEntry } from './services/satcat';
@@ -37,14 +40,15 @@ function App() {
   const [catalogSource, setCatalogSource] = useState<string | null>(null);
   const [objectTypeFilter, setObjectTypeFilter] =
     useState<ObjectTypeFilter>('all');
+  const [globePopulation, setGlobePopulation] =
+    useState<GlobePopulationMode>('capped');
   const [renderFps, setRenderFps] = useState(0);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [starlinkAlignment, setStarlinkAlignment] =
     useState<StarlinkAlignment | null>(null);
   const { location: userLocation, status: locationStatus } = useUserLocation();
-  const isMobile = useIsMobileViewport();
-  const servicingStarlinkIdRef = useRef<string | null>(null);
-
+  const viewportMobile = useIsMobileViewport();
+  const isMobile = MOBILE_UI_ENABLED && viewportMobile;
   const selectedIdRef = useRef<string | null>(null);
   selectedIdRef.current = selectedId;
 
@@ -56,13 +60,11 @@ function App() {
   }, [tles]);
 
   const starlinkFilterActive = objectTypeFilter === 'starlink';
+  const [servicingPinId, setServicingPinId] = useState<string | null>(null);
 
-  const getGlobePinIds = useCallback(
-    () => [
-      selectedId,
-      starlinkFilterActive ? servicingStarlinkIdRef.current : null,
-    ],
-    [selectedId, starlinkFilterActive],
+  const globePinIds = useMemo(
+    () => [selectedId, starlinkFilterActive ? servicingPinId : null],
+    [selectedId, starlinkFilterActive, servicingPinId],
   );
 
   useEffect(() => {
@@ -71,6 +73,8 @@ function App() {
 
   const {
     positions,
+    positionsById,
+    positionEpoch,
     positionsRef,
     catalogPositionsRef,
     targetPositionsRef,
@@ -82,11 +86,13 @@ function App() {
     propagationFps,
     catalogParsedCount,
     activeCount,
+    matchingCatalogCount,
     isParsing,
   } = useSatellitePropagation(tles, objectTypeFilter, typeById, {
     isMobile,
     userLocation,
-    getPinIds: getGlobePinIds,
+    globePopulation,
+    pinIds: globePinIds,
   });
 
   useEffect(() => {
@@ -126,58 +132,60 @@ function App() {
     };
   }, []);
 
-  const [selectedSatellite, setSelectedSatellite] =
-    useState<SatelliteCoordinates | null>(null);
+  const selectedSatellite = useMemo(
+    () =>
+      selectedId
+        ? getSatelliteFromMap(positionsById, selectedId, null)
+        : null,
+    [selectedId, positionsById],
+  );
 
-  useEffect(() => {
-    if (!selectedId) {
-      setSelectedSatellite(null);
-      return;
-    }
-
-    const sat =
-      positionsRef.current?.find((s) => s.id === selectedId) ??
-      positions.find((s) => s.id === selectedId) ??
-      null;
-    setSelectedSatellite(sat);
-  }, [selectedId, positions, positionsRef]);
-
-  const filteredPositions = positions;
   const propagatedCount = positions.length;
   const globeMaxInstances = getGlobeMaxInstances(isMobile);
   const onGlobeRendered = Math.min(propagatedCount, globeMaxInstances);
-  const globeCapActive = !isMobile && propagatedCount > GLOBE_MAX_INSTANCES;
+  const globeDrawLimited = propagatedCount > globeMaxInstances;
+  const globeCapActive =
+    globePopulation === 'capped'
+      ? matchingCatalogCount > globeMaxInstances
+      : globeDrawLimited;
 
   const selectedTypeLabel = getObjectTypeLabel(objectTypeFilter);
 
   const dishSite = useMemo(() => dishObserverSite(userLocation), [userLocation]);
 
+  const starlinkCatalog = useMemo(() => {
+    if (!starlinkFilterActive) return [];
+    const catalog = catalogPositionsRef.current;
+    const out: SatelliteCoordinates[] = [];
+    for (let i = 0; i < catalog.length; i += 1) {
+      const sat = catalog[i];
+      if (isStarlinkObject(sat.id, sat.name, typeById)) out.push(sat);
+    }
+    return out;
+  }, [starlinkFilterActive, positionEpoch, typeById, catalogPositionsRef]);
+
   const servicingStarlink = useMemo(() => {
     if (!starlinkFilterActive || !starlinkAlignment || !dishSite) return null;
-    const catalog =
-      catalogPositionsRef.current.length > 0
-        ? catalogPositionsRef.current
-        : positions.length > 0
-          ? positions
-          : positionsRef.current;
     return findServicingStarlink(
       dishSite,
       starlinkAlignment.azimuth_deg,
       starlinkAlignment.elevation_deg,
-      catalog,
+      starlinkCatalog,
+      typeById,
     );
   }, [
     starlinkFilterActive,
     starlinkAlignment,
     dishSite,
-    positions,
-    positionsRef,
-    catalogPositionsRef,
-    propagationFps,
+    starlinkCatalog,
+    typeById,
   ]);
 
   const servicingStarlinkId = servicingStarlink?.id ?? null;
-  servicingStarlinkIdRef.current = servicingStarlinkId;
+
+  useEffect(() => {
+    setServicingPinId(servicingStarlinkId);
+  }, [servicingStarlinkId]);
 
   const listItems = useMemo(() => {
     const buildItem = (sat: SatelliteCoordinates) => ({
@@ -189,56 +197,37 @@ function App() {
 
     let items: ReturnType<typeof buildItem>[];
     if (!userLocation) {
-      items = filteredPositions.slice(0, LIST_LIMIT).map(buildItem);
+      items = positions.slice(0, LIST_LIMIT).map(buildItem);
     } else {
-      items = nearestBySlantRange(
-        filteredPositions,
-        userLocation,
-        LIST_LIMIT,
-      ).map(buildItem);
+      items = nearestBySlantRange(positions, userLocation, LIST_LIMIT).map(
+        buildItem,
+      );
     }
 
     if (!starlinkFilterActive || !servicingStarlink) return items;
 
     const servicingId = servicingStarlink.id;
     const live =
-      filteredPositions.find((s) => s.id === servicingId) ??
-      positionsRef.current.find((s) => s.id === servicingId) ??
-      catalogPositionsRef.current.find((s) => s.id === servicingId) ??
+      getSatelliteFromMap(positionsById, servicingId, servicingStarlink) ??
       servicingStarlink;
-
-    const servicingItem = buildItem(live as SatelliteCoordinates);
+    const servicingItem = buildItem(live);
     const rest = items.filter((item) => item.sat.id !== servicingId);
     return [servicingItem, ...rest].slice(0, LIST_LIMIT);
   }, [
-    filteredPositions,
+    positions,
+    positionsById,
     userLocation,
     servicingStarlink,
-    positionsRef,
-    catalogPositionsRef,
     starlinkFilterActive,
   ]);
 
   useEffect(() => {
     if (!selectedId) return;
-    const visible = positionsRef.current;
-    let found = false;
-    for (let i = 0; i < visible.length; i += 1) {
-      if (visible[i].id === selectedId) {
-        found = true;
-        break;
-      }
-    }
-    if (!found) setSelectedId(null);
-  }, [positions, selectedId, positionsRef]);
-
-  const servicingSatelliteName = useMemo(() => {
-    if (!servicingStarlink) return null;
-    return servicingStarlink.name;
-  }, [servicingStarlink]);
+    if (!positionsById.has(selectedId)) setSelectedId(null);
+  }, [positionsById, selectedId]);
 
   const servicingLabel = starlinkFilterActive
-    ? (servicingSatelliteName ??
+    ? (servicingStarlink?.name ??
       (servicingStarlinkId ? `NORAD ${servicingStarlinkId}` : null))
     : null;
 
@@ -251,11 +240,14 @@ function App() {
     objectTypeFilter,
     catalogSource,
     globeCapActive,
+    globePopulation,
+    globeMaxInstances,
+    globeDrawLimited,
+    onGlobePopulationChange: setGlobePopulation,
     tlesCount: tles.length,
+    starlinkAlignment,
     onAlignmentChange: setStarlinkAlignment,
-    servicingSatelliteName,
     servicingStarlinkId,
-    servicingStarlink,
     dishSite,
     loading,
     isParsing,
@@ -266,10 +258,9 @@ function App() {
     satcatById,
     typeById,
     onCloseDetails: () => setSelectedId(null),
-    objectTypeFilterValue: objectTypeFilter,
     onObjectTypeFilterChange: setObjectTypeFilter,
     listItems,
-    filteredCount: filteredPositions.length,
+    filteredCount: positions.length,
     selectedId,
     onSelectSatellite: setSelectedId,
     isPaused,
@@ -281,6 +272,7 @@ function App() {
       <main className="visualizer">
         <GlobeVisualizer
           positionsRef={positionsRef}
+          positionsById={positionsById}
           targetPositionsRef={targetPositionsRef}
           lerpFromRef={lerpFromRef}
           lerpStartAtRef={lerpStartAtRef}
@@ -288,7 +280,6 @@ function App() {
           selectedId={selectedId}
           selectedIdRef={selectedIdRef}
           typeById={typeById}
-          servicingStarlinkIdRef={servicingStarlinkIdRef}
           servicingStarlinkId={
             starlinkFilterActive ? servicingStarlinkId : null
           }
@@ -334,20 +325,22 @@ function App() {
         <AppSidebar {...sidebarProps} />
       </aside>
 
-      <div className="mobile-sheet-host md:hidden">
-        <MobileBottomSheet
-          metrics={{
-            calcFps: propagationFps,
-            renderFps,
-            activeCount,
-            servicingLabel,
-          }}
-        >
-          <aside className="sidebar sidebar--sheet">
-            <AppSidebar {...sidebarProps} />
-          </aside>
-        </MobileBottomSheet>
-      </div>
+      {MOBILE_UI_ENABLED && (
+        <div className="mobile-sheet-host md:hidden">
+          <MobileBottomSheet
+            metrics={{
+              calcFps: propagationFps,
+              renderFps,
+              activeCount,
+              servicingLabel,
+            }}
+          >
+            <aside className="sidebar sidebar--sheet">
+              <AppSidebar {...sidebarProps} />
+            </aside>
+          </MobileBottomSheet>
+        </div>
+      )}
     </div>
   );
 }
