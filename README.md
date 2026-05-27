@@ -14,6 +14,7 @@ Built with **Tauri 2**, React, TypeScript, Three.js, and `satellite.js`.
 | **[Application overview](docs/application-overview.md)** | What SatX does: globe, filters, tracking, Starlink, limits |
 | **[Running & building](docs/running/README.md)** | Install, develop, and release builds per OS |
 | **[All docs](docs/README.md)** | Index |
+| **[Acknowledgments](ACKNOWLEDGMENTS.md)** | Libraries and data providers |
 
 ## What SatX does (summary)
 
@@ -80,3 +81,7 @@ UI at `http://localhost:1420` without Tauri. Starlink dish fetch and some native
 | `src-tauri/` | Rust: TLE catalog, Starlink HTTP |
 | `docs/` | User guide, application overview, running guides |
 | `.github/workflows/release.yml` | Multi-OS release builds on tag push |
+
+## Acknowledgments
+
+Thank you to the open-source projects and public data providers that make SatX possible. Full credits: **[ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md)**.
