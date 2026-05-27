@@ -1,10 +1,28 @@
 # SatX Tracker
 
-[https://github.com/bbuckle1959/SatX](https://github.com/bbuckle1959/SatX)
+[![Release](https://img.shields.io/github/v/release/bbuckle1959/SatX?include_prereleases)](https://github.com/bbuckle1959/SatX/releases)
+[![Tauri 2](https://img.shields.io/badge/Tauri-2.x-24C8DB?logo=tauri&logoColor=white)](https://tauri.app/)
+[![Platforms](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-0078d4)](https://github.com/bbuckle1959/SatX/releases)
 
-Desktop satellite tracker for **Windows, macOS, and Linux**. Installers: [Releases](https://github.com/bbuckle1959/SatX/releases). See thousands of orbiting objects on a live 3D globe, filter by type, find what is nearest to you, and (with Starlink) see which satellite your dish is pointing at.
+**See what’s orbiting Earth — live on your desktop.** Track satellites and debris on a 3D globe, filter by type, find what’s nearest to you, and (on Starlink Wi‑Fi) see which satellite your dish is likely using.
 
 Built with **Tauri 2**, React, TypeScript, Three.js, and `satellite.js`.
+
+![SatX Tracker — 3D globe and satellite sidebar](docs/images/screenshot.png)
+
+*Add `docs/images/screenshot.png` for the preview above ([capture guide](docs/images/README.md)).*
+
+## Download
+
+**[Latest release](https://github.com/bbuckle1959/SatX/releases)** — pick the installer for your system.
+
+| Platform | Install |
+|----------|---------|
+| **Windows** | `.msi` or `-setup.exe` from [Releases](https://github.com/bbuckle1959/SatX/releases) |
+| **macOS** | `.dmg` / `.app` from Releases (built by [CI](.github/workflows/release.yml) on `v*` tags) |
+| **Linux** | `.deb`, AppImage, or bundle from Releases (CI on `v*` tags) |
+
+New to SatX? Start with the **[User guide](docs/user-guide.md)**. Developers: [build from source](docs/running/README.md).
 
 ## Documentation
 
