@@ -18,6 +18,9 @@ if errorlevel 1 exit /b 1
 
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0apply-android-starlink.ps1"
 
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0check-android-symlinks.ps1"
+if errorlevel 1 exit /b 1
+
 echo.
 echo Building release APK (install on phone; use on Starlink Wi-Fi for dish)...
 echo.

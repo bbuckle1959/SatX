@@ -7,17 +7,14 @@ import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import type { SatelliteCoordinates } from '../hooks/useSatellitePropagation';
 import { lerpSatelliteCoordinates } from '../lib/lerpGeodetic';
 import type { UserLocation } from '../hooks/useUserLocation';
-import type { DishSite } from '../lib/dishSite';
+import type { SatelliteLookTarget } from '../lib/starlinkPointing';
 import {
   DEFAULT_CAMERA_DISTANCE,
   GLOBE_RADIUS,
   GLOBE_RADIAL_BIAS,
   geodeticToCartesian,
 } from '../lib/geo';
-import type { TleRecord } from '../services/spaceTrack';
-import { SelectedOrbitPath } from './SelectedOrbitPath';
 import { StarlinkServicingLayer } from './StarlinkServicingLayer';
-import type { StarlinkAlignment } from './StarlinkPanel';
 import { attachInstanceSphereRaycast } from '../lib/instanceSphereRaycast';
 import {
   createSatelliteMarkerGeometry,
@@ -26,6 +23,10 @@ import {
 import earthTextureUrl from '../assets/earth_day.jpg';
 
 import { getMobileGlobeRenderProfile } from '../lib/mobileGlobe';
+import {
+  isStarlinkObject,
+  type ObjectType,
+} from '../lib/objectTypes';
 const MARKER_UP = new THREE.Vector3(0, 1, 0);
 const MARKER_DIRECTION = new THREE.Vector3();
 const MARKER_RADIAL_BIAS = GLOBE_RADIAL_BIAS;
@@ -79,6 +80,25 @@ function applyMarkerOrientation(
 /** Bundled by Vite (`src/assets`) so path works in dev, preview, and Tauri. */
 const EARTH_TEXTURE_URL = earthTextureUrl;
 
+function findSatelliteById(
+  id: string,
+  positionsRef: RefObject<SatelliteCoordinates[]>,
+  targetPositionsRef: RefObject<SatelliteCoordinates[]>,
+  catalogPositionsRef: RefObject<SatelliteCoordinates[]>,
+): SatelliteCoordinates | undefined {
+  const sources = [
+    positionsRef.current,
+    targetPositionsRef.current,
+    catalogPositionsRef.current,
+  ];
+  for (const list of sources) {
+    for (let i = 0; i < list.length; i += 1) {
+      if (list[i].id === id) return list[i];
+    }
+  }
+  return undefined;
+}
+
 interface GlobeSceneProps {
   positionsRef: RefObject<SatelliteCoordinates[]>;
   targetPositionsRef: RefObject<SatelliteCoordinates[]>;
@@ -86,11 +106,12 @@ interface GlobeSceneProps {
   lerpStartAtRef: RefObject<number>;
   lerpDurationMs: number;
   selectedId: string | null;
-  selectedTle: TleRecord | null;
   selectedIdRef: RefObject<string | null>;
+  typeById: ReadonlyMap<string, ObjectType>;
   servicingStarlinkIdRef: RefObject<string | null>;
-  starlinkAlignment: StarlinkAlignment | null;
-  dishSite: DishSite | null;
+  servicingStarlinkId: string | null;
+  servicingStarlink: SatelliteLookTarget | null;
+  catalogPositionsRef: RefObject<SatelliteCoordinates[]>;
   userLocation: UserLocation | null;
   onSelectSatelliteRef: RefObject<(id: string | null) => void>;
   onRenderFps: (fps: number) => void;
@@ -416,14 +437,36 @@ function SelectedMarker({
   );
 }
 
-function UserLocationMarker({ location }: { location: UserLocation }) {
+function UserLocationMarker({
+  location,
+  isMobile,
+}: {
+  location: UserLocation;
+  isMobile: boolean;
+}) {
   const [x, y, z] = geodeticToCartesian(location.latitude, location.longitude, 0);
+  const coreRadius = isMobile ? 0.0073 : 0.0027;
+  const haloRadius = isMobile ? 0.0133 : 0;
 
   return (
-    <mesh position={[x, y, z]}>
-      <sphereGeometry args={[0.008, 12, 12]} />
-      <meshBasicMaterial color="#7dd3fc" toneMapped={false} />
-    </mesh>
+    <group position={[x, y, z]}>
+      {isMobile && (
+        <mesh renderOrder={1}>
+          <sphereGeometry args={[haloRadius, 16, 16]} />
+          <meshBasicMaterial
+            color="#dc2626"
+            transparent
+            opacity={0.3}
+            depthWrite={false}
+            toneMapped={false}
+          />
+        </mesh>
+      )}
+      <mesh renderOrder={2}>
+        <sphereGeometry args={[coreRadius, isMobile ? 16 : 10, isMobile ? 16 : 10]} />
+        <meshBasicMaterial color="#ef4444" toneMapped={false} />
+      </mesh>
+    </group>
   );
 }
 
@@ -462,12 +505,122 @@ function CameraFocusOnUser({
   return null;
 }
 
+function CameraFocusOnSelection({
+  selectedId,
+  selectedIdRef,
+  selectedScenePosRef,
+  positionsRef,
+  targetPositionsRef,
+  catalogPositionsRef,
+  typeById,
+  controlsRef,
+}: {
+  selectedId: string | null;
+  selectedIdRef: RefObject<string | null>;
+  selectedScenePosRef: RefObject<{ x: number; y: number; z: number } | null>;
+  positionsRef: RefObject<SatelliteCoordinates[]>;
+  targetPositionsRef: RefObject<SatelliteCoordinates[]>;
+  catalogPositionsRef: RefObject<SatelliteCoordinates[]>;
+  typeById: ReadonlyMap<string, ObjectType>;
+  controlsRef: RefObject<OrbitControlsImpl | null>;
+}) {
+  const { camera } = useThree();
+  const pendingFocusIdRef = useRef<string | null>(null);
+  const direction = useMemo(() => new THREE.Vector3(), []);
+
+  const frameCamera = (x: number, y: number, z: number) => {
+    direction.set(x, y, z).normalize();
+    camera.position.copy(direction.multiplyScalar(DEFAULT_CAMERA_DISTANCE));
+    camera.lookAt(0, 0, 0);
+    const controls = controlsRef.current;
+    if (controls) {
+      controls.target.set(0, 0, 0);
+      controls.update();
+    }
+  };
+
+  useEffect(() => {
+    if (!selectedId) {
+      pendingFocusIdRef.current = null;
+      return;
+    }
+
+    const sat = findSatelliteById(
+      selectedId,
+      positionsRef,
+      targetPositionsRef,
+      catalogPositionsRef,
+    );
+    const name = sat?.name ?? '';
+    if (isStarlinkObject(selectedId, name, typeById)) {
+      pendingFocusIdRef.current = null;
+      return;
+    }
+
+    pendingFocusIdRef.current = selectedId;
+  }, [
+    selectedId,
+    typeById,
+    positionsRef,
+    targetPositionsRef,
+    catalogPositionsRef,
+  ]);
+
+  useFrame(() => {
+    const pendingId = pendingFocusIdRef.current;
+    if (!pendingId || selectedIdRef.current !== pendingId) return;
+
+    const scenePos = selectedScenePosRef.current;
+    if (scenePos) {
+      frameCamera(
+        scenePos.x * MARKER_RADIAL_BIAS,
+        scenePos.y * MARKER_RADIAL_BIAS,
+        scenePos.z * MARKER_RADIAL_BIAS,
+      );
+      pendingFocusIdRef.current = null;
+      return;
+    }
+
+    const sat = findSatelliteById(
+      pendingId,
+      positionsRef,
+      targetPositionsRef,
+      catalogPositionsRef,
+    );
+    if (!sat) return;
+
+    const [x, y, z] = geodeticToCartesian(
+      sat.latitude,
+      sat.longitude,
+      sat.altitude,
+    );
+    frameCamera(x * GLOBE_RADIAL_BIAS, y * GLOBE_RADIAL_BIAS, z * GLOBE_RADIAL_BIAS);
+    pendingFocusIdRef.current = null;
+  });
+
+  return null;
+}
+
 function GlobeOrbitControls({
   controlsRef,
   userLocation,
+  selectedId,
+  selectedIdRef,
+  selectedScenePosRef,
+  positionsRef,
+  targetPositionsRef,
+  catalogPositionsRef,
+  typeById,
 }: {
   controlsRef: RefObject<OrbitControlsImpl | null>;
   userLocation: UserLocation | null;
+  selectedId: string | null;
+  selectedIdRef: RefObject<string | null>;
+  selectedScenePosRef: RefObject<{ x: number; y: number; z: number } | null>;
+  positionsRef: RefObject<SatelliteCoordinates[]>;
+  targetPositionsRef: RefObject<SatelliteCoordinates[]>;
+  catalogPositionsRef: RefObject<SatelliteCoordinates[]>;
+  typeById: ReadonlyMap<string, ObjectType>;
 }) {
   return (
     <>
@@ -483,6 +636,16 @@ function GlobeOrbitControls({
       />
       <CameraFocusOnUser
         userLocation={userLocation}
+        controlsRef={controlsRef}
+      />
+      <CameraFocusOnSelection
+        selectedId={selectedId}
+        selectedIdRef={selectedIdRef}
+        selectedScenePosRef={selectedScenePosRef}
+        positionsRef={positionsRef}
+        targetPositionsRef={targetPositionsRef}
+        catalogPositionsRef={catalogPositionsRef}
+        typeById={typeById}
         controlsRef={controlsRef}
       />
     </>
@@ -518,11 +681,12 @@ function GlobeScene({
   lerpStartAtRef,
   lerpDurationMs,
   selectedId,
-  selectedTle,
   selectedIdRef,
+  typeById,
   servicingStarlinkIdRef,
-  starlinkAlignment,
-  dishSite,
+  servicingStarlinkId,
+  servicingStarlink,
+  catalogPositionsRef,
   userLocation,
   onSelectSatelliteRef,
   onRenderFps,
@@ -586,25 +750,31 @@ function GlobeScene({
         selectedScenePosRef={selectedScenePosRef}
       />
 
-      <SelectedOrbitPath
-        selectedId={selectedId}
-        selectedTle={selectedTle}
-        positionsRef={positionsRef}
-      />
+      {userLocation && (
+        <UserLocationMarker location={userLocation} isMobile={isMobile} />
+      )}
 
-      {userLocation && <UserLocationMarker location={userLocation} />}
-
-      {starlinkAlignment && dishSite && (
+      {userLocation && servicingStarlink && servicingStarlinkId && (
         <StarlinkServicingLayer
-          dishSite={dishSite}
-          servicingStarlinkIdRef={servicingStarlinkIdRef}
+          userLocation={userLocation}
+          servicingStarlink={servicingStarlink}
+          servicingStarlinkId={servicingStarlinkId}
           positionsRef={positionsRef}
+          targetPositionsRef={targetPositionsRef}
+          catalogPositionsRef={catalogPositionsRef}
         />
       )}
 
       <GlobeOrbitControls
         controlsRef={controlsRef}
         userLocation={userLocation}
+        selectedId={selectedId}
+        selectedIdRef={selectedIdRef}
+        selectedScenePosRef={selectedScenePosRef}
+        positionsRef={positionsRef}
+        targetPositionsRef={targetPositionsRef}
+        catalogPositionsRef={catalogPositionsRef}
+        typeById={typeById}
       />
 
       <RenderFpsTracker onRenderFps={onRenderFps} />
@@ -619,11 +789,12 @@ interface GlobeVisualizerProps {
   lerpStartAtRef: RefObject<number>;
   lerpDurationMs: number;
   selectedId: string | null;
-  selectedTle: TleRecord | null;
   selectedIdRef: RefObject<string | null>;
+  typeById: ReadonlyMap<string, ObjectType>;
   servicingStarlinkIdRef: RefObject<string | null>;
-  starlinkAlignment: StarlinkAlignment | null;
-  dishSite: DishSite | null;
+  servicingStarlinkId: string | null;
+  servicingStarlink: SatelliteLookTarget | null;
+  catalogPositionsRef: RefObject<SatelliteCoordinates[]>;
   userLocation: UserLocation | null;
   onSelectSatellite: (id: string | null) => void;
   onRenderFps: (fps: number) => void;
@@ -637,11 +808,12 @@ export function GlobeVisualizer({
   lerpStartAtRef,
   lerpDurationMs,
   selectedId,
-  selectedTle,
   selectedIdRef,
+  typeById,
   servicingStarlinkIdRef,
-  starlinkAlignment,
-  dishSite,
+  servicingStarlinkId,
+  servicingStarlink,
+  catalogPositionsRef,
   userLocation,
   onSelectSatellite,
   onRenderFps,
@@ -682,11 +854,12 @@ export function GlobeVisualizer({
           lerpStartAtRef={lerpStartAtRef}
           lerpDurationMs={lerpDurationMs}
           selectedId={selectedId}
-          selectedTle={selectedTle}
           selectedIdRef={selectedIdRef}
+          typeById={typeById}
           servicingStarlinkIdRef={servicingStarlinkIdRef}
-          starlinkAlignment={starlinkAlignment}
-          dishSite={dishSite}
+          servicingStarlinkId={servicingStarlinkId}
+          servicingStarlink={servicingStarlink}
+          catalogPositionsRef={catalogPositionsRef}
           userLocation={userLocation}
           onSelectSatelliteRef={onSelectSatelliteRef}
           onRenderFps={onRenderFps}

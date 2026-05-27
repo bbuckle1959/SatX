@@ -40,6 +40,7 @@ export interface AppSidebarProps {
   tlesCount: number;
   onAlignmentChange: (data: StarlinkAlignment | null) => void;
   servicingSatelliteName: string | null;
+  servicingStarlinkId: string | null;
   dishSite: DishSite | null;
   loading: boolean;
   isParsing: boolean;
@@ -72,6 +73,7 @@ export function AppSidebar({
   tlesCount,
   onAlignmentChange,
   servicingSatelliteName,
+  servicingStarlinkId,
   dishSite,
   loading,
   isParsing,
@@ -152,12 +154,17 @@ export function AppSidebar({
         </p>
       )}
 
-      <StarlinkPanel
-        onAlignmentChange={onAlignmentChange}
-        servicingSatelliteName={servicingSatelliteName}
-        hasDishSite={dishSite !== null}
-        dishSite={dishSite}
-      />
+      {objectTypeFilter === 'starlink' && (
+        <StarlinkPanel
+          onAlignmentChange={onAlignmentChange}
+          servicingSatelliteName={servicingSatelliteName}
+          servicingStarlinkId={servicingStarlinkId}
+          onSelectServicing={onSelectSatellite}
+          selectedId={selectedId}
+          hasDishSite={dishSite !== null}
+          dishSite={dishSite}
+        />
+      )}
 
       {(loading || isParsing) && (
         <div className="status-banner loading">
@@ -243,7 +250,12 @@ export function AppSidebar({
           filteredListItems.map(({ sat, metrics }) => (
             <li
               key={sat.id}
-              className={selectedId === sat.id ? 'selected' : undefined}
+              className={[
+                servicingStarlinkId === sat.id ? 'servicing' : '',
+                selectedId === sat.id ? 'selected' : '',
+              ]
+                .filter(Boolean)
+                .join(' ') || undefined}
               onClick={() => onSelectSatellite(sat.id)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {

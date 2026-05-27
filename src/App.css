@@ -165,6 +165,27 @@
   color: #fbbf24;
 }
 
+.starlink-strip-servicing-btn {
+  display: block;
+  width: 100%;
+  margin: 0.3rem 0 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.starlink-strip-servicing-btn:hover {
+  color: #fcd34d;
+}
+
+.starlink-strip-servicing-btn--selected {
+  color: #fde68a;
+  font-weight: 600;
+}
+
 .starlink-strip-error {
   margin: 0.3rem 0 0;
   color: #f5a8b8;
@@ -250,6 +271,15 @@
 .satellite-list li.selected {
   background: #152238;
   border-color: #3d6cf5;
+}
+
+.satellite-list li.servicing {
+  border-color: #dc2626;
+}
+
+.satellite-list li.servicing.selected {
+  border-color: #dc2626;
+  background: #1a1520;
 }
 
 .satellite-list li:focus-visible {
@@ -494,6 +524,11 @@
   backdrop-filter: blur(6px);
 }
 
+.overlay-pill--location {
+  border-color: #dc2626;
+  color: #fecaca;
+}
+
 .status-banner {
   margin: 0.75rem 1.25rem 0;
   padding: 0.55rem 0.7rem;
@@ -559,41 +594,65 @@
 
 /* —— Mobile: full-viewport globe + bottom sheet —— */
 
+:root {
+  --mobile-sheet-peek: 76px;
+}
+
 @media (max-width: 767px) {
   .app--mobile {
     position: relative;
     flex-direction: column;
     height: 100dvh;
     width: 100vw;
+    background: #050810;
+    overflow: hidden;
   }
 
   .app--mobile .visualizer {
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: var(--mobile-sheet-peek);
     flex: none;
     width: 100%;
-    height: 100%;
+    height: auto;
     z-index: 0;
+    background: #050810;
+  }
+
+  .app--mobile .globe-wrap {
+    width: 100%;
+    height: 100%;
+    background: #050810;
   }
 
   .app--mobile .visualizer-overlay {
-    top: max(0.5rem, env(safe-area-inset-top, 0px));
+    top: 0.5rem;
     left: 0.5rem;
     right: auto;
     flex-direction: column;
     align-items: flex-start;
     gap: 0.35rem;
+    z-index: 2;
   }
 
   .app--mobile .overlay-pill {
     font-size: 0.7rem;
     padding: 0.3rem 0.55rem;
   }
+
+  .app--mobile .overlay-pill--location-warn {
+    border-color: #4a5f82;
+    color: #8b9bb8;
+  }
 }
 
 .mobile-sheet-host {
   position: fixed;
-  inset: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 30;
   pointer-events: none;
 }
@@ -736,6 +795,15 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+.bottom-sheet:not(.bottom-sheet--expanded) .bottom-sheet-body {
+  display: none;
+  flex: 0;
+  min-height: 0;
+  max-height: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 .sidebar--sheet {

@@ -15,6 +15,10 @@ if ($text -notmatch 'ACCESS_NETWORK_STATE') {
   $text = $text -replace '(<uses-permission android:name="android.permission.INTERNET" />)',
     "`$1`r`n    <uses-permission android:name=`"android.permission.ACCESS_NETWORK_STATE`" />`r`n    <uses-permission android:name=`"android.permission.ACCESS_WIFI_STATE`" />"
 }
+if ($text -notmatch 'ACCESS_FINE_LOCATION') {
+  $text = $text -replace '(<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />)',
+    "`$1`r`n    <uses-permission android:name=`"android.permission.ACCESS_COARSE_LOCATION`" />`r`n    <uses-permission android:name=`"android.permission.ACCESS_FINE_LOCATION`" />"
+}
 $text = $text -replace 'android:usesCleartextTraffic="\$\{usesCleartextTraffic\}"',
   'android:usesCleartextTraffic="true"`r`n        android:networkSecurityConfig="@xml/network_security_config"'
 if ($text -notmatch 'networkSecurityConfig') {
@@ -35,4 +39,46 @@ if (Test-Path $gradle) {
   Set-Content -Path $gradle -Value $g -NoNewline
 }
 
-Write-Host '[apply-android-starlink] Starlink HTTP config applied.' -ForegroundColor Green
+$mainActivity = Join-Path $gen 'java\com\satx\tracker\MainActivity.kt'
+if (Test-Path $mainActivity) {
+  $kotlin = Get-Content $mainActivity -Raw
+  if ($kotlin -notmatch 'requestLocationIfNeeded') {
+    @'
+package com.satx.tracker
+
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Bundle
+import androidx.activity.enableEdgeToEdge
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+
+class MainActivity : TauriActivity() {
+  override fun onCreate(savedInstanceState: Bundle?) {
+    enableEdgeToEdge()
+    super.onCreate(savedInstanceState)
+    requestLocationIfNeeded()
+  }
+
+  private fun requestLocationIfNeeded() {
+    val fine = Manifest.permission.ACCESS_FINE_LOCATION
+    val coarse = Manifest.permission.ACCESS_COARSE_LOCATION
+    val hasFine =
+      ContextCompat.checkSelfPermission(this, fine) == PackageManager.PERMISSION_GRANTED
+    val hasCoarse =
+      ContextCompat.checkSelfPermission(this, coarse) == PackageManager.PERMISSION_GRANTED
+    if (!hasFine && !hasCoarse) {
+      ActivityCompat.requestPermissions(this, arrayOf(fine, coarse), LOCATION_REQUEST_CODE)
+    }
+  }
+
+  companion object {
+    private const val LOCATION_REQUEST_CODE = 9021
+  }
+}
+
+'@ | Set-Content -Path $mainActivity -NoNewline
+  }
+}
+
+Write-Host '[apply-android-starlink] Starlink + location config applied.' -ForegroundColor Green

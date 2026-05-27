@@ -77,17 +77,17 @@ function isStarlinkName(name: string): boolean {
  * Pick the Starlink satellite whose direction from the observer best aligns with
  * the dish boresight (smallest angular separation).
  */
-export function findServicingStarlinkId(
+export function findServicingStarlink(
   observer: GeodeticObserver,
   azimuthDeg: number,
   elevationDeg: number,
   satellites: ReadonlyArray<SatelliteLookTarget>,
-): string | null {
+): SatelliteLookTarget | null {
   const pointing = dishPointingUnitVector(observer, azimuthDeg, elevationDeg);
   const [ox, oy, oz] = geodeticToCartesian(observer.latitude, observer.longitude, 0);
   const observerPos = new THREE.Vector3(ox, oy, oz);
 
-  let bestId: string | null = null;
+  let best: SatelliteLookTarget | null = null;
   let bestAngleRad = Infinity;
 
   for (const sat of satellites) {
@@ -108,9 +108,18 @@ export function findServicingStarlinkId(
 
     if (angle < bestAngleRad) {
       bestAngleRad = angle;
-      bestId = sat.id;
+      best = sat;
     }
   }
 
-  return bestId;
+  return best;
+}
+
+export function findServicingStarlinkId(
+  observer: GeodeticObserver,
+  azimuthDeg: number,
+  elevationDeg: number,
+  satellites: ReadonlyArray<SatelliteLookTarget>,
+): string | null {
+  return findServicingStarlink(observer, azimuthDeg, elevationDeg, satellites)?.id ?? null;
 }

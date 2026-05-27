@@ -75,7 +75,10 @@ The browser (`vite --host`) cannot call the dish API. Use the **native Android a
 
 1. Android Studio + JDK (`setup-android-java.ps1`)
 2. `npm run tauri android init` (already done if `src-tauri/gen/android` exists)
-3. Enable **USB debugging** on the phone; install via USB or wireless ADB
+3. **Windows:** enable **Developer Mode** so Tauri can symlink native libs into `jniLibs`  
+   Settings → System → For developers → **Developer Mode** → On, then open a **new** terminal.  
+   If the build fails with `Creation symbolic link is not allowed for this system`, run `.\scripts\check-android-symlinks.ps1` (it opens that settings page). The project must live on an **NTFS** drive (not exFAT/USB).
+4. Enable **USB debugging** on the phone; install via USB or wireless ADB
 
 **A — Live dev (UI from your PC over Wi‑Fi)**
 

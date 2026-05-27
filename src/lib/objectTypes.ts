@@ -104,6 +104,14 @@ export function classifyObjectType(name: string): ObjectType {
   return 'other';
 }
 
+export function isStarlinkObject(
+  id: string,
+  name: string,
+  typeById: ReadonlyMap<string, ObjectType>,
+): boolean {
+  return typeById.get(id) === 'starlink' || /STARLINK/i.test(name);
+}
+
 export function buildTypeById(
   tles: ReadonlyArray<{ id: string; name: string }>,
 ): Map<string, ObjectType> {

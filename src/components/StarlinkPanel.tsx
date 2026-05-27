@@ -15,14 +15,20 @@ function formatDegrees(value: number): string {
 interface StarlinkPanelProps {
   onAlignmentChange?: (data: StarlinkAlignment | null) => void;
   servicingSatelliteName?: string | null;
+  servicingStarlinkId?: string | null;
+  onSelectServicing?: (id: string) => void;
+  selectedId?: string | null;
   hasDishSite?: boolean;
-  /** Browser geolocation used for boresight matching (same as light blue globe marker). */
+  /** Browser geolocation used for boresight matching (same as red globe marker). */
   dishSite?: { latitude: number; longitude: number } | null;
 }
 
 export function StarlinkPanel({
   onAlignmentChange,
   servicingSatelliteName,
+  servicingStarlinkId = null,
+  onSelectServicing,
+  selectedId = null,
   hasDishSite = false,
   dishSite = null,
 }: StarlinkPanelProps = {}) {
@@ -143,7 +149,7 @@ export function StarlinkPanel({
 
       {alignmentData && !hasDishSite && (
         <p className="starlink-strip-hint">
-          Allow location access (light blue marker) to link dish boresight to a
+          Allow location access (red marker) to link dish boresight to a
           satellite.
         </p>
       )}
@@ -155,10 +161,15 @@ export function StarlinkPanel({
         </p>
       )}
 
-      {alignmentData && hasDishSite && servicingSatelliteName && (
-        <p className="starlink-strip-hint starlink-strip-servicing">
+      {alignmentData && hasDishSite && servicingSatelliteName && servicingStarlinkId && (
+        <button
+          type="button"
+          className={`starlink-strip-hint starlink-strip-servicing starlink-strip-servicing-btn${selectedId === servicingStarlinkId ? ' starlink-strip-servicing-btn--selected' : ''}`}
+          onClick={() => onSelectServicing?.(servicingStarlinkId)}
+        >
           Servicing: {servicingSatelliteName}
-        </p>
+          {selectedId === servicingStarlinkId ? ' · selected' : ' · tap to select'}
+        </button>
       )}
     </section>
   );

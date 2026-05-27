@@ -21,6 +21,10 @@ if errorlevel 1 exit /b 1
 rem Starlink HTTP (192.168.100.1) cleartext config
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0apply-android-starlink.ps1"
 
+rem Tauri jniLibs step needs symlink privilege on Windows
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0check-android-symlinks.ps1"
+if errorlevel 1 exit /b 1
+
 echo.
 echo Starting SatX on Android (LAN dev server + native Starlink APIs)...
 echo  - Phone and PC must be on the same Wi-Fi for the dev UI.

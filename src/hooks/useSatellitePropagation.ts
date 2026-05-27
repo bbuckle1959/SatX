@@ -14,6 +14,7 @@ import {
 import {
   filterCatalogIdsForMobileWorker,
   filterPositionsForMobileDisplay,
+  prioritizePinnedPositions,
 } from '../lib/mobileGlobe';
 import type { UserLocation } from './useUserLocation';
 import {
@@ -87,6 +88,8 @@ export interface UseSatellitePropagationResult {
   positions: SatelliteCoordinates[];
   /** Lerped coordinates for the globe (updated every render frame). */
   positionsRef: RefObject<SatelliteCoordinates[]>;
+  /** Full worker catalog before mobile/display throttling (servicing link lookup). */
+  catalogPositionsRef: RefObject<SatelliteCoordinates[]>;
   /** Latest worker sample; globe lerps from `lerpFromRef` → this. */
   targetPositionsRef: RefObject<SatelliteCoordinates[]>;
   lerpFromRef: RefObject<SatelliteCoordinates[]>;
@@ -123,6 +126,7 @@ export function useSatellitePropagation(
   const [isParsing, setIsParsing] = useState(false);
 
   const positionsRef = useRef<SatelliteCoordinates[]>([]);
+  const catalogPositionsRef = useRef<SatelliteCoordinates[]>([]);
   const targetPositionsRef = useRef<SatelliteCoordinates[]>([]);
   const lerpFromRef = useRef<SatelliteCoordinates[]>([]);
   const lerpStartAtRef = useRef(0);
@@ -164,13 +168,14 @@ export function useSatellitePropagation(
 
   const applyWorkerTargets = useCallback(
     (next: SatelliteCoordinates[]) => {
-      const throttled = isMobile
-        ? filterPositionsForMobileDisplay(
-            next,
-            userLocation,
-            getPinIds?.() ?? [],
-          )
+      catalogPositionsRef.current = next;
+      const pinIds = getPinIds?.() ?? [];
+      let throttled = isMobile
+        ? filterPositionsForMobileDisplay(next, userLocation, pinIds)
         : next;
+      if (pinIds.length > 0) {
+        throttled = prioritizePinnedPositions(throttled, pinIds);
+      }
 
       const display = positionsRef.current;
       const sameLength =
@@ -270,6 +275,7 @@ export function useSatellitePropagation(
   useEffect(() => {
     if (satellites.length === 0) {
       positionsRef.current = [];
+      catalogPositionsRef.current = [];
       targetPositionsRef.current = [];
       lerpFromRef.current = [];
       setPositions([]);
@@ -285,6 +291,7 @@ export function useSatellitePropagation(
   return {
     positions,
     positionsRef,
+    catalogPositionsRef,
     targetPositionsRef,
     lerpFromRef,
     lerpStartAtRef,

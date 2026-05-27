@@ -123,6 +123,35 @@ export function filterCatalogIdsForMobileWorker(
   return [...starlinkIds, ...otherIds.slice(0, remaining)];
 }
 
+/** Move pinned ids to the front so they stay within the globe instance cap. */
+export function prioritizePinnedPositions(
+  positions: ReadonlyArray<SatelliteCoordinates>,
+  pinIds: ReadonlyArray<string | null | undefined>,
+): SatelliteCoordinates[] {
+  const order = pinIds.filter(
+    (id): id is string => typeof id === 'string' && id.length > 0,
+  );
+  if (order.length === 0) return [...positions];
+
+  const pinSet = new Set(order);
+  const byId = new Map<string, SatelliteCoordinates>();
+  const rest: SatelliteCoordinates[] = [];
+
+  for (const sat of positions) {
+    if (pinSet.has(sat.id)) byId.set(sat.id, sat);
+    else rest.push(sat);
+  }
+
+  const pinned: SatelliteCoordinates[] = [];
+  for (const id of order) {
+    const sat = byId.get(id);
+    if (sat) pinned.push(sat);
+  }
+
+  if (pinned.length === 0) return [...positions];
+  return [...pinned, ...rest];
+}
+
 /**
  * Per-frame display set: overhead cone when location known, else catalog order;
  * always keeps pinned ids (selection / servicing).
