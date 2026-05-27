@@ -33,5 +33,7 @@ Then follow your platform guide for prerequisites and the exact dev/build comman
 
 ## Related docs
 
-- [README.md](../../README.md) — features, Starlink workflow, project layout
+- [User guide](../user-guide.md) — everyday use (non-technical)
+- [Application overview](../application-overview.md) — features and behavior
+- [README.md](../../README.md) — project entry point
 - [Tauri 2 prerequisites](https://v2.tauri.app/start/prerequisites/) — upstream install details

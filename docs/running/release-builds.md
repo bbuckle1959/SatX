@@ -142,7 +142,7 @@ Workflow: [`.github/workflows/release.yml`](../../.github/workflows/release.yml)
    ```
 
 4. Open **Actions** on GitHub and watch the **release** workflow.
-5. When it finishes, open **Releases** — the `publish-release` job attaches Windows, macOS, and Linux bundle files.
+5. When it finishes, open [Releases](https://github.com/bbuckle1959/SatX/releases) — the `publish-release` job attaches Windows, macOS, and Linux bundle files.
 
 Tags must match `v*` (e.g. `v0.1.0`, `v1.2.3-beta.1`).
 
@@ -164,7 +164,7 @@ Add repository secrets and extend the workflow when you are ready for public dis
 - [ ] Built on **Windows**, **macOS**, and **Linux** (or CI equivalents)
 - [ ] Smoke-tested each installer on a clean VM or machine
 - [ ] Starlink **Fetch** tested on desktop build (optional; needs dish network)
-- [ ] Release notes + artifacts uploaded (GitHub Releases, website, etc.)
+- [ ] Release notes + artifacts uploaded ([GitHub Releases](https://github.com/bbuckle1959/SatX/releases), website, etc.)
 
 ## Troubleshooting
 
