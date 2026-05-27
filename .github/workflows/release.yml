@@ -1,5 +1,5 @@
 # Build SatX desktop installers on tag push (v*).
-# Artifacts: src-tauri/target/release/bundle/** per OS.
+# Attaches a small set of renamed installers per OS (no .app internals or duplicate exes).
 name: release
 
 on:
@@ -37,17 +37,16 @@ jobs:
       - name: Verify Tauri 2 pins
         run: npm run ensure:tauri2
 
-      # GHA images ship MSVC on PATH (Enterprise 2022); tauri-dev.cmd targets local Build Tools paths.
       - name: Build release
         run: npm run tauri -- build
 
-      - name: Upload Windows bundles
+      - name: Upload Windows installers
         uses: actions/upload-artifact@v4
         with:
           name: satx-windows
           path: |
-            src-tauri/target/release/bundle/**/*
-            src-tauri/target/release/*.exe
+            src-tauri/target/release/bundle/msi/*.msi
+            src-tauri/target/release/bundle/nsis/*-setup.exe
           if-no-files-found: error
 
   build-macos:
@@ -75,11 +74,11 @@ jobs:
       - name: Build release
         run: npm run tauri -- build
 
-      - name: Upload macOS bundles
+      - name: Upload macOS disk image
         uses: actions/upload-artifact@v4
         with:
           name: satx-macos
-          path: src-tauri/target/release/bundle/**/*
+          path: src-tauri/target/release/bundle/dmg/*.dmg
           if-no-files-found: error
 
   build-linux:
@@ -121,30 +120,101 @@ jobs:
       - name: Build release
         run: npm run tauri -- build
 
-      - name: Upload Linux bundles
+      - name: Upload Linux packages
         uses: actions/upload-artifact@v4
         with:
           name: satx-linux
-          path: src-tauri/target/release/bundle/**/*
-          if-no-files-found: error
+          path: |
+            src-tauri/target/release/bundle/deb/*.deb
+            src-tauri/target/release/bundle/appimage/*.AppImage
+          if-no-files-found: warn
 
   publish-release:
     needs: [build-windows, build-macos, build-linux]
     runs-on: ubuntu-latest
     steps:
-      - name: Download all artifacts
+      - uses: actions/checkout@v4
+
+      - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          path: release-artifacts
+          path: artifacts
           merge-multiple: true
 
-      - name: List release files
-        run: find release-artifacts -type f | sort
+      - name: Stage release assets (flat, consistent names)
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_REF_NAME#v}"
+          OUT="release-upload"
+          rm -rf "$OUT"
+          mkdir -p "$OUT"
+
+          shopt -s nullglob globstar
+
+          for f in artifacts/**/*.msi; do
+            cp "$f" "$OUT/SatX-${VERSION}-Windows-x64.msi"
+          done
+
+          for f in artifacts/**/*-setup.exe artifacts/**/*setup.exe; do
+            cp "$f" "$OUT/SatX-${VERSION}-Windows-x64-Setup.exe"
+          done
+
+          for f in artifacts/**/*.dmg; do
+            cp "$f" "$OUT/SatX-${VERSION}-macOS.dmg"
+          done
+
+          for f in artifacts/**/*.deb; do
+            cp "$f" "$OUT/SatX-${VERSION}-Linux-x64.deb"
+          done
+
+          for f in artifacts/**/*.AppImage; do
+            cp "$f" "$OUT/SatX-${VERSION}-Linux-x64.AppImage"
+          done
+
+          echo "Staged assets:"
+          ls -la "$OUT"
+
+          if [ -z "$(ls -A "$OUT")" ]; then
+            echo "No release assets found."
+            exit 1
+          fi
+
+      - name: Write release notes
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          cat > release-notes.md <<EOF
+## SatX Tracker ${GITHUB_REF_NAME}
+
+Desktop satellite tracker — live 3D globe, filters, nearest list, optional Starlink dish mode.
+
+### Downloads (pick your platform)
+
+| Platform | File | Notes |
+|----------|------|--------|
+| **Windows** | \`SatX-${VERSION}-Windows-x64.msi\` | Recommended — Windows Installer |
+| **Windows** | \`SatX-${VERSION}-Windows-x64-Setup.exe\` | Alternative NSIS setup |
+| **macOS** | \`SatX-${VERSION}-macOS.dmg\` | Open disk image, drag app to Applications |
+| **Linux** | \`SatX-${VERSION}-Linux-x64.deb\` | Debian / Ubuntu-style systems |
+| **Linux** | \`SatX-${VERSION}-Linux-x64.AppImage\` | Portable AppImage (if built) |
+
+### Requirements
+
+- Internet for the first catalog download
+- Location permission optional (nearest list & Starlink matching)
+- **Starlink Fetch:** installed app on Starlink Wi‑Fi — see [user guide](https://github.com/bbuckle1959/SatX/blob/main/docs/user-guide.md)
+
+### Documentation
+
+- [User guide](https://github.com/bbuckle1959/SatX/blob/main/docs/user-guide.md)
+- [Application overview](https://github.com/bbuckle1959/SatX/blob/main/docs/application-overview.md)
+EOF
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          generate_release_notes: true
-          files: release-artifacts/**/*
+          name: SatX Tracker ${{ github.ref_name }}
+          body_path: release-notes.md
+          generate_release_notes: false
+          files: release-upload/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

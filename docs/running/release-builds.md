@@ -142,7 +142,7 @@ Workflow: [`.github/workflows/release.yml`](../../.github/workflows/release.yml)
    ```
 
 4. Open **Actions** on GitHub and watch the **release** workflow.
-5. When it finishes, open [Releases](https://github.com/bbuckle1959/SatX/releases) — the `publish-release` job attaches Windows, macOS, and Linux bundle files.
+5. When it finishes, open [Releases](https://github.com/bbuckle1959/SatX/releases) — you should see **up to five** clearly named installers (see [GitHub Releases layout](github-releases.md)).
 
 Tags must match `v*` (e.g. `v0.1.0`, `v1.2.3-beta.1`).
 
