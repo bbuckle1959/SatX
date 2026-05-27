@@ -1,23 +1,39 @@
 # SatX Tracker
 
-Satellite and space debris tracker built with **Tauri 2**, React, TypeScript, and `satellite.js`.
+Desktop satellite tracker built with **Tauri 2**, React, TypeScript, and `satellite.js`. It loads active TLEs, propagates orbits in a Web Worker, and renders thousands of objects on a 3D globe with a searchable sidebar.
 
-This project targets **Tauri 2.0+ only** (npm `>=2.0.0 <3.0.0`, Rust `>=2.0.0, <3`, config schema v2). Tauri 1 is not supported. `npm run ensure:tauri2` verifies dependency pins before desktop builds.
+**Supported platform:** Windows, macOS, and Linux desktop (Tauri shell). **Mobile (iOS/Android) is not supported yet** — some responsive UI exists in the web layer, but there is no supported mobile build or workflow.
+
+This project targets **Tauri 2.0+ only** (npm `>=2.0.0 <3.0.0`, Rust `>=2.0.0, <3`). Tauri 1 is not supported. `npm run ensure:tauri2` checks dependency pins before desktop builds.
+
+## Features
+
+- Live orbital propagation with pause/resume and FPS metrics
+- Object-type filters (stations, navigation, debris, Starlink, and more)
+- Nearest-objects list (50 entries) sorted by slant range when location is available
+- Browser geolocation shown as a red ground marker
+- Click or list-select for object details; non-Starlink selections centre the globe on that object
+- **Starlink dish alignment** (desktop app only): fetch boresight from the dish on `http://192.168.100.1:9201`, match to a servicing satellite, orange link from your location, and servicing entry pinned at the top of the list (Starlink filter only)
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/)
+- [Node.js](https://nodejs.org/) (LTS recommended)
 - [Rust](https://www.rust-lang.org/learn/get-started#installing-rust)
-- [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/) for your OS (WebView2 on Windows, etc.)
+- [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/) for your OS  
+  - Windows: WebView2 and Visual Studio Build Tools (C++ workload)  
+  - macOS: Xcode command-line tools  
+  - Linux: webkit2gtk and related packages per Tauri docs
 
-## Development
+## Development (desktop app)
 
 ```bash
 npm install
 npm run tauri:dev
 ```
 
-On Windows, use `tauri:dev` (not `tauri dev`) so the MSVC build environment is loaded before compiling Rust.
+On Windows, use `npm run tauri:dev` (not `tauri dev` directly). The `scripts/tauri-dev.cmd` wrapper loads the MSVC environment before compiling Rust.
+
+The app opens as a native window with the Vite dev server on `http://localhost:1420`.
 
 ## Production build
 
@@ -25,79 +41,49 @@ On Windows, use `tauri:dev` (not `tauri dev`) so the MSVC build environment is l
 npm run tauri:build
 ```
 
-## Web-only dev (no Rust)
+Installers/artifacts are produced under `src-tauri/target/release/` (exact bundles depend on OS and Tauri bundle settings).
+
+## Browser-only dev (limited)
 
 ```bash
 npm run dev
 ```
 
-Opens the Vite frontend at `http://localhost:1420` without the Tauri shell.
+Runs the frontend at `http://localhost:1420` without Tauri. Useful for UI and globe work, but **Starlink dish fetch does not work** in the browser (no native HTTP to `192.168.100.1`). TLE loading still runs via the browser fallback where configured.
 
-## Mobile (iOS / Android) and Starlink dish HTTP
+To preview the UI from another machine on your LAN:
 
-Dish alignment uses native Rust HTTP to `http://192.168.100.1:9201` (not HTTPS). Mobile OS policies must allow cleartext / local network access.
-
-- **iOS:** `src-tauri/Info.ios.plist` (merged via `bundle.iOS.infoPlist` in `tauri.conf.json`). Grants local network usage text and App Transport Security exceptions.
-- **Android:** After `npm run tauri android init`, follow `src-tauri/mobile/android/AndroidManifest.patch.md` and run `scripts/sync-android-network-config.ps1` to install `network_security_config.xml`.
-
-See `src-tauri/mobile/android/AndroidManifest.patch.md` for exact `AndroidManifest.xml` edits.
-
-### Android prerequisites (Windows)
-
-`tauri android init` needs a **JDK** on `PATH` / `JAVA_HOME`. If you see `Java not found in PATH`:
-
-1. Install [Android Studio](https://developer.android.com/studio) (recommended; includes JDK under `jbr` and the SDK), **or** JDK 17 only:
-   ```powershell
-   winget install Microsoft.OpenJDK.17
-   ```
-2. In the **same** PowerShell session (or set user env vars permanently):
-   ```powershell
-   .\scripts\setup-android-java.ps1
-   npm run tauri android init
-   ```
-3. To persist `JAVA_HOME` after Android Studio install (adjust path if needed):
-   ```powershell
-   [Environment]::SetEnvironmentVariable(
-     'JAVA_HOME',
-     "$env:LOCALAPPDATA\Programs\Android\Android Studio\jbr",
-     'User'
-   )
-   ```
-   Restart the terminal, then run `npm run tauri android init` again.
-
-Full checklist: [Tauri Android prerequisites](https://v2.tauri.app/start/prerequisites/#android).
-
-### Full SatX + Starlink on your phone (Android)
-
-The browser (`vite --host`) cannot call the dish API. Use the **native Android app** so Rust can reach `http://192.168.100.1:9201`.
-
-**One-time**
-
-1. Android Studio + JDK (`setup-android-java.ps1`)
-2. `npm run tauri android init` (already done if `src-tauri/gen/android` exists)
-3. **Windows:** enable **Developer Mode** so Tauri can symlink native libs into `jniLibs`  
-   Settings → System → For developers → **Developer Mode** → On, then open a **new** terminal.  
-   If the build fails with `Creation symbolic link is not allowed for this system`, run `.\scripts\check-android-symlinks.ps1` (it opens that settings page). The project must live on an **NTFS** drive (not exFAT/USB).
-4. Enable **USB debugging** on the phone; install via USB or wireless ADB
-
-**A — Live dev (UI from your PC over Wi‑Fi)**
-
-Phone and PC on the **same Wi‑Fi** (home LAN). Dish alignment still requires the **phone on Starlink Wi‑Fi** (see B).
-
-```powershell
-npm run tauri:android:dev
+```bash
+npm run dev:host
 ```
 
-This runs `tauri android dev --host`, starts Vite on your LAN IP, and installs a debug build on the device.
+Then open `http://<your-pc-ip>:1420` from another device. This is for layout/testing only, not a supported mobile product.
 
-**B — Release APK (no PC; best for Starlink-only use)**
+## Starlink dish alignment (desktop)
 
-Build and install the APK; open SatX while the phone is on **Starlink Wi‑Fi**:
+Dish telemetry is read over plain HTTP from the Starlink terminal at `http://192.168.100.1:9201`. The PC running SatX should be on the **Starlink Wi‑Fi** (or otherwise able to reach that address).
 
-```powershell
-npm run tauri:android:build
-```
+1. Run the desktop app: `npm run tauri:dev` or an installed build.
+2. Allow **location** when prompted (used for boresight matching and the red ground marker).
+3. Set **Object type** to **Starlink**.
+4. In the Starlink strip, click **Fetch** (or **Refresh**).
+5. The servicing satellite appears at the top of the list with a red outline; an orange rod links your location to that satellite on the globe.
 
-Install the APK from `src-tauri/gen/android/app/build/outputs/apk/`. Allow **location** and **local network** if prompted. Tap **Fetch** in the Starlink strip.
+If fetch fails, confirm you are in the native app (not browser-only dev) and connected to the dish network.
 
-**iOS:** Requires macOS + Xcode: `npm run tauri -- ios dev --host` (same Starlink-on-phone rule for dish).
+## Project layout (high level)
+
+| Path | Role |
+|------|------|
+| `src/` | React UI, globe, propagation hooks |
+| `src-tauri/` | Rust commands (TLE catalog, Starlink HTTP) |
+| `scripts/tauri-dev.cmd` | Windows desktop dev entry |
+| `scripts/ensure-tauri2.mjs` | Enforces Tauri 2.x dependency range |
+
+## Not supported (yet)
+
+- **iOS / Android** native apps and `npm run tauri:android:*` workflows
+- Starlink alignment in browser-only `npm run dev`
+- Phone/tablet as a primary target (no tested install path or store builds)
+
+Experimental Android/iOS scaffolding may remain in the repo for future work; treat it as inactive until documented otherwise.
