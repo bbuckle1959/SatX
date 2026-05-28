@@ -82,14 +82,19 @@ src-tauri/target/release/bundle/
 
 Open the `.app` from Finder or run the binary from `target/release/`.
 
-### Gatekeeper / unsigned builds
+### Gatekeeper / “damaged” app (releases)
 
-Locally built apps are often unsigned. If macOS blocks launch:
+GitHub CI builds are **not** Apple-signed or notarized. End users often see **“SatX is damaged and can’t be opened”** or similar — that is Gatekeeper, not a bad download.
 
-- Right-click the app → **Open**, or
-- System Settings → **Privacy & Security** → allow the app.
+**Tell users:**
 
-For distribution outside your machine, you need Apple code signing and notarization (not covered here).
+1. Open the **`.dmg`** from the release zip and drag **SatX** to **Applications**.
+2. **Control-click** the app → **Open** → **Open** (once), **or** run `xattr -cr /Applications/SatX.app`.
+3. Do **not** move the app to Trash when macOS claims it is damaged.
+
+Full steps: [INSTALL-macos.md](../INSTALL-macos.md) (included in the macOS release zip).
+
+**For maintainers:** sign and notarize with an Apple Developer account — [Tauri macOS signing](https://v2.tauri.app/distribute/sign/macos/), [release-builds.md](release-builds.md). Until then, expect support questions about “damaged” builds.
 
 ## Browser-only dev (limited)
 

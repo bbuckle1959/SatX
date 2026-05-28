@@ -16,6 +16,21 @@ If you use **Starlink**, SatX can also show which Starlink satellite your dish i
 
 ---
 
+## Release vs browser
+
+**GitHub Releases are desktop apps only.** After you extract the zip or tar.gz, install the `.msi`, `.dmg`, or `.deb`, then open **SatX** from your Start menu, Applications folder, or app launcher. The interface runs in a built-in window (like other desktop software), not in Chrome, Firefox, or Edge.
+
+| What you have | How you run it |
+|---------------|----------------|
+| **Download from [Releases](https://github.com/bbuckle1959/SatX/releases)** | Install → open the **SatX** desktop app |
+| **A link like `http://localhost:1420`** | For **developers** running the project from source (`npm run dev`), not for release downloads |
+
+You **cannot** use the release installer by typing a URL in a browser. There is no web server in the published build.
+
+**Starlink dish Fetch** and the full desktop catalog path require the **installed** app. A browser tab opened during development does not provide those features.
+
+---
+
 ## First launch
 
 1. Open **SatX** from your Start menu, Applications folder, or desktop shortcut.
@@ -206,6 +221,16 @@ Still stuck? See [Troubleshooting](#troubleshooting) below.
 ---
 
 ## Troubleshooting
+
+### macOS says the app is “damaged” or won’t open
+
+This usually means **Gatekeeper** blocked an **unsigned** download from the internet — not that the file is corrupt.
+
+1. Install from the official [SatX Releases](https://github.com/bbuckle1959/SatX/releases) zip: open the **`.dmg`**, drag **SatX** to **Applications**.
+2. **Control-click** (right-click) **SatX** in Applications → **Open** → **Open** (first time only).
+3. Or in Terminal: `xattr -cr /Applications/SatX.app` then open the app again.
+
+See **INSTALL-macos.md** inside the macOS release zip, or [Installing on macOS](running/INSTALL-macos.md).
 
 ### “Loading satellite catalog…” never finishes
 

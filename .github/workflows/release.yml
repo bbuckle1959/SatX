@@ -188,8 +188,18 @@ jobs:
           | Platform | File | Contents |
           |----------|------|----------|
           | **Windows** | \`SatX-${VERSION}-Windows-x64.zip\` | MSI, NSIS Setup.exe, README, LICENSE, docs/ |
-          | **macOS** | \`SatX-${VERSION}-macOS.zip\` | \`.dmg\`, README, LICENSE, docs/ |
+          | **macOS** | \`SatX-${VERSION}-macOS.zip\` | \`.dmg\`, README, LICENSE, docs/, **INSTALL-macos.md** |
           | **Linux** | \`SatX-${VERSION}-Linux-x64.tar.gz\` | \`.deb\`, AppImage (if built), README, LICENSE, docs/ |
+
+          ### macOS: “damaged” or “can’t be opened”
+
+          The app is **not corrupted**. GitHub CI builds are **unsigned**, so Gatekeeper blocks the first launch. Inside the macOS zip, read **INSTALL-macos.md**, or:
+
+          1. Drag **SatX** from the \`.dmg\` to **Applications**.
+          2. **Control-click** the app in Applications → **Open** → **Open** (once).
+          3. Or run: \`xattr -cr /Applications/SatX.app\`
+
+          Signed/notarized releases require Apple Developer signing in CI (see [docs/running/release-builds.md](https://github.com/bbuckle1959/SatX/blob/main/docs/running/release-builds.md)).
 
           ### Requirements
 

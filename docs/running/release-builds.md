@@ -78,9 +78,17 @@ src-tauri/target/release/bundle/dmg/SatX_0.2.0_*.dmg   # version in filename
 
 Zip the `.app` or ship the `.dmg`.
 
-### Optional: signing and notarization
+### Optional: signing and notarization (fixes “damaged” for end users)
 
-For distribution outside your Mac, you need an **Apple Developer** ID, code signing, and **notarization**. Without it, Gatekeeper may block the app. See [Tauri — macOS code signing](https://v2.tauri.app/distribute/sign/macos/).
+CI builds from [`.github/workflows/release.yml`](../../.github/workflows/release.yml) are **unsigned**. macOS Gatekeeper often reports the app as **damaged** or refuses to open it until the user Control-clicks → **Open** or runs `xattr -cr` (see [INSTALL-macos.md](../INSTALL-macos.md)).
+
+For distribution without that friction you need:
+
+1. **Apple Developer Program** membership.
+2. **Developer ID Application** certificate in CI (secrets such as `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`).
+3. **Notarization** (`APPLE_ID`, `APPLE_PASSWORD`, `APPLE_TEAM_ID`) per [Tauri — macOS code signing](https://v2.tauri.app/distribute/sign/macos/).
+
+Add signing env vars to the `build-macos` job and rebuild the release tag after secrets are configured.
 
 ## Linux release
 

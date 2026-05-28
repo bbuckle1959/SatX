@@ -16,6 +16,8 @@ Packaging is done by [`scripts/package-release-archives.sh`](../../scripts/packa
 
 After downloading, extract the archive, then run the installer inside (e.g. double-click the `.msi` or `.dmg`).
 
+**macOS:** If the system says the app is **damaged**, read **INSTALL-macos.md** in the zip — the build is unsigned; use Control-click → **Open** or `xattr -cr` on the `.app`.
+
 The release **description** includes a table that matches these names.
 
 ## Start over (delete release + tag)

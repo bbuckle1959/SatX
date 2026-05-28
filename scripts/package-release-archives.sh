@@ -32,6 +32,13 @@ copy_docs() {
   fi
 }
 
+copy_macos_install_guide() {
+  local dest="$1"
+  if [ -f "$ROOT/docs/INSTALL-macos.md" ]; then
+    cp "$ROOT/docs/INSTALL-macos.md" "$dest/INSTALL-macos.md"
+  fi
+}
+
 # --- Windows ---
 win_msi="$(find "$ARTIFACTS" -type f -name '*.msi' 2>/dev/null | head -n 1 || true)"
 win_exe="$(find "$ARTIFACTS" -type f \( -name '*-setup.exe' -o -name '*setup.exe' \) 2>/dev/null | head -n 1 || true)"
@@ -66,6 +73,7 @@ if [ -z "$mac_dmg" ]; then
 fi
 cp "$mac_dmg" "$STAGE/macos/SatX-${VERSION}-macOS.dmg"
 copy_docs "$STAGE/macos"
+copy_macos_install_guide "$STAGE/macos"
 MAC_ZIP="${OUT}/SatX-${VERSION}-macOS.zip"
 rm -f "$MAC_ZIP"
 (

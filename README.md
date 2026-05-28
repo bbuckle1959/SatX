@@ -17,7 +17,7 @@ Built with **Tauri 2**, React, TypeScript, Three.js, and `satellite.js`.
 | Platform | Install |
 |----------|---------|
 | **Windows** | `SatX-*-Windows-x64.zip` — extract, then run the `.msi` (or `-Setup.exe`) inside |
-| **macOS** | `SatX-*-macOS.zip` — extract, open the `.dmg`, drag the app to Applications |
+| **macOS** | `SatX-*-macOS.zip` — extract, open the `.dmg`, drag to Applications; if macOS says “damaged”, see **INSTALL-macos.md** in the zip (Control-click → Open) |
 | **Linux** | `SatX-*-Linux-x64.tar.gz` — extract, install the `.deb` or run the AppImage |
 
 Each archive includes **README.md**, **LICENSE**, **ACKNOWLEDGMENTS.md**, and the **docs/** folder. See the release notes table on [Releases](https://github.com/bbuckle1959/SatX/releases). [Layout tips](docs/running/github-releases.md).
