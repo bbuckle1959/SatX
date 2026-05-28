@@ -53,7 +53,7 @@ src-tauri\target\release\bundle\
   nsis\                                    # NSIS installer (if enabled)
 ```
 
-Distribute the `.msi` / NSIS setup exe, or zip the release `.exe` for advanced users.
+CI packs the MSI and NSIS setup into `SatX-{version}-Windows-x64.zip` with README and LICENSE. For a local release, see [GitHub Releases layout](github-releases.md#manual-upload-local-windows-build).
 
 ### Optional: code signing (Windows)
 
@@ -145,7 +145,7 @@ CI installs **Node.js 22** (pinned in the workflow — do not use `lts/*` in `se
    ```
 
 5. Open **Actions** on GitHub and watch the **release** workflow.
-6. When it finishes, open [Releases](https://github.com/bbuckle1959/SatX/releases) — you should see **up to five** clearly named installers (see [GitHub Releases layout](github-releases.md)).
+6. When it finishes, open [Releases](https://github.com/bbuckle1959/SatX/releases) — you should see **three** platform archives (Windows zip, macOS zip, Linux tar.gz), each with installers plus README and LICENSE (see [GitHub Releases layout](github-releases.md)).
 
 Tags must match `v*` (e.g. `v0.2.0`, `v1.2.3-beta.1`).
 

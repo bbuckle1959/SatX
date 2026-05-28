@@ -47,7 +47,7 @@ git tag v0.1.0
 git push origin v0.1.0
 ```
 
-Watch **Actions → release**. When it finishes, check Releases for up to five named installers and the download table in the description.
+Watch **Actions → release**. When it finishes, check Releases for three platform archives (zip / zip / tar.gz) and the download table in the description.
 
 **Option A2 — CI (manual run):**
 

@@ -2,7 +2,7 @@
 
 This guide is for **everyday use** of SatX — no programming knowledge required. It explains what you see on screen and how to get useful results.
 
-**Installing the app?** Download the installer for your computer (Windows, Mac, or Linux) from the [SatX Releases](https://github.com/bbuckle1959/SatX/releases) page, or use a copy shared by whoever gave you SatX. If you received only the source code, ask a technical contact to build an installer using [Release builds](running/release-builds.md).
+**Installing the app?** Download the archive for your computer from [SatX Releases](https://github.com/bbuckle1959/SatX/releases) — **Windows** `.zip`, **macOS** `.zip`, or **Linux** `.tar.gz`. Extract it; inside you will find the installer, plus `README.md` and `LICENSE`. If you received only the source code, ask a technical contact to build an installer using [Release builds](running/release-builds.md).
 
 Project home: [https://github.com/bbuckle1959/SatX](https://github.com/bbuckle1959/SatX)
 
