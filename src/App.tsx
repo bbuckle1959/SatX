@@ -3,6 +3,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import './App.css';
 import { AppSidebar } from './components/AppSidebar';
 import { GlobeVisualizer } from './components/GlobeVisualizer';
+import { GroundStationDetails } from './components/GroundStationDetails';
+import { SatelliteDetails } from './components/SatelliteDetails';
 import { MobileBottomSheet } from './components/MobileBottomSheet';
 import type { StarlinkAlignment } from './components/StarlinkPanel';
 import { dishObserverSite } from './lib/dishSite';
@@ -11,7 +13,10 @@ import { findServicingStarlink } from './lib/starlinkPointing';
 import type { GlobePopulationMode } from './lib/globeCatalog';
 import { getGlobeMaxInstances } from './lib/mobileGlobe';
 import { nearestBySlantRange } from './lib/nearestSatellites';
-import { getSatelliteFromMap } from './lib/satelliteLookup';
+import {
+  findSatelliteById,
+  getSatelliteFromMap,
+} from './lib/satelliteLookup';
 import {
   useSatellitePropagation,
   type SatelliteCoordinates,
@@ -26,7 +31,15 @@ import {
 } from './lib/objectTypes';
 import { fetchActiveSatcat, type SatcatEntry } from './services/satcat';
 import { fetchActiveTles, type TleRecord } from './services/spaceTrack';
+import type {
+  GroundStation,
+  GroundStationsSummary,
+} from './lib/groundStationTypes';
 import { viewRelativeMetrics } from './lib/viewMetrics';
+import {
+  getBundledGroundStations,
+  loadGroundStations,
+} from './services/groundStations';
 
 const LIST_LIMIT = 50;
 
@@ -44,6 +57,9 @@ function App() {
     useState<GlobePopulationMode>('capped');
   const [renderFps, setRenderFps] = useState(0);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedGroundStationId, setSelectedGroundStationId] = useState<
+    string | null
+  >(null);
   const [starlinkAlignment, setStarlinkAlignment] =
     useState<StarlinkAlignment | null>(null);
   const { location: userLocation, status: locationStatus } = useUserLocation();
@@ -61,6 +77,21 @@ function App() {
 
   const starlinkFilterActive = objectTypeFilter === 'starlink';
   const [servicingPinId, setServicingPinId] = useState<string | null>(null);
+  const [showGateways, setShowGateways] = useState(true);
+  const [showPops, setShowPops] = useState(false);
+  const [groundStations, setGroundStations] = useState(
+    () => getBundledGroundStations().stations,
+  );
+  const [groundStationCounts, setGroundStationCounts] =
+    useState<GroundStationsSummary>(() => {
+      const c = getBundledGroundStations().counts;
+      return {
+        gateways: c.gateways,
+        operational: c.operational,
+        planned: c.planned,
+        pops: c.pops,
+      };
+    });
 
   const globePinIds = useMemo(
     () => [selectedId, starlinkFilterActive ? servicingPinId : null],
@@ -68,8 +99,30 @@ function App() {
   );
 
   useEffect(() => {
-    if (!starlinkFilterActive) setStarlinkAlignment(null);
+    if (!starlinkFilterActive) {
+      setStarlinkAlignment(null);
+      setSelectedGroundStationId(null);
+    }
   }, [starlinkFilterActive]);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadGroundStations()
+      .then((bundle) => {
+        if (cancelled) return;
+        setGroundStations(bundle.stations);
+        setGroundStationCounts({
+          gateways: bundle.counts.gateways,
+          operational: bundle.counts.operational,
+          planned: bundle.counts.planned,
+          pops: bundle.counts.pops,
+        });
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const {
     positions,
@@ -132,13 +185,66 @@ function App() {
     };
   }, []);
 
-  const selectedSatellite = useMemo(
+  const groundStationById = useMemo(() => {
+    const map = new Map<string, GroundStation>();
+    for (const station of groundStations) map.set(station.id, station);
+    return map;
+  }, [groundStations]);
+
+  const selectedSatellite = useMemo(() => {
+    if (!selectedId) return null;
+    return (
+      findSatelliteById(
+        selectedId,
+        positionsById,
+        positionsRef,
+        targetPositionsRef,
+        catalogPositionsRef,
+      ) ?? null
+    );
+  }, [selectedId, positionsById, positionEpoch]);
+
+  const selectedGroundStation = useMemo(
     () =>
-      selectedId
-        ? getSatelliteFromMap(positionsById, selectedId, null)
+      selectedGroundStationId
+        ? (groundStationById.get(selectedGroundStationId) ?? null)
         : null,
-    [selectedId, positionsById],
+    [selectedGroundStationId, groundStationById],
   );
+
+  const handleSelectSatellite = (id: string | null) => {
+    setSelectedGroundStationId(null);
+    setSelectedId(id);
+  };
+
+  const handleSelectGroundStation = (id: string | null) => {
+    setSelectedId(null);
+    setSelectedGroundStationId(id);
+  };
+
+  const handleClearSelection = () => {
+    setSelectedId(null);
+    setSelectedGroundStationId(null);
+  };
+
+  useEffect(() => {
+    if (!selectedGroundStationId) return;
+    const station = groundStationById.get(selectedGroundStationId);
+    if (!station) {
+      setSelectedGroundStationId(null);
+      return;
+    }
+    if (station.kind === 'gateway' && !showGateways) {
+      setSelectedGroundStationId(null);
+    } else if (station.kind === 'pop' && !showPops) {
+      setSelectedGroundStationId(null);
+    }
+  }, [
+    selectedGroundStationId,
+    groundStationById,
+    showGateways,
+    showPops,
+  ]);
 
   const propagatedCount = positions.length;
   const globeMaxInstances = getGlobeMaxInstances(isMobile);
@@ -223,8 +329,15 @@ function App() {
 
   useEffect(() => {
     if (!selectedId) return;
-    if (!positionsById.has(selectedId)) setSelectedId(null);
-  }, [positionsById, selectedId]);
+    const found = findSatelliteById(
+      selectedId,
+      positionsById,
+      positionsRef,
+      targetPositionsRef,
+      catalogPositionsRef,
+    );
+    if (!found) setSelectedId(null);
+  }, [selectedId, positionsById, positionEpoch]);
 
   const servicingLabel = starlinkFilterActive
     ? (servicingStarlink?.name ??
@@ -252,23 +365,27 @@ function App() {
     loading,
     isParsing,
     error,
-    selectedSatellite,
     userLocation,
-    tleById,
-    satcatById,
-    typeById,
-    onCloseDetails: () => setSelectedId(null),
     onObjectTypeFilterChange: setObjectTypeFilter,
     listItems,
     filteredCount: positions.length,
     selectedId,
-    onSelectSatellite: setSelectedId,
+    onSelectSatellite: handleSelectSatellite,
     isPaused,
     onTogglePropagation: togglePropagation,
+    showGateways,
+    showPops,
+    onShowGatewaysChange: setShowGateways,
+    onShowPopsChange: setShowPops,
+    groundStationCounts,
   };
 
   return (
     <div className={`app${isMobile ? ' app--mobile' : ''}`}>
+      <aside className="sidebar hidden md:flex">
+        <AppSidebar {...sidebarProps} />
+      </aside>
+
       <main className="visualizer">
         <GlobeVisualizer
           positionsRef={positionsRef}
@@ -288,10 +405,37 @@ function App() {
           }
           catalogPositionsRef={catalogPositionsRef}
           userLocation={userLocation}
-          onSelectSatellite={setSelectedId}
+          onSelectSatellite={handleSelectSatellite}
           onRenderFps={setRenderFps}
           isMobile={isMobile}
+          groundStations={groundStations}
+          showGateways={starlinkFilterActive && showGateways}
+          showPops={starlinkFilterActive && showPops}
+          selectedGroundStationId={selectedGroundStationId}
+          onSelectGroundStation={handleSelectGroundStation}
+          onClearSelection={handleClearSelection}
         />
+        {selectedSatellite && (
+          <div className="visualizer-details">
+            <SatelliteDetails
+              satellite={selectedSatellite}
+              userLocation={userLocation}
+              tle={tleById.get(selectedSatellite.id)}
+              satcat={satcatById.get(selectedSatellite.id)}
+              objectType={typeById.get(selectedSatellite.id)}
+              onClose={handleClearSelection}
+            />
+          </div>
+        )}
+        {selectedGroundStation && !selectedSatellite && (
+          <div className="visualizer-details">
+            <GroundStationDetails
+              station={selectedGroundStation}
+              userLocation={userLocation}
+              onClose={handleClearSelection}
+            />
+          </div>
+        )}
         <div className="visualizer-overlay">
           <span className="overlay-pill">
             {isPaused ? 'Paused' : 'Live'} · {onGlobeRendered.toLocaleString()}{' '}
@@ -315,15 +459,26 @@ function App() {
               Location off — enable in settings
             </span>
           )}
-          {!isMobile && (
-            <span className="overlay-pill">Click object for details</span>
+          {starlinkFilterActive && showGateways && (
+            <span className="overlay-pill-gateway">
+              Gateways {groundStationCounts.operational.toLocaleString()} op
+              {groundStationCounts.planned > 0
+                ? ` / ${groundStationCounts.planned.toLocaleString()} planned`
+                : ''}
+            </span>
+          )}
+          {starlinkFilterActive && showPops && (
+            <span className="overlay-pill-pop">
+              {groundStationCounts.pops.toLocaleString()} PoPs
+            </span>
+          )}
+          {!isMobile && !selectedSatellite && !selectedGroundStation && (
+            <span className="overlay-pill">
+              Click satellite or ground site for details
+            </span>
           )}
         </div>
       </main>
-
-      <aside className="sidebar hidden md:flex">
-        <AppSidebar {...sidebarProps} />
-      </aside>
 
       {MOBILE_UI_ENABLED && (
         <div className="mobile-sheet-host md:hidden">

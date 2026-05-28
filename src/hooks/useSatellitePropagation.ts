@@ -17,10 +17,7 @@ import {
 } from '../lib/globeCatalog';
 import { ORBIT_LERP_MS, syncSatelliteCoordinates } from '../lib/lerpGeodetic';
 import { getGlobeMaxInstances } from '../lib/mobileGlobe';
-import {
-  buildPositionsById,
-  mergePositionsById,
-} from '../lib/satelliteLookup';
+import { mergePositionsById } from '../lib/satelliteLookup';
 import type { UserLocation } from './useUserLocation';
 import {
   type ObjectType,
@@ -196,7 +193,8 @@ export function useSatellitePropagation(
       targetPositionsRef.current = throttled;
       lerpStartAtRef.current = performance.now();
       setPositions(throttled);
-      setPositionsById(buildPositionsById(throttled));
+      // Full catalog map for selection/details; `positions` stays throttled for the list.
+      setPositionsById(new Map(catalogByIdRef.current));
       setPositionEpoch((epoch) => epoch + 1);
     },
     [isMobile, userLocation, pinIds, maxInstances, typeById, globePopulation],

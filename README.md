@@ -91,6 +91,7 @@ UI at `http://localhost:1420` without Tauri. Starlink dish fetch and some native
 | `npm run tauri -- dev` / `build` | macOS / Linux |
 | `npm run dev` | Vite only (browser) |
 | `npm run ensure:tauri2` | Verify Tauri 2.x pins |
+| `npm run sync:ground-stations` | Refresh bundled Starlink gateway/PoP JSON from Hugging Face |
 
 ## Project layout (developers)
 

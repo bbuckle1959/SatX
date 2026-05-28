@@ -13,7 +13,9 @@ import {
   GLOBE_RADIAL_BIAS,
   geodeticToCartesian,
 } from '../lib/geo';
+import { GroundStationsLayer } from './GroundStationsLayer';
 import { StarlinkServicingLayer } from './StarlinkServicingLayer';
+import type { GroundStation } from '../lib/groundStationTypes';
 import { attachInstanceSphereRaycast } from '../lib/instanceSphereRaycast';
 import { createSatelliteMarkerGeometry } from '../lib/satelliteMarkerGeometry';
 import earthTextureUrl from '../assets/earth_day.jpg';
@@ -95,6 +97,13 @@ interface GlobeSceneProps {
   onSelectSatelliteRef: RefObject<(id: string | null) => void>;
   onRenderFps: (fps: number) => void;
   isMobile: boolean;
+  groundStations: ReadonlyArray<GroundStation>;
+  showGateways: boolean;
+  showPops: boolean;
+  selectedGroundStationId: string | null;
+  selectedGroundStationIdRef: RefObject<string | null>;
+  onSelectGroundStationRef: RefObject<(id: string | null) => void>;
+  onClearSelectionRef: RefObject<() => void>;
 }
 
 interface SatelliteInstancesProps {
@@ -139,10 +148,10 @@ function EarthPlaceholder({ segments }: { segments: number }) {
 
 /** Texture + meshBasicMaterial so the map is always visible (not washed out by lights). */
 function EarthGlobeTextured({
-  onSelectSatelliteRef,
+  onClearSelectionRef,
   segments,
 }: {
-  onSelectSatelliteRef: RefObject<(id: string | null) => void>;
+  onClearSelectionRef: RefObject<() => void>;
   segments: number;
 }) {
   const { gl } = useThree();
@@ -158,7 +167,7 @@ function EarthGlobeTextured({
     <mesh
       onClick={(e: ThreeEvent<MouseEvent>) => {
         e.stopPropagation();
-        onSelectSatelliteRef.current(null);
+        onClearSelectionRef.current();
       }}
     >
       <sphereGeometry args={[GLOBE_RADIUS, segments, segments]} />
@@ -168,16 +177,16 @@ function EarthGlobeTextured({
 }
 
 function EarthGlobe({
-  onSelectSatelliteRef,
+  onClearSelectionRef,
   segments,
 }: {
-  onSelectSatelliteRef: RefObject<(id: string | null) => void>;
+  onClearSelectionRef: RefObject<() => void>;
   segments: number;
 }) {
   return (
     <Suspense fallback={<EarthPlaceholder segments={segments} />}>
       <EarthGlobeTextured
-        onSelectSatelliteRef={onSelectSatelliteRef}
+        onClearSelectionRef={onClearSelectionRef}
         segments={segments}
       />
     </Suspense>
@@ -631,6 +640,13 @@ function GlobeScene({
   onSelectSatelliteRef,
   onRenderFps,
   isMobile,
+  groundStations,
+  showGateways,
+  showPops,
+  selectedGroundStationId,
+  selectedGroundStationIdRef,
+  onSelectGroundStationRef,
+  onClearSelectionRef,
 }: GlobeSceneProps) {
   const renderProfile = useMemo(
     () => getMobileGlobeRenderProfile(isMobile),
@@ -668,9 +684,20 @@ function GlobeScene({
       />
 
       <EarthGlobe
-        onSelectSatelliteRef={onSelectSatelliteRef}
+        onClearSelectionRef={onClearSelectionRef}
         segments={renderProfile.earthSegments}
       />
+      {(showGateways || showPops) && groundStations.length > 0 && (
+        <GroundStationsLayer
+          stations={groundStations}
+          showGateways={showGateways}
+          showPops={showPops}
+          selectedGroundStationId={selectedGroundStationId}
+          selectedGroundStationIdRef={selectedGroundStationIdRef}
+          onSelectGroundStationRef={onSelectGroundStationRef}
+          pickRadius={renderProfile.groundStationPickRadius}
+        />
+      )}
       <SatelliteInstances
         positionsRef={positionsRef}
         targetPositionsRef={targetPositionsRef}
@@ -736,6 +763,12 @@ interface GlobeVisualizerProps {
   onSelectSatellite: (id: string | null) => void;
   onRenderFps: (fps: number) => void;
   isMobile: boolean;
+  groundStations: ReadonlyArray<GroundStation>;
+  showGateways: boolean;
+  showPops: boolean;
+  selectedGroundStationId: string | null;
+  onSelectGroundStation: (id: string | null) => void;
+  onClearSelection: () => void;
 }
 
 export function GlobeVisualizer({
@@ -755,9 +788,21 @@ export function GlobeVisualizer({
   onSelectSatellite,
   onRenderFps,
   isMobile,
+  groundStations,
+  showGateways,
+  showPops,
+  selectedGroundStationId,
+  onSelectGroundStation,
+  onClearSelection,
 }: GlobeVisualizerProps) {
   const onSelectSatelliteRef = useRef(onSelectSatellite);
   onSelectSatelliteRef.current = onSelectSatellite;
+  const selectedGroundStationIdRef = useRef(selectedGroundStationId);
+  selectedGroundStationIdRef.current = selectedGroundStationId;
+  const onSelectGroundStationRef = useRef(onSelectGroundStation);
+  onSelectGroundStationRef.current = onSelectGroundStation;
+  const onClearSelectionRef = useRef(onClearSelection);
+  onClearSelectionRef.current = onClearSelection;
   const renderProfile = useMemo(
     () => getMobileGlobeRenderProfile(isMobile),
     [isMobile],
@@ -801,6 +846,13 @@ export function GlobeVisualizer({
           onSelectSatelliteRef={onSelectSatelliteRef}
           onRenderFps={onRenderFps}
           isMobile={isMobile}
+          groundStations={groundStations}
+          showGateways={showGateways}
+          showPops={showPops}
+          selectedGroundStationId={selectedGroundStationId}
+          selectedGroundStationIdRef={selectedGroundStationIdRef}
+          onSelectGroundStationRef={onSelectGroundStationRef}
+          onClearSelectionRef={onClearSelectionRef}
         />
       </Canvas>
     </div>

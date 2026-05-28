@@ -5,6 +5,9 @@ import { isStarlinkObject, type ObjectType } from './objectTypes';
 
 const DEG2RAD = Math.PI / 180;
 
+/** Ignore satellites below this elevation at the dish (trees, buildings). */
+export const MIN_SERVICING_SATELLITE_ELEVATION_DEG = 25;
+
 export interface GeodeticObserver {
   latitude: number;
   longitude: number;
@@ -72,7 +75,8 @@ export function dishPointingUnitVector(
 
 /**
  * Pick the Starlink satellite whose direction from the observer best aligns with
- * the dish boresight (smallest angular separation).
+ * the dish boresight (smallest angular separation). Only considers satellites at
+ * least {@link MIN_SERVICING_SATELLITE_ELEVATION_DEG} above the local horizon.
  */
 export function findServicingStarlink(
   observer: GeodeticObserver,
@@ -84,6 +88,8 @@ export function findServicingStarlink(
   const pointing = dishPointingUnitVector(observer, azimuthDeg, elevationDeg);
   const [ox, oy, oz] = geodeticToCartesian(observer.latitude, observer.longitude, 0);
   const observerPos = new THREE.Vector3(ox, oy, oz);
+  const upAxis = observerPos.clone().normalize();
+  const minElRad = MIN_SERVICING_SATELLITE_ELEVATION_DEG * DEG2RAD;
 
   let best: SatelliteLookTarget | null = null;
   let bestAngleRad = Infinity;
@@ -99,6 +105,9 @@ export function findServicingStarlink(
     const toSat = new THREE.Vector3(sx, sy, sz).sub(observerPos);
     const range = toSat.length();
     if (range < 1e-6) continue;
+
+    const sinEl = THREE.MathUtils.clamp(toSat.dot(upAxis) / range, -1, 1);
+    if (Math.asin(sinEl) < minElRad) continue;
 
     toSat.normalize();
     const dot = THREE.MathUtils.clamp(pointing.dot(toSat), -1, 1);

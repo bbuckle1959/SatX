@@ -2,6 +2,8 @@ import { invoke, isTauri } from '@tauri-apps/api/core';
 import { AlertTriangle, Loader2, Radio, RefreshCw } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
+import { MIN_SERVICING_SATELLITE_ELEVATION_DEG } from '../lib/starlinkPointing';
+
 export interface StarlinkAlignment {
   azimuth_deg: number;
   elevation_deg: number;
@@ -154,6 +156,13 @@ export function StarlinkPanel({
         <p className="starlink-strip-hint">
           Dish site {dishSite.latitude.toFixed(2)}°, {dishSite.longitude.toFixed(2)}°
           (your location)
+        </p>
+      )}
+
+      {alignment && hasDishSite && !servicingStarlinkId && (
+        <p className="starlink-strip-hint" role="status">
+          No in-beam satellite ≥{MIN_SERVICING_SATELLITE_ELEVATION_DEG}° above the
+          horizon at the dish (low targets ignored for obstructions).
         </p>
       )}
 

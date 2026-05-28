@@ -1,0 +1,2864 @@
+{
+  "source": "juliensimon/starlink-ground-stations",
+  "syncedAt": "2026-05-28T12:54:12.831Z",
+  "counts": {
+    "gateways": 303,
+    "operational": 250,
+    "planned": 53,
+    "pops": 52,
+    "total": 355
+  },
+  "stations": [
+    {
+      "id": "gw-adelanto-ca",
+      "kind": "gateway",
+      "name": "Adelanto, CA",
+      "latitude": 34.5828,
+      "longitude": -117.409,
+      "status": "planned"
+    },
+    {
+      "id": "gw-aerzen-germany",
+      "kind": "gateway",
+      "name": "Aerzen, Germany",
+      "latitude": 52.0489,
+      "longitude": 9.2683,
+      "status": "operational"
+    },
+    {
+      "id": "gw-akita-japan",
+      "kind": "gateway",
+      "name": "Akita, Japan",
+      "latitude": 39.72,
+      "longitude": 140.1024,
+      "status": "operational"
+    },
+    {
+      "id": "gw-akron-oh",
+      "kind": "gateway",
+      "name": "Akron, OH",
+      "latitude": 41.0575,
+      "longitude": -81.5199,
+      "status": "operational"
+    },
+    {
+      "id": "gw-alfouvar-de-cima-portugal",
+      "kind": "gateway",
+      "name": "Alfouvar de Cima, Portugal",
+      "latitude": 40.5167,
+      "longitude": -8.25,
+      "status": "operational"
+    },
+    {
+      "id": "gw-anchorage-ak",
+      "kind": "gateway",
+      "name": "Anchorage, AK",
+      "latitude": 61.2181,
+      "longitude": -149.9003,
+      "status": "operational"
+    },
+    {
+      "id": "gw-anderson-sc",
+      "kind": "gateway",
+      "name": "Anderson, SC",
+      "latitude": 34.5034,
+      "longitude": -82.6501,
+      "status": "planned"
+    },
+    {
+      "id": "gw-angeles-philippines",
+      "kind": "gateway",
+      "name": "Angeles, Philippines",
+      "latitude": 15.145,
+      "longitude": 120.5887,
+      "status": "operational"
+    },
+    {
+      "id": "gw-angola-in",
+      "kind": "gateway",
+      "name": "Angola, IN",
+      "latitude": 41.6348,
+      "longitude": -84.9994,
+      "status": "planned"
+    },
+    {
+      "id": "gw-arbuckle-ca",
+      "kind": "gateway",
+      "name": "Arbuckle, CA",
+      "latitude": 39.02,
+      "longitude": -122.06,
+      "status": "planned"
+    },
+    {
+      "id": "gw-arlington-or",
+      "kind": "gateway",
+      "name": "Arlington, OR",
+      "latitude": 45.7226,
+      "longitude": -120.1979,
+      "status": "planned"
+    },
+    {
+      "id": "gw-arvin-ca",
+      "kind": "gateway",
+      "name": "Arvin, CA",
+      "latitude": 35.2094,
+      "longitude": -118.8278,
+      "status": "planned"
+    },
+    {
+      "id": "gw-ashburn-va",
+      "kind": "gateway",
+      "name": "Ashburn, VA",
+      "latitude": 39.0157,
+      "longitude": -77.4649,
+      "status": "operational"
+    },
+    {
+      "id": "gw-atlanta",
+      "kind": "gateway",
+      "name": "Atlanta",
+      "latitude": 33.7545,
+      "longitude": -84.3898,
+      "status": "planned"
+    },
+    {
+      "id": "gw-awarua-nz",
+      "kind": "gateway",
+      "name": "Awarua, NZ",
+      "latitude": -46.5294,
+      "longitude": 168.3781,
+      "status": "operational"
+    },
+    {
+      "id": "gw-ballinspittle-ireland",
+      "kind": "gateway",
+      "name": "Ballinspittle, Ireland",
+      "latitude": 51.6508,
+      "longitude": -8.5808,
+      "status": "operational"
+    },
+    {
+      "id": "gw-bandon-or",
+      "kind": "gateway",
+      "name": "Bandon, OR",
+      "latitude": 43.2476,
+      "longitude": -124.3828,
+      "status": "operational"
+    },
+    {
+      "id": "gw-banning-ca",
+      "kind": "gateway",
+      "name": "Banning, CA",
+      "latitude": 33.9191,
+      "longitude": -116.8494,
+      "status": "operational"
+    },
+    {
+      "id": "gw-bastrop-tx",
+      "kind": "gateway",
+      "name": "Bastrop, TX",
+      "latitude": 30.1579,
+      "longitude": -97.4069,
+      "status": "operational"
+    },
+    {
+      "id": "gw-baxley-ga",
+      "kind": "gateway",
+      "name": "Baxley, GA",
+      "latitude": 31.7791,
+      "longitude": -82.3485,
+      "status": "operational"
+    },
+    {
+      "id": "gw-beekmantown-ny",
+      "kind": "gateway",
+      "name": "Beekmantown, NY",
+      "latitude": 44.7629,
+      "longitude": -73.5754,
+      "status": "operational"
+    },
+    {
+      "id": "gw-bellingham-wa",
+      "kind": "gateway",
+      "name": "Bellingham, WA",
+      "latitude": 48.7519,
+      "longitude": -122.4787,
+      "status": "operational"
+    },
+    {
+      "id": "gw-benkelman-ne",
+      "kind": "gateway",
+      "name": "Benkelman, NE",
+      "latitude": 40.0492,
+      "longitude": -101.5329,
+      "status": "planned"
+    },
+    {
+      "id": "gw-big-ivy-tn",
+      "kind": "gateway",
+      "name": "Big Ivy, TN",
+      "latitude": 35.1599,
+      "longitude": -88.061,
+      "status": "operational"
+    },
+    {
+      "id": "gw-blountsville-al",
+      "kind": "gateway",
+      "name": "Blountsville, AL",
+      "latitude": 33.981,
+      "longitude": -86.5914,
+      "status": "planned"
+    },
+    {
+      "id": "gw-bluffdale-ut",
+      "kind": "gateway",
+      "name": "Bluffdale, UT",
+      "latitude": 40.4798,
+      "longitude": -111.9042,
+      "status": "operational"
+    },
+    {
+      "id": "gw-boca-chica-tx",
+      "kind": "gateway",
+      "name": "Boca Chica, TX",
+      "latitude": 26.0621,
+      "longitude": -97.1668,
+      "status": "operational"
+    },
+    {
+      "id": "gw-bogantungan-australia",
+      "kind": "gateway",
+      "name": "Bogantungan, Australia",
+      "latitude": -23.6478,
+      "longitude": 147.2956,
+      "status": "planned"
+    },
+    {
+      "id": "gw-boise-id",
+      "kind": "gateway",
+      "name": "Boise, ID",
+      "latitude": 43.5811,
+      "longitude": -116.29,
+      "status": "operational"
+    },
+    {
+      "id": "gw-boorowa-australia",
+      "kind": "gateway",
+      "name": "Boorowa, Australia",
+      "latitude": -34.4392,
+      "longitude": 148.7142,
+      "status": "operational"
+    },
+    {
+      "id": "gw-boydton-va",
+      "kind": "gateway",
+      "name": "Boydton, VA",
+      "latitude": 36.6677,
+      "longitude": -78.3875,
+      "status": "planned"
+    },
+    {
+      "id": "gw-brewster-wa",
+      "kind": "gateway",
+      "name": "Brewster, WA",
+      "latitude": 48.0962,
+      "longitude": -119.7806,
+      "status": "operational"
+    },
+    {
+      "id": "gw-bridgewater-ct",
+      "kind": "gateway",
+      "name": "Bridgewater, CT",
+      "latitude": 41.5454,
+      "longitude": -73.3544,
+      "status": "operational"
+    },
+    {
+      "id": "gw-broadview-il",
+      "kind": "gateway",
+      "name": "Broadview, IL",
+      "latitude": 41.8642,
+      "longitude": -87.8534,
+      "status": "operational"
+    },
+    {
+      "id": "gw-broken-hill-australia",
+      "kind": "gateway",
+      "name": "Broken Hill, Australia",
+      "latitude": -31.9505,
+      "longitude": 141.4681,
+      "status": "operational"
+    },
+    {
+      "id": "gw-brooklyn-park-mn",
+      "kind": "gateway",
+      "name": "Brooklyn Park, MN",
+      "latitude": 45.144,
+      "longitude": -93.3858,
+      "status": "operational"
+    },
+    {
+      "id": "gw-brunswick-me",
+      "kind": "gateway",
+      "name": "Brunswick, ME",
+      "latitude": 43.9145,
+      "longitude": -69.9653,
+      "status": "planned"
+    },
+    {
+      "id": "gw-bulla-bulling-australia",
+      "kind": "gateway",
+      "name": "Bulla Bulling, Australia",
+      "latitude": -31.1,
+      "longitude": 121.0167,
+      "status": "operational"
+    },
+    {
+      "id": "gw-burbank-ca",
+      "kind": "gateway",
+      "name": "Burbank, CA",
+      "latitude": 34.2001,
+      "longitude": -118.3438,
+      "status": "operational"
+    },
+    {
+      "id": "gw-butte-mt",
+      "kind": "gateway",
+      "name": "Butte, MT",
+      "latitude": 46.0038,
+      "longitude": -112.5348,
+      "status": "operational"
+    },
+    {
+      "id": "gw-cabo-san-lucas-mexico",
+      "kind": "gateway",
+      "name": "Cabo San Lucas, Mexico",
+      "latitude": 22.8905,
+      "longitude": -109.9167,
+      "status": "operational"
+    },
+    {
+      "id": "gw-cal-nev-ari-nv",
+      "kind": "gateway",
+      "name": "Cal-Nev-Ari, NV",
+      "latitude": 35.2987,
+      "longitude": -114.8745,
+      "status": "operational"
+    },
+    {
+      "id": "gw-calais-me",
+      "kind": "gateway",
+      "name": "Calais, ME",
+      "latitude": 45.1714,
+      "longitude": -67.2476,
+      "status": "operational"
+    },
+    {
+      "id": "gw-caldera-chile",
+      "kind": "gateway",
+      "name": "Caldera, Chile",
+      "latitude": -27.0667,
+      "longitude": -70.8167,
+      "status": "operational"
+    },
+    {
+      "id": "gw-caleta-dr",
+      "kind": "gateway",
+      "name": "Caleta, DR",
+      "latitude": 18.456,
+      "longitude": -69.752,
+      "status": "planned"
+    },
+    {
+      "id": "gw-calrossie-australia",
+      "kind": "gateway",
+      "name": "Calrossie, Australia",
+      "latitude": -36.45,
+      "longitude": 145.3,
+      "status": "operational"
+    },
+    {
+      "id": "gw-calverton-ny",
+      "kind": "gateway",
+      "name": "Calverton, NY",
+      "latitude": 40.9089,
+      "longitude": -72.7976,
+      "status": "operational"
+    },
+    {
+      "id": "gw-camacari-brazil",
+      "kind": "gateway",
+      "name": "Camaçari, Brazil",
+      "latitude": -12.6996,
+      "longitude": -38.3263,
+      "status": "operational"
+    },
+    {
+      "id": "gw-canyonleigh-australia",
+      "kind": "gateway",
+      "name": "Canyonleigh, Australia",
+      "latitude": -34.5333,
+      "longitude": 150.2,
+      "status": "operational"
+    },
+    {
+      "id": "gw-cape-canaveral-fl",
+      "kind": "gateway",
+      "name": "Cape Canaveral, FL",
+      "latitude": 28.5434,
+      "longitude": -80.6666,
+      "status": "planned"
+    },
+    {
+      "id": "gw-cass-county-nd",
+      "kind": "gateway",
+      "name": "Cass County, ND",
+      "latitude": 46.93,
+      "longitude": -97.25,
+      "status": "operational"
+    },
+    {
+      "id": "gw-cataby-australia",
+      "kind": "gateway",
+      "name": "Cataby, Australia",
+      "latitude": -30.75,
+      "longitude": 115.5333,
+      "status": "operational"
+    },
+    {
+      "id": "gw-centennial-co",
+      "kind": "gateway",
+      "name": "Centennial, CO",
+      "latitude": 39.5919,
+      "longitude": -104.8469,
+      "status": "operational"
+    },
+    {
+      "id": "gw-chalfont-grove-uk",
+      "kind": "gateway",
+      "name": "Chalfont Grove, UK",
+      "latitude": 51.6167,
+      "longitude": -0.5667,
+      "status": "operational"
+    },
+    {
+      "id": "gw-chantilly-va",
+      "kind": "gateway",
+      "name": "Chantilly, VA",
+      "latitude": 38.9102,
+      "longitude": -77.4727,
+      "status": "operational"
+    },
+    {
+      "id": "gw-chapel-hill-nc",
+      "kind": "gateway",
+      "name": "Chapel Hill, NC",
+      "latitude": 35.8958,
+      "longitude": -79.2267,
+      "status": "operational"
+    },
+    {
+      "id": "gw-charcas-mexico",
+      "kind": "gateway",
+      "name": "Charcas, Mexico",
+      "latitude": 23.1314,
+      "longitude": -101.1136,
+      "status": "operational"
+    },
+    {
+      "id": "gw-charleston-sc",
+      "kind": "gateway",
+      "name": "Charleston, SC",
+      "latitude": 32.7765,
+      "longitude": -79.9311,
+      "status": "operational"
+    },
+    {
+      "id": "gw-charleston-sc",
+      "kind": "gateway",
+      "name": "Charleston, SC",
+      "latitude": 32.7765,
+      "longitude": -79.9311,
+      "status": "planned"
+    },
+    {
+      "id": "gw-chaska-mn",
+      "kind": "gateway",
+      "name": "Chaska, MN",
+      "latitude": 44.851,
+      "longitude": -93.598,
+      "status": "operational"
+    },
+    {
+      "id": "gw-chattanooga-tn",
+      "kind": "gateway",
+      "name": "Chattanooga, TN",
+      "latitude": 35.0317,
+      "longitude": -85.2975,
+      "status": "operational"
+    },
+    {
+      "id": "gw-cheyenne-wy",
+      "kind": "gateway",
+      "name": "Cheyenne, WY",
+      "latitude": 41.14,
+      "longitude": -104.8202,
+      "status": "planned"
+    },
+    {
+      "id": "gw-chicago-il",
+      "kind": "gateway",
+      "name": "Chicago, IL",
+      "latitude": 41.8414,
+      "longitude": -87.6711,
+      "status": "operational"
+    },
+    {
+      "id": "gw-chico-ca",
+      "kind": "gateway",
+      "name": "Chico, CA",
+      "latitude": 39.7754,
+      "longitude": -121.9199,
+      "status": "operational"
+    },
+    {
+      "id": "gw-clarksville-ga",
+      "kind": "gateway",
+      "name": "Clarksville, GA",
+      "latitude": 34.6485,
+      "longitude": -83.5473,
+      "status": "operational"
+    },
+    {
+      "id": "gw-clinton-il",
+      "kind": "gateway",
+      "name": "Clinton, IL",
+      "latitude": 40.1536,
+      "longitude": -88.9645,
+      "status": "planned"
+    },
+    {
+      "id": "gw-cobargo-australia",
+      "kind": "gateway",
+      "name": "Cobargo, Australia",
+      "latitude": -36.3886,
+      "longitude": 149.89,
+      "status": "operational"
+    },
+    {
+      "id": "gw-colburn-id",
+      "kind": "gateway",
+      "name": "Colburn, ID",
+      "latitude": 48.4,
+      "longitude": -116.55,
+      "status": "operational"
+    },
+    {
+      "id": "gw-columbus-oh",
+      "kind": "gateway",
+      "name": "Columbus, OH",
+      "latitude": 39.9612,
+      "longitude": -82.9988,
+      "status": "planned"
+    },
+    {
+      "id": "gw-conrad-mt",
+      "kind": "gateway",
+      "name": "Conrad, MT",
+      "latitude": 48.17,
+      "longitude": -111.95,
+      "status": "operational"
+    },
+    {
+      "id": "gw-corpus-christi-tx",
+      "kind": "gateway",
+      "name": "Corpus Christi, TX",
+      "latitude": 27.7931,
+      "longitude": -97.4519,
+      "status": "operational"
+    },
+    {
+      "id": "gw-cromwell-nz",
+      "kind": "gateway",
+      "name": "Cromwell, NZ",
+      "latitude": -45.05,
+      "longitude": 169.2,
+      "status": "operational"
+    },
+    {
+      "id": "gw-dallas-tx",
+      "kind": "gateway",
+      "name": "Dallas, TX",
+      "latitude": 32.7999,
+      "longitude": -96.8182,
+      "status": "operational"
+    },
+    {
+      "id": "gw-debeque-co",
+      "kind": "gateway",
+      "name": "Debeque, CO",
+      "latitude": 39.289,
+      "longitude": -108.205,
+      "status": "operational"
+    },
+    {
+      "id": "gw-delta-ut",
+      "kind": "gateway",
+      "name": "Delta, UT",
+      "latitude": 39.3461,
+      "longitude": -112.5894,
+      "status": "operational"
+    },
+    {
+      "id": "gw-denver-co",
+      "kind": "gateway",
+      "name": "Denver, CO",
+      "latitude": 39.7457,
+      "longitude": -104.9954,
+      "status": "operational"
+    },
+    {
+      "id": "gw-des-moines-nm",
+      "kind": "gateway",
+      "name": "Des Moines, NM",
+      "latitude": 36.69751,
+      "longitude": -103.79202,
+      "status": "planned"
+    },
+    {
+      "id": "gw-douglas-wy",
+      "kind": "gateway",
+      "name": "Douglas, WY",
+      "latitude": 42.7401,
+      "longitude": -105.3504,
+      "status": "operational"
+    },
+    {
+      "id": "gw-draper-ut",
+      "kind": "gateway",
+      "name": "Draper, UT",
+      "latitude": 40.4799,
+      "longitude": -111.8229,
+      "status": "operational"
+    },
+    {
+      "id": "gw-dubois-id",
+      "kind": "gateway",
+      "name": "Dubois, ID",
+      "latitude": 44.1704,
+      "longitude": -112.2251,
+      "status": "operational"
+    },
+    {
+      "id": "gw-dubuque-ia",
+      "kind": "gateway",
+      "name": "Dubuque, IA",
+      "latitude": 42.4446,
+      "longitude": -90.6785,
+      "status": "operational"
+    },
+    {
+      "id": "gw-duluth-mn",
+      "kind": "gateway",
+      "name": "Duluth, MN",
+      "latitude": 46.8281,
+      "longitude": -92.1304,
+      "status": "operational"
+    },
+    {
+      "id": "gw-dumas-tx",
+      "kind": "gateway",
+      "name": "Dumas, TX",
+      "latitude": 35.8628,
+      "longitude": -101.9732,
+      "status": "operational"
+    },
+    {
+      "id": "gw-eagan-mn",
+      "kind": "gateway",
+      "name": "Eagan, MN",
+      "latitude": 44.8393,
+      "longitude": -93.1456,
+      "status": "operational"
+    },
+    {
+      "id": "gw-edison-nj",
+      "kind": "gateway",
+      "name": "Edison, NJ",
+      "latitude": 40.5211,
+      "longitude": -74.3451,
+      "status": "operational"
+    },
+    {
+      "id": "gw-el-marques",
+      "kind": "gateway",
+      "name": "El Marques",
+      "latitude": 20.7351,
+      "longitude": -100.2836,
+      "status": "operational"
+    },
+    {
+      "id": "gw-el-veintiseis-pr",
+      "kind": "gateway",
+      "name": "El Veintiseis, PR",
+      "latitude": 18.4287,
+      "longitude": -66.1915,
+      "status": "planned"
+    },
+    {
+      "id": "gw-elbert-co",
+      "kind": "gateway",
+      "name": "Elbert, CO",
+      "latitude": 39.2239,
+      "longitude": -104.5347,
+      "status": "operational"
+    },
+    {
+      "id": "gw-elfordstown-ireland",
+      "kind": "gateway",
+      "name": "Elfordstown, Ireland",
+      "latitude": 52.0833,
+      "longitude": -8.25,
+      "status": "operational"
+    },
+    {
+      "id": "gw-elkton-md",
+      "kind": "gateway",
+      "name": "Elkton, MD",
+      "latitude": 39.6068,
+      "longitude": -75.8333,
+      "status": "planned"
+    },
+    {
+      "id": "gw-evanston-wy",
+      "kind": "gateway",
+      "name": "Evanston, WY",
+      "latitude": 41.2683,
+      "longitude": -110.9632,
+      "status": "operational"
+    },
+    {
+      "id": "gw-fair-park-ut",
+      "kind": "gateway",
+      "name": "Fair Park, UT",
+      "latitude": 40.7669,
+      "longitude": -111.9212,
+      "status": "operational"
+    },
+    {
+      "id": "gw-fairbanks-ak",
+      "kind": "gateway",
+      "name": "Fairbanks, AK",
+      "latitude": 64.8378,
+      "longitude": -147.7164,
+      "status": "operational"
+    },
+    {
+      "id": "gw-falda-del-carmen-argentina",
+      "kind": "gateway",
+      "name": "Falda del Carmen, Argentina",
+      "latitude": -31.5333,
+      "longitude": -64.45,
+      "status": "operational"
+    },
+    {
+      "id": "gw-fawley-uk",
+      "kind": "gateway",
+      "name": "Fawley, UK",
+      "latitude": 50.8167,
+      "longitude": -1.3333,
+      "status": "planned"
+    },
+    {
+      "id": "gw-flushing-ny",
+      "kind": "gateway",
+      "name": "Flushing, NY",
+      "latitude": 40.772,
+      "longitude": -73.8348,
+      "status": "planned"
+    },
+    {
+      "id": "gw-foggia-italy",
+      "kind": "gateway",
+      "name": "Foggia, Italy",
+      "latitude": 41.4621,
+      "longitude": 15.5444,
+      "status": "operational"
+    },
+    {
+      "id": "gw-fort-lauderdale-fl",
+      "kind": "gateway",
+      "name": "Fort Lauderdale, FL",
+      "latitude": 26.1224,
+      "longitude": -80.1373,
+      "status": "operational"
+    },
+    {
+      "id": "gw-franklin-park-il",
+      "kind": "gateway",
+      "name": "Franklin Park, IL",
+      "latitude": 41.9288,
+      "longitude": -87.8574,
+      "status": "operational"
+    },
+    {
+      "id": "gw-frederick-md",
+      "kind": "gateway",
+      "name": "Frederick, MD",
+      "latitude": 39.4143,
+      "longitude": -77.4105,
+      "status": "operational"
+    },
+    {
+      "id": "gw-fremont-ca",
+      "kind": "gateway",
+      "name": "Fremont, CA",
+      "latitude": 37.4921,
+      "longitude": -121.9367,
+      "status": "operational"
+    },
+    {
+      "id": "gw-ft-lauderdale-fl",
+      "kind": "gateway",
+      "name": "Ft. Lauderdale, FL",
+      "latitude": 26.1911,
+      "longitude": -80.1934,
+      "status": "operational"
+    },
+    {
+      "id": "gw-gaffney-sc",
+      "kind": "gateway",
+      "name": "Gaffney, SC",
+      "latitude": 35.0718,
+      "longitude": -81.6498,
+      "status": "operational"
+    },
+    {
+      "id": "gw-goodyear-az",
+      "kind": "gateway",
+      "name": "Goodyear, AZ",
+      "latitude": 33.4121,
+      "longitude": -112.4129,
+      "status": "operational"
+    },
+    {
+      "id": "gw-goonhilly-uk",
+      "kind": "gateway",
+      "name": "Goonhilly, UK",
+      "latitude": 50.0502,
+      "longitude": -5.1825,
+      "status": "operational"
+    },
+    {
+      "id": "gw-gordon-ga",
+      "kind": "gateway",
+      "name": "Gordon, GA",
+      "latitude": 32.8411,
+      "longitude": -83.2538,
+      "status": "operational"
+    },
+    {
+      "id": "gw-grant-district-wv",
+      "kind": "gateway",
+      "name": "Grant District, WV",
+      "latitude": 38.978,
+      "longitude": -79.1466,
+      "status": "operational"
+    },
+    {
+      "id": "gw-greenville-pa",
+      "kind": "gateway",
+      "name": "Greenville, PA",
+      "latitude": 41.4028,
+      "longitude": -80.3812,
+      "status": "operational"
+    },
+    {
+      "id": "gw-guarapari-brazil",
+      "kind": "gateway",
+      "name": "Guarapari, Brazil",
+      "latitude": -20.6614,
+      "longitude": -40.4981,
+      "status": "operational"
+    },
+    {
+      "id": "gw-hamshire-tx",
+      "kind": "gateway",
+      "name": "Hamshire, TX",
+      "latitude": 29.8622,
+      "longitude": -94.6749,
+      "status": "operational"
+    },
+    {
+      "id": "gw-hawkins-tx",
+      "kind": "gateway",
+      "name": "Hawkins, TX",
+      "latitude": 32.6136,
+      "longitude": -95.2998,
+      "status": "operational"
+    },
+    {
+      "id": "gw-hawthorne-ca",
+      "kind": "gateway",
+      "name": "Hawthorne, CA",
+      "latitude": 33.9207,
+      "longitude": -118.328,
+      "status": "operational"
+    },
+    {
+      "id": "gw-highlands-ranch-co",
+      "kind": "gateway",
+      "name": "Highlands Ranch, CO",
+      "latitude": 39.55,
+      "longitude": -105.0333,
+      "status": "operational"
+    },
+    {
+      "id": "gw-hillman-mi",
+      "kind": "gateway",
+      "name": "Hillman, MI",
+      "latitude": 45.0586,
+      "longitude": -83.9022,
+      "status": "operational"
+    },
+    {
+      "id": "gw-hillsboro-tx",
+      "kind": "gateway",
+      "name": "Hillsboro, TX",
+      "latitude": 32.011,
+      "longitude": -97.13,
+      "status": "operational"
+    },
+    {
+      "id": "gw-hinds-nz",
+      "kind": "gateway",
+      "name": "Hinds, NZ",
+      "latitude": -43.8667,
+      "longitude": 171.5833,
+      "status": "operational"
+    },
+    {
+      "id": "gw-hitterdal-mn",
+      "kind": "gateway",
+      "name": "Hitterdal, MN",
+      "latitude": 46.9769,
+      "longitude": -96.2595,
+      "status": "operational"
+    },
+    {
+      "id": "gw-honolulu-hi",
+      "kind": "gateway",
+      "name": "Honolulu, HI",
+      "latitude": 21.315,
+      "longitude": -157.8664,
+      "status": "operational"
+    },
+    {
+      "id": "gw-hoo-uk",
+      "kind": "gateway",
+      "name": "Hoo, UK",
+      "latitude": 51.42,
+      "longitude": 0.56,
+      "status": "planned"
+    },
+    {
+      "id": "gw-howell-ut",
+      "kind": "gateway",
+      "name": "Howell, UT",
+      "latitude": 41.8366,
+      "longitude": -112.4352,
+      "status": "operational"
+    },
+    {
+      "id": "gw-ibi-spain",
+      "kind": "gateway",
+      "name": "Ibi, Spain",
+      "latitude": 38.6264,
+      "longitude": -0.5726,
+      "status": "operational"
+    },
+    {
+      "id": "gw-inman-ks",
+      "kind": "gateway",
+      "name": "Inman, KS",
+      "latitude": 38.2319,
+      "longitude": -97.7725,
+      "status": "operational"
+    },
+    {
+      "id": "gw-iron-mountain-co",
+      "kind": "gateway",
+      "name": "Iron Mountain, CO",
+      "latitude": 39.7775,
+      "longitude": -104.9685,
+      "status": "operational"
+    },
+    {
+      "id": "gw-irvine-ca",
+      "kind": "gateway",
+      "name": "Irvine, CA",
+      "latitude": 33.6872,
+      "longitude": -117.8479,
+      "status": "operational"
+    },
+    {
+      "id": "gw-isle-of-man-uk",
+      "kind": "gateway",
+      "name": "Isle of Man, UK",
+      "latitude": 54.13909,
+      "longitude": -4.49728,
+      "status": "operational"
+    },
+    {
+      "id": "gw-itaborai-brazil",
+      "kind": "gateway",
+      "name": "Itaboraí, Brazil",
+      "latitude": -22.7446,
+      "longitude": -42.8586,
+      "status": "operational"
+    },
+    {
+      "id": "gw-joao-camara-brazil",
+      "kind": "gateway",
+      "name": "João Câmara, Brazil",
+      "latitude": -5.5372,
+      "longitude": -35.8139,
+      "status": "planned"
+    },
+    {
+      "id": "gw-kalama-wa",
+      "kind": "gateway",
+      "name": "Kalama, WA",
+      "latitude": 46.01,
+      "longitude": -122.84,
+      "status": "operational"
+    },
+    {
+      "id": "gw-kaua-i-hi",
+      "kind": "gateway",
+      "name": "Kaua'i, HI",
+      "latitude": 21.9994,
+      "longitude": -159.378,
+      "status": "operational"
+    },
+    {
+      "id": "gw-kaunas-lithuania",
+      "kind": "gateway",
+      "name": "Kaunas, Lithuania",
+      "latitude": 54.8985,
+      "longitude": 23.9036,
+      "status": "operational"
+    },
+    {
+      "id": "gw-kenansville-fl",
+      "kind": "gateway",
+      "name": "Kenansville, FL",
+      "latitude": 27.8847,
+      "longitude": -81.0962,
+      "status": "operational"
+    },
+    {
+      "id": "gw-kent-wa",
+      "kind": "gateway",
+      "name": "Kent, WA",
+      "latitude": 47.4211,
+      "longitude": -122.2481,
+      "status": "operational"
+    },
+    {
+      "id": "gw-ketchikan-ak",
+      "kind": "gateway",
+      "name": "Ketchikan, AK",
+      "latitude": 55.342,
+      "longitude": -131.636,
+      "status": "operational"
+    },
+    {
+      "id": "gw-ki-ki-australia",
+      "kind": "gateway",
+      "name": "Ki Ki, Australia",
+      "latitude": -35.8,
+      "longitude": 139.7167,
+      "status": "operational"
+    },
+    {
+      "id": "gw-kihei-hi",
+      "kind": "gateway",
+      "name": "Kihei, HI",
+      "latitude": 20.746,
+      "longitude": -156.432,
+      "status": "operational"
+    },
+    {
+      "id": "gw-kiowa-co",
+      "kind": "gateway",
+      "name": "Kiowa, CO",
+      "latitude": 39.292,
+      "longitude": -104.5052,
+      "status": "operational"
+    },
+    {
+      "id": "gw-kuparuk-ak",
+      "kind": "gateway",
+      "name": "Kuparuk, AK",
+      "latitude": 70.3316,
+      "longitude": -149.5947,
+      "status": "operational"
+    },
+    {
+      "id": "gw-lawrence-ks",
+      "kind": "gateway",
+      "name": "Lawrence, KS",
+      "latitude": 38.9717,
+      "longitude": -95.2353,
+      "status": "operational"
+    },
+    {
+      "id": "gw-lekki",
+      "kind": "gateway",
+      "name": "Lekki",
+      "latitude": 6.4711,
+      "longitude": 3.8148,
+      "status": "operational"
+    },
+    {
+      "id": "gw-lepe-spain",
+      "kind": "gateway",
+      "name": "Lepe, Spain",
+      "latitude": 37.2547,
+      "longitude": -7.2044,
+      "status": "operational"
+    },
+    {
+      "id": "gw-limestone-me",
+      "kind": "gateway",
+      "name": "Limestone, ME",
+      "latitude": 46.9149,
+      "longitude": -67.9195,
+      "status": "operational"
+    },
+    {
+      "id": "gw-lindon-ut",
+      "kind": "gateway",
+      "name": "Lindon, UT",
+      "latitude": 40.3327,
+      "longitude": -111.7312,
+      "status": "operational"
+    },
+    {
+      "id": "gw-lisle-il",
+      "kind": "gateway",
+      "name": "Lisle, IL",
+      "latitude": 41.8006,
+      "longitude": -88.0961,
+      "status": "operational"
+    },
+    {
+      "id": "gw-litchfield-mn",
+      "kind": "gateway",
+      "name": "Litchfield, MN",
+      "latitude": 45.12,
+      "longitude": -94.53,
+      "status": "operational"
+    },
+    {
+      "id": "gw-lithia-springs-ga",
+      "kind": "gateway",
+      "name": "Lithia Springs, GA",
+      "latitude": 33.7459,
+      "longitude": -84.5795,
+      "status": "operational"
+    },
+    {
+      "id": "gw-llano-grande-mexico",
+      "kind": "gateway",
+      "name": "Llano Grande, Mexico",
+      "latitude": 19.34,
+      "longitude": -97.008,
+      "status": "operational"
+    },
+    {
+      "id": "gw-lockport-ny",
+      "kind": "gateway",
+      "name": "Lockport, NY",
+      "latitude": 43.1709,
+      "longitude": -78.6903,
+      "status": "operational"
+    },
+    {
+      "id": "gw-loring-me",
+      "kind": "gateway",
+      "name": "Loring, ME",
+      "latitude": 46.95,
+      "longitude": -67.89,
+      "status": "operational"
+    },
+    {
+      "id": "gw-los-angeles-ca",
+      "kind": "gateway",
+      "name": "Los Angeles, CA",
+      "latitude": 34.0581,
+      "longitude": -118.2354,
+      "status": "operational"
+    },
+    {
+      "id": "gw-lunenburg-vt",
+      "kind": "gateway",
+      "name": "Lunenburg, VT",
+      "latitude": 44.412,
+      "longitude": -71.7318,
+      "status": "operational"
+    },
+    {
+      "id": "gw-luz-brazil",
+      "kind": "gateway",
+      "name": "Luz, Brazil",
+      "latitude": -19.79,
+      "longitude": -44.7325,
+      "status": "operational"
+    },
+    {
+      "id": "gw-lynnwood-wa",
+      "kind": "gateway",
+      "name": "Lynnwood, WA",
+      "latitude": 47.8417,
+      "longitude": -122.3009,
+      "status": "operational"
+    },
+    {
+      "id": "gw-madera-ca",
+      "kind": "gateway",
+      "name": "Madera, CA",
+      "latitude": 36.8588,
+      "longitude": -119.9105,
+      "status": "operational"
+    },
+    {
+      "id": "gw-manaus-brazil",
+      "kind": "gateway",
+      "name": "Manaus, Brazil",
+      "latitude": -3.119,
+      "longitude": -60.0217,
+      "status": "operational"
+    },
+    {
+      "id": "gw-mandale-nc",
+      "kind": "gateway",
+      "name": "Mandale, NC",
+      "latitude": 35.895778,
+      "longitude": -79.226722,
+      "status": "operational"
+    },
+    {
+      "id": "gw-manistique-mi",
+      "kind": "gateway",
+      "name": "Manistique, MI",
+      "latitude": 45.9575,
+      "longitude": -86.2464,
+      "status": "operational"
+    },
+    {
+      "id": "gw-marathon-on",
+      "kind": "gateway",
+      "name": "Marathon, ON",
+      "latitude": 48.754,
+      "longitude": -86.379,
+      "status": "operational"
+    },
+    {
+      "id": "gw-marcell-mn",
+      "kind": "gateway",
+      "name": "Marcell, MN",
+      "latitude": 47.593,
+      "longitude": -93.6941,
+      "status": "operational"
+    },
+    {
+      "id": "gw-marsala-italy",
+      "kind": "gateway",
+      "name": "Marsala, Italy",
+      "latitude": 37.7986,
+      "longitude": 12.4357,
+      "status": "operational"
+    },
+    {
+      "id": "gw-marshall-tx",
+      "kind": "gateway",
+      "name": "Marshall, TX",
+      "latitude": 32.5449,
+      "longitude": -94.3674,
+      "status": "planned"
+    },
+    {
+      "id": "gw-mazahua-mexico",
+      "kind": "gateway",
+      "name": "Mazahua, Mexico",
+      "latitude": 19.65,
+      "longitude": -100.05,
+      "status": "operational"
+    },
+    {
+      "id": "gw-mcgregor-tx",
+      "kind": "gateway",
+      "name": "McGregor, TX",
+      "latitude": 31.44,
+      "longitude": -97.41,
+      "status": "operational"
+    },
+    {
+      "id": "gw-merida-mexico",
+      "kind": "gateway",
+      "name": "Merida, Mexico",
+      "latitude": 20.9674,
+      "longitude": -89.5926,
+      "status": "operational"
+    },
+    {
+      "id": "gw-merredin-australia",
+      "kind": "gateway",
+      "name": "Merredin, Australia",
+      "latitude": -31.4833,
+      "longitude": 118.2833,
+      "status": "operational"
+    },
+    {
+      "id": "gw-merrillan-wi",
+      "kind": "gateway",
+      "name": "Merrillan, WI",
+      "latitude": 44.45,
+      "longitude": -90.8333,
+      "status": "operational"
+    },
+    {
+      "id": "gw-mesa-az",
+      "kind": "gateway",
+      "name": "Mesa, AZ",
+      "latitude": 33.4212,
+      "longitude": -111.8592,
+      "status": "operational"
+    },
+    {
+      "id": "gw-miami-fl",
+      "kind": "gateway",
+      "name": "Miami, FL",
+      "latitude": 25.7915,
+      "longitude": -80.3797,
+      "status": "operational"
+    },
+    {
+      "id": "gw-milano-italy",
+      "kind": "gateway",
+      "name": "Milano, Italy",
+      "latitude": 45.4642,
+      "longitude": 9.19,
+      "status": "operational"
+    },
+    {
+      "id": "gw-milwaukee-wi",
+      "kind": "gateway",
+      "name": "Milwaukee, WI",
+      "latitude": 43.1512,
+      "longitude": -88.0088,
+      "status": "operational"
+    },
+    {
+      "id": "gw-minneapolis-mn",
+      "kind": "gateway",
+      "name": "Minneapolis, MN",
+      "latitude": 44.9709,
+      "longitude": -93.2544,
+      "status": "operational"
+    },
+    {
+      "id": "gw-molokai-hi",
+      "kind": "gateway",
+      "name": "Molokai, HI",
+      "latitude": 21.1333,
+      "longitude": -157.0167,
+      "status": "operational"
+    },
+    {
+      "id": "gw-monterey",
+      "kind": "gateway",
+      "name": "Monterey",
+      "latitude": 36.2231,
+      "longitude": -121.3877,
+      "status": "operational"
+    },
+    {
+      "id": "gw-montes-carlos",
+      "kind": "gateway",
+      "name": "Montes Carlos",
+      "latitude": 9.2895,
+      "longitude": -75.3994,
+      "status": "operational"
+    },
+    {
+      "id": "gw-morn-hill-uk",
+      "kind": "gateway",
+      "name": "Morn Hill, UK",
+      "latitude": 51.0894,
+      "longitude": -1.2833,
+      "status": "planned"
+    },
+    {
+      "id": "gw-mossoro-brazil",
+      "kind": "gateway",
+      "name": "Mossoró, Brazil",
+      "latitude": -5.1878,
+      "longitude": -37.3441,
+      "status": "operational"
+    },
+    {
+      "id": "gw-mt-ayr-in",
+      "kind": "gateway",
+      "name": "Mt. Ayr, IN",
+      "latitude": 39.975,
+      "longitude": -87.3036,
+      "status": "operational"
+    },
+    {
+      "id": "gw-muallim-turkey",
+      "kind": "gateway",
+      "name": "Muallim, Turkey",
+      "latitude": 40.0333,
+      "longitude": 30.05,
+      "status": "operational"
+    },
+    {
+      "id": "gw-murayjat-oman",
+      "kind": "gateway",
+      "name": "Murayjat, Oman",
+      "latitude": 23.588,
+      "longitude": 58.545,
+      "status": "operational"
+    },
+    {
+      "id": "gw-murrieta-ca",
+      "kind": "gateway",
+      "name": "Murrieta, CA",
+      "latitude": 33.5539,
+      "longitude": -117.2139,
+      "status": "planned"
+    },
+    {
+      "id": "gw-myrtle-beach-sc",
+      "kind": "gateway",
+      "name": "Myrtle Beach, SC",
+      "latitude": 33.71,
+      "longitude": -78.8958,
+      "status": "operational"
+    },
+    {
+      "id": "gw-nemaha-ne",
+      "kind": "gateway",
+      "name": "Nemaha, NE",
+      "latitude": 40.3408,
+      "longitude": -95.6708,
+      "status": "operational"
+    },
+    {
+      "id": "gw-new-braunfels-tx",
+      "kind": "gateway",
+      "name": "New Braunfels, TX",
+      "latitude": 29.703,
+      "longitude": -98.1245,
+      "status": "operational"
+    },
+    {
+      "id": "gw-new-york-ny",
+      "kind": "gateway",
+      "name": "New York, NY",
+      "latitude": 40.7178,
+      "longitude": -74.0083,
+      "status": "operational"
+    },
+    {
+      "id": "gw-niland-ca",
+      "kind": "gateway",
+      "name": "Niland, CA",
+      "latitude": 33.2205,
+      "longitude": -115.4668,
+      "status": "operational"
+    },
+    {
+      "id": "gw-nome-ak",
+      "kind": "gateway",
+      "name": "Nome, AK",
+      "latitude": 64.5011,
+      "longitude": -165.4064,
+      "status": "operational"
+    },
+    {
+      "id": "gw-norcross-ga",
+      "kind": "gateway",
+      "name": "Norcross, GA",
+      "latitude": 33.941,
+      "longitude": -84.2135,
+      "status": "operational"
+    },
+    {
+      "id": "gw-north-bend-wa",
+      "kind": "gateway",
+      "name": "North Bend, WA",
+      "latitude": 47.4957,
+      "longitude": -121.7868,
+      "status": "planned"
+    },
+    {
+      "id": "gw-north-kansas-city-mo",
+      "kind": "gateway",
+      "name": "North Kansas City, MO",
+      "latitude": 39.1372,
+      "longitude": -94.5778,
+      "status": "planned"
+    },
+    {
+      "id": "gw-north-miami-fl",
+      "kind": "gateway",
+      "name": "North Miami, FL",
+      "latitude": 25.9496,
+      "longitude": -80.1918,
+      "status": "operational"
+    },
+    {
+      "id": "gw-northlake-il",
+      "kind": "gateway",
+      "name": "Northlake, IL",
+      "latitude": 41.92,
+      "longitude": -87.9113,
+      "status": "operational"
+    },
+    {
+      "id": "gw-noviciado-chile",
+      "kind": "gateway",
+      "name": "Noviciado, Chile",
+      "latitude": -33.4167,
+      "longitude": -70.9333,
+      "status": "operational"
+    },
+    {
+      "id": "gw-olympia-wa",
+      "kind": "gateway",
+      "name": "Olympia, WA",
+      "latitude": 47.0379,
+      "longitude": -122.9007,
+      "status": "planned"
+    },
+    {
+      "id": "gw-otaru-japan",
+      "kind": "gateway",
+      "name": "Otaru, Japan",
+      "latitude": 43.1907,
+      "longitude": 140.9945,
+      "status": "operational"
+    },
+    {
+      "id": "gw-oxford-al",
+      "kind": "gateway",
+      "name": "Oxford, AL",
+      "latitude": 33.5936,
+      "longitude": -85.8768,
+      "status": "operational"
+    },
+    {
+      "id": "gw-panaca-nv",
+      "kind": "gateway",
+      "name": "Panaca, NV",
+      "latitude": 37.8,
+      "longitude": -114.39,
+      "status": "operational"
+    },
+    {
+      "id": "gw-passa-quatro-brazil",
+      "kind": "gateway",
+      "name": "Passa Quatro, Brazil",
+      "latitude": -22.3869,
+      "longitude": -44.9708,
+      "status": "planned"
+    },
+    {
+      "id": "gw-perry-fl",
+      "kind": "gateway",
+      "name": "Perry, FL",
+      "latitude": 30.0616,
+      "longitude": -83.5805,
+      "status": "operational"
+    },
+    {
+      "id": "gw-penuelas-mexico",
+      "kind": "gateway",
+      "name": "Peñuelas, Mexico",
+      "latitude": 21.8422,
+      "longitude": -102.3344,
+      "status": "operational"
+    },
+    {
+      "id": "gw-phoenix-az",
+      "kind": "gateway",
+      "name": "Phoenix, AZ",
+      "latitude": 33.6841,
+      "longitude": -112.0983,
+      "status": "operational"
+    },
+    {
+      "id": "gw-pimba-australia",
+      "kind": "gateway",
+      "name": "Pimba, Australia",
+      "latitude": -31.2833,
+      "longitude": 136.8,
+      "status": "operational"
+    },
+    {
+      "id": "gw-pine-valley-ca",
+      "kind": "gateway",
+      "name": "Pine Valley, CA",
+      "latitude": 32.7014,
+      "longitude": -116.3651,
+      "status": "operational"
+    },
+    {
+      "id": "gw-piscataway-nj",
+      "kind": "gateway",
+      "name": "Piscataway, NJ",
+      "latitude": 40.5434,
+      "longitude": -74.498,
+      "status": "operational"
+    },
+    {
+      "id": "gw-piti-gu",
+      "kind": "gateway",
+      "name": "Piti, GU",
+      "latitude": 13.4156,
+      "longitude": 144.6879,
+      "status": "operational"
+    },
+    {
+      "id": "gw-ponce-pr",
+      "kind": "gateway",
+      "name": "Ponce, PR",
+      "latitude": 18.0111,
+      "longitude": -66.6141,
+      "status": "operational"
+    },
+    {
+      "id": "gw-port-matilda-pa",
+      "kind": "gateway",
+      "name": "Port Matilda, PA",
+      "latitude": 40.8015,
+      "longitude": -78.0489,
+      "status": "planned"
+    },
+    {
+      "id": "gw-port-st-lucie-fl",
+      "kind": "gateway",
+      "name": "Port St. Lucie, FL",
+      "latitude": 27.2813,
+      "longitude": -80.4831,
+      "status": "operational"
+    },
+    {
+      "id": "gw-porto-alegre-brazil",
+      "kind": "gateway",
+      "name": "Porto Alegre, Brazil",
+      "latitude": -30.0346,
+      "longitude": -51.2177,
+      "status": "operational"
+    },
+    {
+      "id": "gw-pott-s-junction-gu",
+      "kind": "gateway",
+      "name": "Pott's Junction, GU",
+      "latitude": 13.6164,
+      "longitude": 144.8587,
+      "status": "planned"
+    },
+    {
+      "id": "gw-presidente-prudente-brazil",
+      "kind": "gateway",
+      "name": "Presidente Prudente, Brazil",
+      "latitude": -22.1257,
+      "longitude": -51.3875,
+      "status": "operational"
+    },
+    {
+      "id": "gw-prosser-wa",
+      "kind": "gateway",
+      "name": "Prosser, WA",
+      "latitude": 46.2068,
+      "longitude": -119.7687,
+      "status": "operational"
+    },
+    {
+      "id": "gw-prudhoe-bay-ak",
+      "kind": "gateway",
+      "name": "Prudhoe Bay, AK",
+      "latitude": 70.2466,
+      "longitude": -148.569,
+      "status": "operational"
+    },
+    {
+      "id": "gw-puerto-montt-chile",
+      "kind": "gateway",
+      "name": "Puerto Montt, Chile",
+      "latitude": -41.4689,
+      "longitude": -72.9411,
+      "status": "operational"
+    },
+    {
+      "id": "gw-puerto-saavedra-chile",
+      "kind": "gateway",
+      "name": "Puerto Saavedra, Chile",
+      "latitude": -38.7833,
+      "longitude": -73.3833,
+      "status": "operational"
+    },
+    {
+      "id": "gw-punta-arenas-chile",
+      "kind": "gateway",
+      "name": "Punta Arenas, Chile",
+      "latitude": -53.1638,
+      "longitude": -70.9171,
+      "status": "operational"
+    },
+    {
+      "id": "gw-punta-gorda-fl",
+      "kind": "gateway",
+      "name": "Punta Gorda, FL",
+      "latitude": 26.9298,
+      "longitude": -82.0454,
+      "status": "operational"
+    },
+    {
+      "id": "gw-puwera-nz",
+      "kind": "gateway",
+      "name": "Puwera, NZ",
+      "latitude": -35.8,
+      "longitude": 174.2333,
+      "status": "operational"
+    },
+    {
+      "id": "gw-quincy-wa",
+      "kind": "gateway",
+      "name": "Quincy, WA",
+      "latitude": 47.2343,
+      "longitude": -119.8526,
+      "status": "planned"
+    },
+    {
+      "id": "gw-redmond-wa",
+      "kind": "gateway",
+      "name": "Redmond, WA",
+      "latitude": 47.674,
+      "longitude": -122.1215,
+      "status": "operational"
+    },
+    {
+      "id": "gw-richardson-tx",
+      "kind": "gateway",
+      "name": "Richardson, TX",
+      "latitude": 32.9483,
+      "longitude": -96.7299,
+      "status": "planned"
+    },
+    {
+      "id": "gw-rio-negro-brazil",
+      "kind": "gateway",
+      "name": "Rio Negro, Brazil",
+      "latitude": -26.105,
+      "longitude": -49.7978,
+      "status": "operational"
+    },
+    {
+      "id": "gw-riverside-ga",
+      "kind": "gateway",
+      "name": "Riverside, GA",
+      "latitude": 33.8151,
+      "longitude": -84.4601,
+      "status": "operational"
+    },
+    {
+      "id": "gw-robbins-ca",
+      "kind": "gateway",
+      "name": "Robbins, CA",
+      "latitude": 38.875,
+      "longitude": -121.70705555555556,
+      "status": "operational"
+    },
+    {
+      "id": "gw-roberts-wi",
+      "kind": "gateway",
+      "name": "Roberts, WI",
+      "latitude": 44.9839,
+      "longitude": -92.556,
+      "status": "planned"
+    },
+    {
+      "id": "gw-robertsdale-al",
+      "kind": "gateway",
+      "name": "Robertsdale, AL",
+      "latitude": 30.55,
+      "longitude": -87.71,
+      "status": "operational"
+    },
+    {
+      "id": "gw-rolette-county-nd",
+      "kind": "gateway",
+      "name": "Rolette County, ND",
+      "latitude": 48.6604,
+      "longitude": -99.8105,
+      "status": "operational"
+    },
+    {
+      "id": "gw-rolette-nd",
+      "kind": "gateway",
+      "name": "Rolette, ND",
+      "latitude": 48.6597,
+      "longitude": -99.8406,
+      "status": "operational"
+    },
+    {
+      "id": "gw-roll-az",
+      "kind": "gateway",
+      "name": "Roll, AZ",
+      "latitude": 32.8128,
+      "longitude": -113.9953,
+      "status": "operational"
+    },
+    {
+      "id": "gw-romulus-ny",
+      "kind": "gateway",
+      "name": "Romulus, NY",
+      "latitude": 42.7584,
+      "longitude": -76.8347,
+      "status": "planned"
+    },
+    {
+      "id": "gw-saguenay-qc",
+      "kind": "gateway",
+      "name": "Saguenay, QC",
+      "latitude": 48.4279,
+      "longitude": -71.0548,
+      "status": "operational"
+    },
+    {
+      "id": "gw-salem-or",
+      "kind": "gateway",
+      "name": "Salem, OR",
+      "latitude": 44.9453,
+      "longitude": -122.8886,
+      "status": "operational"
+    },
+    {
+      "id": "gw-salt-lake-city-ut",
+      "kind": "gateway",
+      "name": "Salt Lake City, UT",
+      "latitude": 40.5861,
+      "longitude": -111.968,
+      "status": "operational"
+    },
+    {
+      "id": "gw-sambro-creek-ns",
+      "kind": "gateway",
+      "name": "Sambro Creek, NS",
+      "latitude": 44.4833,
+      "longitude": -63.6,
+      "status": "operational"
+    },
+    {
+      "id": "gw-san-antonio-tx",
+      "kind": "gateway",
+      "name": "San Antonio, TX",
+      "latitude": 29.4241,
+      "longitude": -98.4936,
+      "status": "planned"
+    },
+    {
+      "id": "gw-san-clemente-chile",
+      "kind": "gateway",
+      "name": "San Clemente, Chile",
+      "latitude": -35.5333,
+      "longitude": -71.4833,
+      "status": "operational"
+    },
+    {
+      "id": "gw-san-jose-ca",
+      "kind": "gateway",
+      "name": "San Jose, CA",
+      "latitude": 37.2422,
+      "longitude": -121.7844,
+      "status": "operational"
+    },
+    {
+      "id": "gw-sanderson-tx",
+      "kind": "gateway",
+      "name": "Sanderson, TX",
+      "latitude": 30.1421,
+      "longitude": -102.3949,
+      "status": "operational"
+    },
+    {
+      "id": "gw-sandston-va",
+      "kind": "gateway",
+      "name": "Sandston, VA",
+      "latitude": 37.4901,
+      "longitude": -77.2461,
+      "status": "operational"
+    },
+    {
+      "id": "gw-santa-clara-ca",
+      "kind": "gateway",
+      "name": "Santa Clara, CA",
+      "latitude": 37.3992,
+      "longitude": -121.9803,
+      "status": "operational"
+    },
+    {
+      "id": "gw-santa-elena-chile",
+      "kind": "gateway",
+      "name": "Santa Elena, Chile",
+      "latitude": -36.8167,
+      "longitude": -72.0167,
+      "status": "operational"
+    },
+    {
+      "id": "gw-santana-de-parnaiba-brazil",
+      "kind": "gateway",
+      "name": "Santana de Parnaíba, Brazil",
+      "latitude": -23.4431,
+      "longitude": -46.9186,
+      "status": "planned"
+    },
+    {
+      "id": "gw-santiago-de-los-caballeros-dr",
+      "kind": "gateway",
+      "name": "Santiago de los Caballeros, DR",
+      "latitude": 19.4517,
+      "longitude": -70.697,
+      "status": "operational"
+    },
+    {
+      "id": "gw-savanna-ok",
+      "kind": "gateway",
+      "name": "Savanna, OK",
+      "latitude": 34.78930555555555,
+      "longitude": -95.8765,
+      "status": "planned"
+    },
+    {
+      "id": "gw-savannah-tn",
+      "kind": "gateway",
+      "name": "Savannah, TN",
+      "latitude": 35.2245,
+      "longitude": -88.2492,
+      "status": "planned"
+    },
+    {
+      "id": "gw-seattle-wa",
+      "kind": "gateway",
+      "name": "Seattle, WA",
+      "latitude": 47.5832,
+      "longitude": -122.3251,
+      "status": "operational"
+    },
+    {
+      "id": "gw-secaucus-nj",
+      "kind": "gateway",
+      "name": "Secaucus, NJ",
+      "latitude": 40.7855,
+      "longitude": -74.0686,
+      "status": "operational"
+    },
+    {
+      "id": "gw-shakopee-mn",
+      "kind": "gateway",
+      "name": "Shakopee, MN",
+      "latitude": 44.7797,
+      "longitude": -93.4627,
+      "status": "operational"
+    },
+    {
+      "id": "gw-sheffield-il",
+      "kind": "gateway",
+      "name": "Sheffield, IL",
+      "latitude": 41.3592,
+      "longitude": -89.7373,
+      "status": "planned"
+    },
+    {
+      "id": "gw-slope-county-nd",
+      "kind": "gateway",
+      "name": "Slope County, ND",
+      "latitude": 46.45,
+      "longitude": -103.95,
+      "status": "operational"
+    },
+    {
+      "id": "gw-springbrook-creek-australia",
+      "kind": "gateway",
+      "name": "Springbrook Creek, Australia",
+      "latitude": -24.8333,
+      "longitude": 152.1167,
+      "status": "operational"
+    },
+    {
+      "id": "gw-springer-ok",
+      "kind": "gateway",
+      "name": "Springer, OK",
+      "latitude": 34.2853,
+      "longitude": -97.1317,
+      "status": "operational"
+    },
+    {
+      "id": "gw-st-james-mn",
+      "kind": "gateway",
+      "name": "St James, MN",
+      "latitude": 44.0515,
+      "longitude": -94.5346,
+      "status": "operational"
+    },
+    {
+      "id": "gw-st-john-s-nl",
+      "kind": "gateway",
+      "name": "St. John's, NL",
+      "latitude": 47.5615,
+      "longitude": -52.7126,
+      "status": "operational"
+    },
+    {
+      "id": "gw-staten-island-ny",
+      "kind": "gateway",
+      "name": "Staten Island, NY",
+      "latitude": 40.6068,
+      "longitude": -74.1748,
+      "status": "planned"
+    },
+    {
+      "id": "gw-sterling-va",
+      "kind": "gateway",
+      "name": "Sterling, VA",
+      "latitude": 38.985,
+      "longitude": -77.4239,
+      "status": "operational"
+    },
+    {
+      "id": "gw-sullivan-me",
+      "kind": "gateway",
+      "name": "Sullivan, ME",
+      "latitude": 44.5314,
+      "longitude": -68.2022,
+      "status": "operational"
+    },
+    {
+      "id": "gw-sunnyvale-ca",
+      "kind": "gateway",
+      "name": "Sunnyvale, CA",
+      "latitude": 37.4117,
+      "longitude": -122.0217,
+      "status": "operational"
+    },
+    {
+      "id": "gw-sunset-tx",
+      "kind": "gateway",
+      "name": "Sunset, TX",
+      "latitude": 33.4486,
+      "longitude": -97.7767,
+      "status": "operational"
+    },
+    {
+      "id": "gw-surrency-ga",
+      "kind": "gateway",
+      "name": "Surrency, GA",
+      "latitude": 31.6829,
+      "longitude": -82.2697,
+      "status": "operational"
+    },
+    {
+      "id": "gw-surubim-brazil",
+      "kind": "gateway",
+      "name": "Surubim, Brazil",
+      "latitude": -7.8311,
+      "longitude": -35.7531,
+      "status": "operational"
+    },
+    {
+      "id": "gw-sussex-nj",
+      "kind": "gateway",
+      "name": "Sussex, NJ",
+      "latitude": 41.2018,
+      "longitude": -74.5263,
+      "status": "operational"
+    },
+    {
+      "id": "gw-suva-fiji",
+      "kind": "gateway",
+      "name": "Suva, Fiji",
+      "latitude": -18.1416,
+      "longitude": 178.4419,
+      "status": "operational"
+    },
+    {
+      "id": "gw-sao-goncalo-do-amarante-brazil",
+      "kind": "gateway",
+      "name": "São Gonçalo do Amarante, Brazil",
+      "latitude": -3.6075,
+      "longitude": -38.9722,
+      "status": "planned"
+    },
+    {
+      "id": "gw-tapachula-mexico",
+      "kind": "gateway",
+      "name": "Tapachula, Mexico",
+      "latitude": 14.9032,
+      "longitude": -92.2577,
+      "status": "operational"
+    },
+    {
+      "id": "gw-te-hana-nz",
+      "kind": "gateway",
+      "name": "Te Hana, NZ",
+      "latitude": -36.2667,
+      "longitude": 174.55,
+      "status": "operational"
+    },
+    {
+      "id": "gw-tea-gardens-australia",
+      "kind": "gateway",
+      "name": "Tea Gardens, Australia",
+      "latitude": -32.6667,
+      "longitude": 152.15,
+      "status": "operational"
+    },
+    {
+      "id": "gw-the-dalles-or",
+      "kind": "gateway",
+      "name": "The Dalles, OR",
+      "latitude": 45.5946,
+      "longitude": -121.1787,
+      "status": "planned"
+    },
+    {
+      "id": "gw-thomaston-ga",
+      "kind": "gateway",
+      "name": "Thomaston, GA",
+      "latitude": 32.9471,
+      "longitude": -84.2618,
+      "status": "operational"
+    },
+    {
+      "id": "gw-tionesta-ca",
+      "kind": "gateway",
+      "name": "Tionesta, CA",
+      "latitude": 41.1811,
+      "longitude": -122.8747,
+      "status": "operational"
+    },
+    {
+      "id": "gw-toa-baja-pr",
+      "kind": "gateway",
+      "name": "Toa Baja, PR",
+      "latitude": 18.4441,
+      "longitude": -66.2545,
+      "status": "operational"
+    },
+    {
+      "id": "gw-toonpan-australia",
+      "kind": "gateway",
+      "name": "Toonpan, Australia",
+      "latitude": -19.2833,
+      "longitude": 146.75,
+      "status": "operational"
+    },
+    {
+      "id": "gw-torrumbarry-australia",
+      "kind": "gateway",
+      "name": "Torrumbarry, Australia",
+      "latitude": -36.0333,
+      "longitude": 144.5833,
+      "status": "operational"
+    },
+    {
+      "id": "gw-tracy-city-tn",
+      "kind": "gateway",
+      "name": "Tracy City, TN",
+      "latitude": 35.2595,
+      "longitude": -85.7369,
+      "status": "operational"
+    },
+    {
+      "id": "gw-troms-norway",
+      "kind": "gateway",
+      "name": "Tromsø, Norway",
+      "latitude": 69.6496,
+      "longitude": 18.956,
+      "status": "operational"
+    },
+    {
+      "id": "gw-tucson-az",
+      "kind": "gateway",
+      "name": "Tucson, AZ",
+      "latitude": 32.1701,
+      "longitude": -110.9577,
+      "status": "operational"
+    },
+    {
+      "id": "gw-tukwila-wa",
+      "kind": "gateway",
+      "name": "Tukwila, WA",
+      "latitude": 47.5089,
+      "longitude": -122.2994,
+      "status": "operational"
+    },
+    {
+      "id": "gw-tulelake-ca",
+      "kind": "gateway",
+      "name": "Tulelake, CA",
+      "latitude": 41.644,
+      "longitude": -121.3293,
+      "status": "operational"
+    },
+    {
+      "id": "gw-tumon-gu",
+      "kind": "gateway",
+      "name": "Tumon, GU",
+      "latitude": 13.5028,
+      "longitude": 144.8052,
+      "status": "planned"
+    },
+    {
+      "id": "gw-unalaska-ak",
+      "kind": "gateway",
+      "name": "Unalaska, AK",
+      "latitude": 53.8603,
+      "longitude": -166.5049,
+      "status": "planned"
+    },
+    {
+      "id": "gw-uruguaiana-brazil",
+      "kind": "gateway",
+      "name": "Uruguaiana, Brazil",
+      "latitude": -29.7547,
+      "longitude": -57.0883,
+      "status": "operational"
+    },
+    {
+      "id": "gw-vernon-ut",
+      "kind": "gateway",
+      "name": "Vernon, UT",
+      "latitude": 40.09,
+      "longitude": -112.43,
+      "status": "operational"
+    },
+    {
+      "id": "gw-villahermosa-mexico",
+      "kind": "gateway",
+      "name": "Villahermosa, Mexico",
+      "latitude": 17.9893,
+      "longitude": -92.9472,
+      "status": "operational"
+    },
+    {
+      "id": "gw-villarejo-de-salvanes-spain",
+      "kind": "gateway",
+      "name": "Villarejo de Salvanes, Spain",
+      "latitude": 40.1667,
+      "longitude": -3.2667,
+      "status": "operational"
+    },
+    {
+      "id": "gw-villenave-d-ornon",
+      "kind": "gateway",
+      "name": "Villenave d’Ornon",
+      "latitude": 44.7738,
+      "longitude": -0.5595,
+      "status": "operational"
+    },
+    {
+      "id": "gw-virginia-beach-va",
+      "kind": "gateway",
+      "name": "Virginia Beach, VA",
+      "latitude": 36.7838,
+      "longitude": -76.0093,
+      "status": "operational"
+    },
+    {
+      "id": "gw-wagin-australia",
+      "kind": "gateway",
+      "name": "Wagin, Australia",
+      "latitude": -33.3167,
+      "longitude": 117.35,
+      "status": "operational"
+    },
+    {
+      "id": "gw-wailuku-hi",
+      "kind": "gateway",
+      "name": "Wailuku, HI",
+      "latitude": 20.9005,
+      "longitude": -156.5046,
+      "status": "operational"
+    },
+    {
+      "id": "gw-warra-australia",
+      "kind": "gateway",
+      "name": "Warra, Australia",
+      "latitude": -26.9833,
+      "longitude": 150.9333,
+      "status": "operational"
+    },
+    {
+      "id": "gw-warren-mo",
+      "kind": "gateway",
+      "name": "Warren, MO",
+      "latitude": 38.7728,
+      "longitude": -91.1643,
+      "status": "operational"
+    },
+    {
+      "id": "gw-watkins-co",
+      "kind": "gateway",
+      "name": "Watkins, CO",
+      "latitude": 39.7582,
+      "longitude": -104.617,
+      "status": "operational"
+    },
+    {
+      "id": "gw-weehawken-nj",
+      "kind": "gateway",
+      "name": "Weehawken, NJ",
+      "latitude": 40.7616,
+      "longitude": -74.0253,
+      "status": "operational"
+    },
+    {
+      "id": "gw-wellington-ut",
+      "kind": "gateway",
+      "name": "Wellington, UT",
+      "latitude": 39.5401,
+      "longitude": -110.6928,
+      "status": "operational"
+    },
+    {
+      "id": "gw-west-jordan-ut",
+      "kind": "gateway",
+      "name": "West Jordan, UT",
+      "latitude": 40.6198,
+      "longitude": -111.9863,
+      "status": "operational"
+    },
+    {
+      "id": "gw-westbury-ny",
+      "kind": "gateway",
+      "name": "Westbury, NY",
+      "latitude": 40.7559,
+      "longitude": -73.5579,
+      "status": "operational"
+    },
+    {
+      "id": "gw-westminster-co",
+      "kind": "gateway",
+      "name": "Westminster, CO",
+      "latitude": 39.8845,
+      "longitude": -105.0802,
+      "status": "operational"
+    },
+    {
+      "id": "gw-wherstead-uk",
+      "kind": "gateway",
+      "name": "Wherstead, UK",
+      "latitude": 52.0333,
+      "longitude": 1.15,
+      "status": "planned"
+    },
+    {
+      "id": "gw-wichita-falls-tx",
+      "kind": "gateway",
+      "name": "Wichita Falls, TX",
+      "latitude": 33.9137,
+      "longitude": -98.4934,
+      "status": "planned"
+    },
+    {
+      "id": "gw-willemstad-curacao",
+      "kind": "gateway",
+      "name": "Willemstad, Curaçao",
+      "latitude": 12.1696,
+      "longitude": -68.99,
+      "status": "operational"
+    },
+    {
+      "id": "gw-willows-australia",
+      "kind": "gateway",
+      "name": "Willows, Australia",
+      "latitude": -19.3667,
+      "longitude": 146.7833,
+      "status": "planned"
+    },
+    {
+      "id": "gw-wise-va",
+      "kind": "gateway",
+      "name": "Wise, VA",
+      "latitude": 36.977333,
+      "longitude": -82.528,
+      "status": "operational"
+    },
+    {
+      "id": "gw-wola-krobowska-poland",
+      "kind": "gateway",
+      "name": "Wola Krobowska, Poland",
+      "latitude": 50.35,
+      "longitude": 20.55,
+      "status": "operational"
+    },
+    {
+      "id": "gw-woodwalton-uk",
+      "kind": "gateway",
+      "name": "Woodwalton, UK",
+      "latitude": 52.4167,
+      "longitude": -0.2833,
+      "status": "planned"
+    },
+    {
+      "id": "gw-yamaguchi-japan",
+      "kind": "gateway",
+      "name": "Yamaguchi, Japan",
+      "latitude": 34.1861,
+      "longitude": 131.4706,
+      "status": "operational"
+    },
+    {
+      "id": "gw-york-pa",
+      "kind": "gateway",
+      "name": "York, PA",
+      "latitude": 39.9626,
+      "longitude": -76.7277,
+      "status": "planned"
+    },
+    {
+      "id": "pop-buenos-aires-ar",
+      "kind": "pop",
+      "name": "Buenos Aires, AR",
+      "latitude": -34.6096,
+      "longitude": -58.3888,
+      "country": "AR"
+    },
+    {
+      "id": "pop-darwin-au",
+      "kind": "pop",
+      "name": "Darwin, AU",
+      "latitude": -12.4604,
+      "longitude": 130.841,
+      "country": "AU"
+    },
+    {
+      "id": "pop-fortitude-valley-au",
+      "kind": "pop",
+      "name": "Fortitude Valley, AU",
+      "latitude": -27.4573,
+      "longitude": 153.0363,
+      "country": "AU"
+    },
+    {
+      "id": "pop-melbourne-au",
+      "kind": "pop",
+      "name": "Melbourne, AU",
+      "latitude": -37.8142,
+      "longitude": 144.9632,
+      "country": "AU"
+    },
+    {
+      "id": "pop-malaga-au",
+      "kind": "pop",
+      "name": "Málaga, AU",
+      "latitude": -31.8607,
+      "longitude": 115.8942,
+      "country": "AU"
+    },
+    {
+      "id": "pop-syd",
+      "kind": "pop",
+      "name": "Sydney, AU",
+      "latitude": -33.8698,
+      "longitude": 151.2083,
+      "country": "AU",
+      "code": "syd"
+    },
+    {
+      "id": "pop-gazipur-bd",
+      "kind": "pop",
+      "name": "Gazipur, BD",
+      "latitude": 23.9997,
+      "longitude": 90.4184,
+      "country": "BD"
+    },
+    {
+      "id": "pop-sofia-bg",
+      "kind": "pop",
+      "name": "Sofia, BG",
+      "latitude": 42.6977,
+      "longitude": 23.3217,
+      "country": "BG"
+    },
+    {
+      "id": "pop-barueri-br",
+      "kind": "pop",
+      "name": "Barueri, BR",
+      "latitude": -23.5112,
+      "longitude": -46.8765,
+      "country": "BR"
+    },
+    {
+      "id": "pop-brasilia-br",
+      "kind": "pop",
+      "name": "Brasília, BR",
+      "latitude": -10.3333,
+      "longitude": -53.2,
+      "country": "BR"
+    },
+    {
+      "id": "pop-fortaleza-br",
+      "kind": "pop",
+      "name": "Fortaleza, BR",
+      "latitude": -3.7305,
+      "longitude": -38.5218,
+      "country": "BR"
+    },
+    {
+      "id": "pop-calgary-ca",
+      "kind": "pop",
+      "name": "Calgary, CA",
+      "latitude": 51.0456,
+      "longitude": -114.0575,
+      "country": "CA"
+    },
+    {
+      "id": "pop-montreal-ca",
+      "kind": "pop",
+      "name": "Montreal, CA",
+      "latitude": 45.5032,
+      "longitude": -73.5698,
+      "country": "CA"
+    },
+    {
+      "id": "pop-toronto-ca",
+      "kind": "pop",
+      "name": "Toronto, CA",
+      "latitude": 43.6535,
+      "longitude": -79.3839,
+      "country": "CA"
+    },
+    {
+      "id": "pop-santiago-cl",
+      "kind": "pop",
+      "name": "Santiago, CL",
+      "latitude": -33.4377,
+      "longitude": -70.6511,
+      "country": "CL"
+    },
+    {
+      "id": "pop-bogota-co",
+      "kind": "pop",
+      "name": "Bogota, CO",
+      "latitude": 4.6534,
+      "longitude": -74.0836,
+      "country": "CO"
+    },
+    {
+      "id": "pop-frntdeu",
+      "kind": "pop",
+      "name": "Frankfurt, DE",
+      "latitude": 50.1106,
+      "longitude": 8.6821,
+      "country": "DE",
+      "code": "frntdeu"
+    },
+    {
+      "id": "pop-madresp",
+      "kind": "pop",
+      "name": "Madrid, ES",
+      "latitude": 40.4168,
+      "longitude": -3.7035,
+      "country": "ES",
+      "code": "madresp"
+    },
+    {
+      "id": "pop-lndngbr",
+      "kind": "pop",
+      "name": "London, GB",
+      "latitude": 51.5074,
+      "longitude": -0.1278,
+      "country": "GB",
+      "code": "lndngbr"
+    },
+    {
+      "id": "pop-guatemala-city-gt",
+      "kind": "pop",
+      "name": "Guatemala City, GT",
+      "latitude": 14.6416,
+      "longitude": -90.5133,
+      "country": "GT"
+    },
+    {
+      "id": "pop-surabaya-id",
+      "kind": "pop",
+      "name": "Surabaya, ID",
+      "latitude": -7.2463,
+      "longitude": 112.7378,
+      "country": "ID"
+    },
+    {
+      "id": "pop-mumbai-in",
+      "kind": "pop",
+      "name": "Mumbai, IN",
+      "latitude": 19.055,
+      "longitude": 72.8692,
+      "country": "IN"
+    },
+    {
+      "id": "pop-milan-it",
+      "kind": "pop",
+      "name": "Milan, IT",
+      "latitude": 45.4642,
+      "longitude": 9.1896,
+      "country": "IT"
+    },
+    {
+      "id": "pop-nrt",
+      "kind": "pop",
+      "name": "Tokyo, JP",
+      "latitude": 35.6769,
+      "longitude": 139.7639,
+      "country": "JP",
+      "code": "nrt"
+    },
+    {
+      "id": "pop-karen-ke",
+      "kind": "pop",
+      "name": "Karen, KE",
+      "latitude": -1.3284,
+      "longitude": 36.705,
+      "country": "KE"
+    },
+    {
+      "id": "pop-el-marques-mx",
+      "kind": "pop",
+      "name": "El Marques, MX",
+      "latitude": 20.7351,
+      "longitude": -100.2836,
+      "country": "MX"
+    },
+    {
+      "id": "pop-lekki-ng",
+      "kind": "pop",
+      "name": "Lekki, NG",
+      "latitude": 6.4711,
+      "longitude": 3.8148,
+      "country": "NG"
+    },
+    {
+      "id": "pop-auckland-nz",
+      "kind": "pop",
+      "name": "Auckland, NZ",
+      "latitude": -36.8485,
+      "longitude": 174.7633,
+      "country": "NZ"
+    },
+    {
+      "id": "pop-christchurch-nz",
+      "kind": "pop",
+      "name": "Christchurch, NZ",
+      "latitude": -43.5321,
+      "longitude": 172.6362,
+      "country": "NZ"
+    },
+    {
+      "id": "pop-muscat-om",
+      "kind": "pop",
+      "name": "Muscat, OM",
+      "latitude": 23.6124,
+      "longitude": 58.5938,
+      "country": "OM"
+    },
+    {
+      "id": "pop-santiago-de-surco-pe",
+      "kind": "pop",
+      "name": "Santiago de Surco, PE",
+      "latitude": -12.1251,
+      "longitude": -76.9822,
+      "country": "PE"
+    },
+    {
+      "id": "pop-makati-ph",
+      "kind": "pop",
+      "name": "Makati, PH",
+      "latitude": 14.5568,
+      "longitude": 121.0211,
+      "country": "PH"
+    },
+    {
+      "id": "pop-warsaw-pl",
+      "kind": "pop",
+      "name": "Warsaw, PL",
+      "latitude": 52.2334,
+      "longitude": 21.0711,
+      "country": "PL"
+    },
+    {
+      "id": "pop-doha-qa",
+      "kind": "pop",
+      "name": "Doha, QA",
+      "latitude": 25.3109,
+      "longitude": 51.5082,
+      "country": "QA"
+    },
+    {
+      "id": "pop-sin",
+      "kind": "pop",
+      "name": "Singapore, SG",
+      "latitude": 1.3571,
+      "longitude": 103.8195,
+      "country": "SG",
+      "code": "sin"
+    },
+    {
+      "id": "pop-iad",
+      "kind": "pop",
+      "name": "Ashburn, US",
+      "latitude": 31.706,
+      "longitude": -83.6536,
+      "country": "US",
+      "code": "iad"
+    },
+    {
+      "id": "pop-atlanta-us",
+      "kind": "pop",
+      "name": "Atlanta, US",
+      "latitude": 33.7545,
+      "longitude": -84.3898,
+      "country": "US"
+    },
+    {
+      "id": "pop-atlanta-us",
+      "kind": "pop",
+      "name": "Atlanta, US",
+      "latitude": 33.7545,
+      "longitude": -84.3898,
+      "country": "US"
+    },
+    {
+      "id": "pop-bluffdale-us",
+      "kind": "pop",
+      "name": "Bluffdale, US",
+      "latitude": 40.4898,
+      "longitude": -111.9393,
+      "country": "US"
+    },
+    {
+      "id": "pop-chi",
+      "kind": "pop",
+      "name": "Chicago, US",
+      "latitude": 41.8756,
+      "longitude": -87.6244,
+      "country": "US",
+      "code": "chi"
+    },
+    {
+      "id": "pop-dallas-us",
+      "kind": "pop",
+      "name": "Dallas, US",
+      "latitude": 32.7763,
+      "longitude": -96.7969,
+      "country": "US"
+    },
+    {
+      "id": "pop-denver-us",
+      "kind": "pop",
+      "name": "Denver, US",
+      "latitude": 39.7392,
+      "longitude": -104.9849,
+      "country": "US"
+    },
+    {
+      "id": "pop-kansas-city-us",
+      "kind": "pop",
+      "name": "Kansas City, US",
+      "latitude": 39.1001,
+      "longitude": -94.5781,
+      "country": "US"
+    },
+    {
+      "id": "pop-lax",
+      "kind": "pop",
+      "name": "Los Angeles, US",
+      "latitude": 34.0537,
+      "longitude": -118.2428,
+      "country": "US",
+      "code": "lax"
+    },
+    {
+      "id": "pop-mia",
+      "kind": "pop",
+      "name": "Miami, US",
+      "latitude": 25.7742,
+      "longitude": -80.1936,
+      "country": "US",
+      "code": "mia"
+    },
+    {
+      "id": "pop-minneapolis-us",
+      "kind": "pop",
+      "name": "Minneapolis, US",
+      "latitude": 44.9773,
+      "longitude": -93.2655,
+      "country": "US"
+    },
+    {
+      "id": "pop-new-york-us",
+      "kind": "pop",
+      "name": "New York, US",
+      "latitude": 40.7127,
+      "longitude": -74.006,
+      "country": "US"
+    },
+    {
+      "id": "pop-salt-lake-city-us",
+      "kind": "pop",
+      "name": "Salt Lake City, US",
+      "latitude": 40.7596,
+      "longitude": -111.8868,
+      "country": "US"
+    },
+    {
+      "id": "pop-san-jose-us",
+      "kind": "pop",
+      "name": "San Jose, US",
+      "latitude": 37.3362,
+      "longitude": -121.8906,
+      "country": "US"
+    },
+    {
+      "id": "pop-sea",
+      "kind": "pop",
+      "name": "Seattle, US",
+      "latitude": 47.6038,
+      "longitude": -122.3301,
+      "country": "US",
+      "code": "sea"
+    },
+    {
+      "id": "pop-tempe-us",
+      "kind": "pop",
+      "name": "Tempe, US",
+      "latitude": 33.4255,
+      "longitude": -111.94,
+      "country": "US"
+    },
+    {
+      "id": "pop-johannesburg-za",
+      "kind": "pop",
+      "name": "Johannesburg, ZA",
+      "latitude": -26.205,
+      "longitude": 28.0497,
+      "country": "ZA"
+    }
+  ]
+}

@@ -16,7 +16,8 @@
     "tauri:dev": "scripts\\tauri-dev.cmd",
     "tauri:build": "scripts\\tauri-dev.cmd build",
     "tauri:android:dev": "scripts\\tauri-android-dev.cmd",
-    "tauri:android:build": "scripts\\tauri-android-build.cmd"
+    "tauri:android:build": "scripts\\tauri-android-build.cmd",
+    "sync:ground-stations": "node scripts/sync-ground-stations.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",

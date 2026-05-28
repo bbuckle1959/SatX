@@ -1,21 +1,26 @@
-import { Activity, Filter, Pause, Play, Radio, Satellite, Search } from 'lucide-react';
+import {
+  Activity,
+  Antenna,
+  Filter,
+  Pause,
+  Play,
+  Radio,
+  Satellite,
+  Search,
+} from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import {
   StarlinkPanel,
   type StarlinkAlignment,
 } from './StarlinkPanel';
-import { SatelliteDetails } from './SatelliteDetails';
 import type { SatelliteCoordinates } from '../hooks/useSatellitePropagation';
 import type { UserLocation } from '../hooks/useUserLocation';
 import {
   getObjectTypeLabel,
   OBJECT_TYPE_OPTIONS,
-  type ObjectType,
   type ObjectTypeFilter,
 } from '../lib/objectTypes';
-import type { SatcatEntry } from '../services/satcat';
-import type { TleRecord } from '../services/spaceTrack';
 import {
   formatDistanceKm,
   formatHeightKm,
@@ -26,6 +31,7 @@ import {
   GLOBE_POPULATION_OPTIONS,
   type GlobePopulationMode,
 } from '../lib/globeCatalog';
+import type { GroundStationsSummary } from '../lib/groundStationTypes';
 
 export interface SidebarListItem {
   sat: SatelliteCoordinates;
@@ -53,12 +59,7 @@ export interface AppSidebarProps {
   loading: boolean;
   isParsing: boolean;
   error: string | null;
-  selectedSatellite: SatelliteCoordinates | null;
   userLocation: UserLocation | null;
-  tleById: Map<string, TleRecord>;
-  satcatById: Map<string, SatcatEntry>;
-  typeById: Map<string, ObjectType>;
-  onCloseDetails: () => void;
   onObjectTypeFilterChange: (value: ObjectTypeFilter) => void;
   listItems: SidebarListItem[];
   filteredCount: number;
@@ -66,6 +67,11 @@ export interface AppSidebarProps {
   onSelectSatellite: (id: string) => void;
   isPaused: boolean;
   onTogglePropagation: () => void;
+  showGateways: boolean;
+  showPops: boolean;
+  onShowGatewaysChange: (value: boolean) => void;
+  onShowPopsChange: (value: boolean) => void;
+  groundStationCounts: GroundStationsSummary;
 }
 
 export function AppSidebar({
@@ -89,12 +95,7 @@ export function AppSidebar({
   loading,
   isParsing,
   error,
-  selectedSatellite,
   userLocation,
-  tleById,
-  satcatById,
-  typeById,
-  onCloseDetails,
   onObjectTypeFilterChange,
   listItems,
   filteredCount,
@@ -102,6 +103,11 @@ export function AppSidebar({
   onSelectSatellite,
   isPaused,
   onTogglePropagation,
+  showGateways,
+  showPops,
+  onShowGatewaysChange,
+  onShowPopsChange,
+  groundStationCounts,
 }: AppSidebarProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const selectedTypeLabel = getObjectTypeLabel(objectTypeFilter);
@@ -191,17 +197,6 @@ export function AppSidebar({
       )}
       {error && <div className="status-banner error">{error}</div>}
 
-      {selectedSatellite && (
-        <SatelliteDetails
-          satellite={selectedSatellite}
-          userLocation={userLocation}
-          tle={tleById.get(selectedSatellite.id)}
-          satcat={satcatById.get(selectedSatellite.id)}
-          objectType={typeById.get(selectedSatellite.id)}
-          onClose={onCloseDetails}
-        />
-      )}
-
       <div className="search-wrap">
         <label className="search-label" htmlFor="satellite-search">
           <Search size={14} aria-hidden />
@@ -267,6 +262,34 @@ export function AppSidebar({
             : `Propagates and prioritizes up to ${globeMaxInstances.toLocaleString()} objects for performance.`}
         </p>
       </div>
+
+      {objectTypeFilter === 'starlink' && (
+        <div className="ground-station-toggles filter-wrap">
+          <span className="filter-label">
+            <Antenna size={14} aria-hidden />
+            Ground infrastructure
+          </span>
+          <label className="ground-station-toggle">
+            <input
+              type="checkbox"
+              checked={showGateways}
+              onChange={(e) => onShowGatewaysChange(e.target.checked)}
+            />
+            <span>
+              Gateways ({groundStationCounts.operational.toLocaleString()} op /{' '}
+              {groundStationCounts.planned.toLocaleString()} planned)
+            </span>
+          </label>
+          <label className="ground-station-toggle">
+            <input
+              type="checkbox"
+              checked={showPops}
+              onChange={(e) => onShowPopsChange(e.target.checked)}
+            />
+            <span>PoPs ({groundStationCounts.pops.toLocaleString()})</span>
+          </label>
+        </div>
+      )}
 
       <div className="list-meta">
         Showing {filteredListItems.length.toLocaleString()} of{' '}

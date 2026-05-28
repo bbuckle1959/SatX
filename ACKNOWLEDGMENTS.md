@@ -15,6 +15,17 @@ Repository: [https://github.com/bbuckle1959/SatX](https://github.com/bbuckle1959
 
 Object-type grouping in the app follows CelesTrak-style naming conventions; classification is inferred locally from satellite names.
 
+## Starlink ground infrastructure
+
+| Provider | Role in SatX |
+|----------|----------------|
+| [**juliensimon/starlink-ground-stations**](https://huggingface.co/datasets/juliensimon/starlink-ground-stations) (Hugging Face) | Gateway earth stations and internet Points of Presence shown on the globe |
+| [**Starlink Insider**](https://starlinkinsider.com/) | Gateway list and operational status (via the dataset pipeline) |
+| [**FCC IBFS**](https://www.fcc.gov/international-bureau-filing-system) | US earth-station license coordinates |
+| [**PeeringDB**](https://www.peeringdb.com/) | PoP facility locations for SpaceX ASNs |
+
+SatX ships a bundled snapshot in `src/data/ground-stations.json`. Refresh it with `npm run sync:ground-stations` before releases.
+
 ## Desktop shell and backend (Rust)
 
 | Project | Role in SatX |

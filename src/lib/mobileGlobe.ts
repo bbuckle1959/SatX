@@ -67,6 +67,11 @@ export function getSatellitePickRadius(isMobile: boolean): number {
   return base * mult;
 }
 
+/** Pick sphere for gateway/PoP octahedron markers on the globe surface. */
+export function getGroundStationPickRadius(isMobile: boolean): number {
+  return isMobile ? 0.028 : 0.012;
+}
+
 export function getPointsRaycastThreshold(isMobile: boolean): number {
   return isMobile ? 0.12 : 0.04;
 }
@@ -74,6 +79,7 @@ export function getPointsRaycastThreshold(isMobile: boolean): number {
 export interface MobileGlobeRenderProfile {
   maxInstances: number;
   pickRadius: number;
+  groundStationPickRadius: number;
   pointsRaycastThreshold: number;
   starsCount: number;
   earthSegments: number;
@@ -87,6 +93,7 @@ export function getMobileGlobeRenderProfile(
     return {
       maxInstances: GLOBE_MAX_INSTANCES,
       pickRadius: getSatellitePickRadius(false),
+      groundStationPickRadius: getGroundStationPickRadius(false),
       pointsRaycastThreshold: getPointsRaycastThreshold(false),
       starsCount: 800,
       earthSegments: 48,
@@ -97,6 +104,7 @@ export function getMobileGlobeRenderProfile(
   return {
     maxInstances: MOBILE_GLOBE_MAX_INSTANCES,
     pickRadius: getSatellitePickRadius(true),
+    groundStationPickRadius: getGroundStationPickRadius(true),
     pointsRaycastThreshold: getPointsRaycastThreshold(true),
     starsCount: 200,
     earthSegments: 32,

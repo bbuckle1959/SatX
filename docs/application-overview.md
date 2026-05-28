@@ -11,7 +11,7 @@ The window has two parts:
 | Area | Purpose |
 |------|---------|
 | **Globe** (large view) | Earth with satellite markers; drag to rotate, scroll to zoom |
-| **Sidebar** (right) | Filters, search, list of satellites, details, and controls |
+| **Sidebar** (left) | Filters, search, list of satellites, and controls |
 
 A small overlay on the globe shows **Live/Paused**, how many objects are on screen, and your location when available.
 
@@ -20,6 +20,7 @@ A small overlay on the globe shows **Live/Paused**, how many objects are on scre
 1. **Satellite catalog (TLEs)** — Two-line orbital elements for active objects, loaded from public sources (e.g. CelesTrak-style feeds). The app downloads this when it starts (first load can take a little while).
 2. **Your location** — From the operating system when you allow location access. Shown as a **red dot** on the globe. Used to sort the “nearest” list and for Starlink matching.
 3. **Starlink dish** (optional) — Only in the **installed desktop app**, and only when your PC can reach the dish at `192.168.100.1`. Provides azimuth and elevation of where the dish is pointing.
+4. **Ground stations** (optional) — Starlink **gateway** earth stations and **PoP** (internet exchange) locations from the public [juliensimon/starlink-ground-stations](https://huggingface.co/datasets/juliensimon/starlink-ground-stations) dataset. Bundled for offline use; the app may refresh from Hugging Face when online.
 
 Positions are **computed continuously** from the TLEs (standard orbit math), not streamed from each satellite.
 
@@ -72,6 +73,19 @@ Controls how many objects are **calculated and tracked** at once:
 | **Full catalog** | Every object matching the current type filter is propagated. Heavier on large catalogs; the globe still draws at most 16,000 markers at a time. |
 
 Use **Full catalog** when you need completeness; use **Optimized** for everyday browsing.
+
+### Ground infrastructure (globe)
+
+Under **Ground infrastructure** in the sidebar:
+
+| Toggle | Default | Globe markers |
+|--------|---------|----------------|
+| **Gateways** | On | Amber diamonds at gateway sites (brighter = operational, dimmer = planned) |
+| **PoPs** | Off | Cyan diamonds at internet exchange points |
+
+Counts in the label reflect the bundled dataset (e.g. operational vs planned gateways). An overlay pill on the globe summarizes what is currently visible.
+
+Maintainers can update the bundled file with `npm run sync:ground-stations` (fetches the latest Hugging Face snapshot).
 
 ## Selecting a satellite
 
