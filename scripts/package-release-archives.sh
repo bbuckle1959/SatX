@@ -10,9 +10,17 @@ ARTIFACTS="${2:?artifacts directory required}"
 OUT="${3:?output directory required}"
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+ARTIFACTS="$(cd "$ARTIFACTS" && pwd)"
+OUT="$(mkdir -p "$OUT" && cd "$OUT" && pwd)"
 STAGE="${OUT}/.staging"
-rm -rf "$STAGE" "$OUT"
-mkdir -p "$STAGE/windows" "$STAGE/macos" "$STAGE/linux" "$OUT"
+rm -rf "$STAGE"
+mkdir -p "$STAGE/windows" "$STAGE/macos" "$STAGE/linux"
+
+echo "Packaging SatX ${VERSION}"
+echo "  artifacts: $ARTIFACTS"
+echo "  output:    $OUT"
+echo "Artifact tree:"
+find "$ARTIFACTS" -type f | sed 's/^/  /' || true
 
 copy_docs() {
   local dest="$1"
@@ -38,17 +46,17 @@ fi
 if [ ! -f "$STAGE/windows/SatX-${VERSION}-Windows-x64.msi" ] && \
    [ ! -f "$STAGE/windows/SatX-${VERSION}-Windows-x64-Setup.exe" ]; then
   echo "ERROR: No Windows installers under $ARTIFACTS"
-  find "$ARTIFACTS" -type f | head -20 || true
   exit 1
 fi
 
 copy_docs "$STAGE/windows"
+WIN_ZIP="${OUT}/SatX-${VERSION}-Windows-x64.zip"
+rm -f "$WIN_ZIP"
 (
   cd "$STAGE/windows"
-  zip -r "$OUT/SatX-${VERSION}-Windows-x64.zip" .
+  zip -r -q "$WIN_ZIP" .
 )
-echo "Created $OUT/SatX-${VERSION}-Windows-x64.zip"
-unzip -l "$OUT/SatX-${VERSION}-Windows-x64.zip" | head -20
+echo "Created $WIN_ZIP ($(du -h "$WIN_ZIP" | cut -f1))"
 
 # --- macOS ---
 mac_dmg="$(find "$ARTIFACTS" -type f -name '*.dmg' 2>/dev/null | head -n 1 || true)"
@@ -58,12 +66,13 @@ if [ -z "$mac_dmg" ]; then
 fi
 cp "$mac_dmg" "$STAGE/macos/SatX-${VERSION}-macOS.dmg"
 copy_docs "$STAGE/macos"
+MAC_ZIP="${OUT}/SatX-${VERSION}-macOS.zip"
+rm -f "$MAC_ZIP"
 (
   cd "$STAGE/macos"
-  zip -r "$OUT/SatX-${VERSION}-macOS.zip" .
+  zip -r -q "$MAC_ZIP" .
 )
-echo "Created $OUT/SatX-${VERSION}-macOS.zip"
-unzip -l "$OUT/SatX-${VERSION}-macOS.zip" | head -20
+echo "Created $MAC_ZIP ($(du -h "$MAC_ZIP" | cut -f1))"
 
 # --- Linux ---
 linux_deb="$(find "$ARTIFACTS" -type f -name '*.deb' 2>/dev/null | head -n 1 || true)"
@@ -83,13 +92,14 @@ if [ ! -f "$STAGE/linux/SatX-${VERSION}-Linux-x64.deb" ] && \
 fi
 
 copy_docs "$STAGE/linux"
+LINUX_TAR="${OUT}/SatX-${VERSION}-Linux-x64.tar.gz"
+rm -f "$LINUX_TAR"
 (
   cd "$STAGE/linux"
-  tar -czf "$OUT/SatX-${VERSION}-Linux-x64.tar.gz" .
+  tar -czf "$LINUX_TAR" .
 )
-echo "Created $OUT/SatX-${VERSION}-Linux-x64.tar.gz"
-tar -tzf "$OUT/SatX-${VERSION}-Linux-x64.tar.gz" | head -20
+echo "Created $LINUX_TAR ($(du -h "$LINUX_TAR" | cut -f1))"
 
 rm -rf "$STAGE"
-echo "Release archives ready in $OUT:"
+echo "Release archives in $OUT:"
 ls -la "$OUT"

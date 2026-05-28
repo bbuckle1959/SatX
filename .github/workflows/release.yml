@@ -158,12 +158,19 @@ jobs:
           path: artifacts
           merge-multiple: true
 
+      - name: List downloaded artifacts
+        run: find artifacts -type f | sed 's/^/  /' || echo "(no files)"
+
       - name: Package platform archives (installers + docs)
         run: |
+          sed -i 's/\r$//' scripts/package-release-archives.sh
           chmod +x scripts/package-release-archives.sh
           VERSION="${{ steps.tag.outputs.name }}"
           VERSION="${VERSION#v}"
           bash scripts/package-release-archives.sh "$VERSION" artifacts release-upload
+          test -f "release-upload/SatX-${VERSION}-Windows-x64.zip"
+          test -f "release-upload/SatX-${VERSION}-macOS.zip"
+          test -f "release-upload/SatX-${VERSION}-Linux-x64.tar.gz"
 
       - name: Write release notes
         run: |
@@ -196,6 +203,11 @@ jobs:
           - [Application overview](https://github.com/bbuckle1959/SatX/blob/main/docs/application-overview.md)
           EOF
 
+      - name: Verify release archives exist
+        run: |
+          ls -la release-upload/
+          test "$(find release-upload -maxdepth 1 -name '*.zip' -o -name '*.tar.gz' | wc -l)" -eq 3
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -204,6 +216,10 @@ jobs:
           name: SatX Tracker ${{ steps.tag.outputs.name }}
           body_path: release-notes.md
           generate_release_notes: false
-          files: release-upload/*
+          fail_on_unmatched_files: true
+          files: |
+            release-upload/SatX-*-Windows-x64.zip
+            release-upload/SatX-*-macOS.zip
+            release-upload/SatX-*-Linux-x64.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
