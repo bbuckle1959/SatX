@@ -151,7 +151,7 @@ function GroundStationInstances({
       ref={meshRef}
       args={[geometry, material, count]}
       frustumCulled={false}
-      renderOrder={3}
+      renderOrder={4}
       onClick={selectInstance}
       onPointerDown={selectInstance}
       onPointerOver={(e) => {

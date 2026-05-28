@@ -18,7 +18,7 @@ The release **description** includes a table that matches these names so users a
 
 ## Start over (delete release + tag)
 
-See **[reset-release.md](reset-release.md)** for delete steps and a clean `v0.1.0` (or new version) publish.
+See **[reset-release.md](reset-release.md)** for delete steps and a clean tag publish (e.g. `v0.2.0`).
 
 ## Fixing an existing crowded release
 
@@ -35,8 +35,8 @@ See **[reset-release.md](reset-release.md)** for delete steps and a clean `v0.1.
 
 After `npm run tauri:build`, upload **only**:
 
-- `src-tauri\target\release\bundle\msi\SatX_*_x64_en-US.msi` → rename to `SatX-0.1.0-Windows-x64.msi`
-- `src-tauri\target\release\bundle\nsis\*-setup.exe` → rename to `SatX-0.1.0-Windows-x64-Setup.exe`
+- `src-tauri\target\release\bundle\msi\SatX_*_x64_en-US.msi` → rename to `SatX-{version}-Windows-x64.msi`
+- `src-tauri\target\release\bundle\nsis\*-setup.exe` → rename to `SatX-{version}-Windows-x64-Setup.exe`
 
 Skip uploading `src-tauri\target\release\satx.exe` unless you intentionally offer a portable zip with a README note.
 

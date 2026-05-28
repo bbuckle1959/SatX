@@ -49,7 +49,13 @@ git push origin v0.1.0
 
 Watch **Actions → release**. When it finishes, check Releases for up to five named installers and the download table in the description.
 
-**Option A2 — CI (manual run):** Actions → **release** → **Run workflow** → enter `v0.1.0` → Run.
+**Option A2 — CI (manual run):**
+
+1. Open **Actions** → in the left sidebar under **Workflows**, click **release** (not a past run from the list).
+2. Or open: [release workflow](https://github.com/bbuckle1959/SatX/actions/workflows/release.yml)
+3. If you see **Run workflow** (top right), choose branch `main`, enter the tag (e.g. `v0.2.0`), and run.
+
+If **Run workflow** is missing: you may lack write access, Actions may be disabled, or you are on a run detail page instead of the workflow page. Use **Option A** (push tag) instead.
 
 **Option B — Windows only (local build):**
 

@@ -73,7 +73,7 @@ npm run tauri -- build
 
 ```text
 src-tauri/target/release/bundle/macos/SatX.app
-src-tauri/target/release/bundle/dmg/SatX_0.1.0_*.dmg   # version in filename
+src-tauri/target/release/bundle/dmg/SatX_0.2.0_*.dmg   # version in filename
 ```
 
 Zip the `.app` or ship the `.dmg`.
@@ -130,21 +130,34 @@ Workflow: [`.github/workflows/release.yml`](../../.github/workflows/release.yml)
 | `build-linux` | `ubuntu-latest` | `npm run tauri -- build` + apt packages |
 | `publish-release` | `ubuntu-latest` | Uploads artifacts to a GitHub Release |
 
+CI installs **Node.js 22** (pinned in the workflow — do not use `lts/*` in `setup-node`; it fails on macOS runners).
+
 ### Trigger a release build
 
 1. Bump version in `package.json`, `src-tauri/tauri.conf.json`, and `src-tauri/Cargo.toml`.
-2. Commit and push to your default branch.
-3. Create and push a version tag:
+2. Optionally refresh ground-station data: `npm run sync:ground-stations` (commit `src/data/ground-stations.json` if changed).
+3. Commit and push to your default branch.
+4. Create and push a version tag (tag should include the workflow fix and version bump on `main`):
 
    ```bash
-   git tag v0.1.0
-   git push origin v0.1.0
+   git tag v0.2.0
+   git push origin v0.2.0
    ```
 
-4. Open **Actions** on GitHub and watch the **release** workflow.
-5. When it finishes, open [Releases](https://github.com/bbuckle1959/SatX/releases) — you should see **up to five** clearly named installers (see [GitHub Releases layout](github-releases.md)).
+5. Open **Actions** on GitHub and watch the **release** workflow.
+6. When it finishes, open [Releases](https://github.com/bbuckle1959/SatX/releases) — you should see **up to five** clearly named installers (see [GitHub Releases layout](github-releases.md)).
 
-Tags must match `v*` (e.g. `v0.1.0`, `v1.2.3-beta.1`).
+Tags must match `v*` (e.g. `v0.2.0`, `v1.2.3-beta.1`).
+
+### Re-run without a new tag (manual workflow)
+
+If **Run workflow** is available in your repo:
+
+1. Open **Actions** → click **release** in the left sidebar under **Workflows** (not an individual run).
+2. Direct link: `https://github.com/bbuckle1959/SatX/actions/workflows/release.yml`
+3. Use the **Run workflow** dropdown (top right), enter the tag name (e.g. `v0.2.0`), and run.
+
+The button only appears on the workflow list page when `workflow_dispatch` is on the default branch and you have write access. If it is missing, delete and re-push the tag per [reset-release.md](reset-release.md).
 
 ### Manual download without a Release
 
@@ -160,6 +173,7 @@ Add repository secrets and extend the workflow when you are ready for public dis
 ## Checklist per release
 
 - [ ] Version bumped in `package.json`, `tauri.conf.json`, `Cargo.toml`
+- [ ] `npm run sync:ground-stations` run if refreshing gateway/PoP data (optional)
 - [ ] `npm run ensure:tauri2` passes
 - [ ] Built on **Windows**, **macOS**, and **Linux** (or CI equivalents)
 - [ ] Smoke-tested each installer on a clean VM or machine

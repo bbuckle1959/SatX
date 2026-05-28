@@ -112,6 +112,8 @@ npm run dev:host
 3. Allow **location** when prompted.
 4. Set **Object type** to **Starlink** and click **Fetch**.
 
+Optional: **Ground infrastructure** toggles (gateways / PoPs). Servicing match uses satellites **≥25°** elevation at the dish. See the [User guide](../user-guide.md).
+
 Check dish API reachability:
 
 ```bash

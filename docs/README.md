@@ -10,3 +10,4 @@ Repository: [https://github.com/bbuckle1959/SatX](https://github.com/bbuckle1959
 | **[Release builds](running/release-builds.md)** | Creating installers and GitHub Releases |
 | **[GitHub Releases layout](running/github-releases.md)** | Avoid crowded assets; naming convention |
 | **[Acknowledgments](../ACKNOWLEDGMENTS.md)** | Libraries and data providers |
+| **[Screenshot guide](images/README.md)** | Capture `docs/images/screenshot.png` for the README |

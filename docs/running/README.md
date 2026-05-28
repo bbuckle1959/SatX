@@ -32,6 +32,7 @@ Then follow your platform guide for prerequisites and the exact dev/build comman
 | Desktop dev | Native window + hot reload; Vite at `http://localhost:1420` |
 | Desktop build | Release binary and installers under `src-tauri/target/release/bundle/` |
 | `npm run dev` | Browser UI only — no Starlink dish API |
+| `npm run sync:ground-stations` | Refresh bundled gateway/PoP JSON from Hugging Face |
 
 ## Related docs
 

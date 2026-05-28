@@ -39,10 +39,12 @@ New to SatX? Start with the **[User guide](docs/user-guide.md)**. Developers: [b
 ## What SatX does (summary)
 
 - Loads a public catalog of active satellite orbits and **updates positions in real time** on a 3D Earth view.
+- **Left sidebar** for filters, search, and the nearest list; **details** for the selected satellite or ground site appear in a panel **over the globe** (upper-left).
 - Shows a **red marker** at your location (when you allow it) and lists the **50 closest** objects by distance.
 - **Filter** by object type (stations, Starlink, navigation, debris, weather, and more), **search** by name or id, and open **details** by clicking the globe or list.
 - **Globe set:** **Optimized** (up to 16,000 objects, default) or **Full catalog** (every object matching the filter; heavier).
-- **Starlink** (desktop app, on dish Wi‑Fi): fetch dish pointing, highlight the likely **servicing** satellite, and draw an **orange link** from you to that satellite.
+- **Starlink** (desktop app, on dish Wi‑Fi): fetch dish pointing, match a **servicing** satellite (≥25° above your horizon), and draw an **orange link** from you to that satellite.
+- **Starlink ground map** (Starlink filter): optional **gateway** and **PoP** markers on the globe from a bundled public dataset; click a site for details.
 
 Details: **[Application overview](docs/application-overview.md)** · How to use it: **[User guide](docs/user-guide.md)**
 
@@ -98,6 +100,7 @@ UI at `http://localhost:1420` without Tauri. Starlink dish fetch and some native
 | Path | Role |
 |------|------|
 | `src/` | React UI, globe, hooks, workers |
+| `src/data/ground-stations.json` | Bundled Starlink gateways & PoPs |
 | `src/lib/globeCatalog.ts` | Filters, globe cap vs full catalog |
 | `src-tauri/` | Rust: TLE catalog, Starlink HTTP |
 | `docs/` | User guide, application overview, running guides |

@@ -101,6 +101,8 @@ Opens the frontend in your default browser. **Starlink dish fetch does not work*
 3. Allow **location** when prompted.
 4. Set **Object type** to **Starlink** and click **Fetch**.
 
+Optional on the same filter: **Ground infrastructure** → **Gateways** / **PoPs** on the globe. Servicing-satellite matching only considers satellites **≥25°** above the horizon at the dish. See the [User guide](../user-guide.md).
+
 Verify dish reachability:
 
 ```powershell
@@ -127,5 +129,6 @@ Test-NetConnection -ComputerName 192.168.100.1 -Port 9201
 | `npm run tauri:build` | Release build with MSVC wrapper |
 | `npm run dev` | Vite only (browser) |
 | `npm run ensure:tauri2` | Check Tauri 2 dependency pins |
+| `npm run sync:ground-stations` | Refresh bundled gateway/PoP JSON |
 
 [← All platforms](README.md)

@@ -12,7 +12,7 @@ Project home: [https://github.com/bbuckle1959/SatX](https://github.com/bbuckle19
 
 SatX shows **satellites and space debris** orbiting Earth on a **3D globe**, similar to a planetarium view. Positions update automatically so you can see what is overhead or nearby.
 
-If you use **Starlink**, SatX can also show which Starlink satellite your dish is likely pointing at — when you are on the Starlink network and using the proper desktop app.
+If you use **Starlink**, SatX can also show which Starlink satellite your dish is likely pointing at — when you are on the Starlink network and using the proper desktop app — and optionally map **gateway** earth stations and **PoP** (internet exchange) sites on the globe.
 
 ---
 
@@ -24,6 +24,7 @@ If you use **Starlink**, SatX can also show which Starlink satellite your dish i
    - A **red dot** on the globe where you are  
    - A list of satellites sorted by **distance from you**  
    - Starlink “servicing” satellite matching  
+   - Distances to ground sites when you select them  
 
 You can use SatX without location, but the nearest list and Starlink features work much better with it.
 
@@ -32,26 +33,32 @@ You can use SatX without location, but the nearest list and Starlink features wo
 ## The screen at a glance
 
 ```
-┌─────────────────────────────────────┬──────────────────┐
-│                                     │  SatX Tracker    │
-│         3D GLOBE (Earth)            │  metrics         │
-│    · satellites (small markers)     │  search          │
-│    · red dot = you (if allowed)     │  filters         │
-│    · orange line = Starlink link    │  satellite list  │
-│                                     │  details panel   │
-└─────────────────────────────────────┴──────────────────┘
+┌──────────────────┬──────────────────────────────────────┐
+│  SIDEBAR (left)  │  3D GLOBE                            │
+│  metrics         │  · details panel (upper-left, when   │
+│  search          │    something is selected)            │
+│  filters         │  · satellites (small markers)        │
+│  satellite list  │  · red dot = you (if allowed)        │
+│  Pause / Play    │  · amber/cyan = gateways / PoPs      │
+│                  │    (Starlink mode only)              │
+│                  │  · orange line = Starlink link       │
+│                  │  · overlay pills (top): Live, counts │
+└──────────────────┴──────────────────────────────────────┘
 ```
 
 **On the globe**
 
 - **Drag** with the mouse to rotate Earth.  
 - **Scroll** (or pinch on a trackpad) to zoom in and out.  
-- **Click** a satellite marker to see details.
+- **Click** a satellite marker to see its details in the **panel on the globe**.  
+- **Click** a gateway (amber) or PoP (cyan) marker when those layers are on.  
+- **Click** empty space on the globe to clear selection (if you are not clicking near a ground site).
 
 **In the sidebar**
 
 - Numbers at the top (Calc FPS, Active, etc.) are optional — they show that tracking is running.  
-- **Search**, **filters**, and the **list** are what most people use daily.
+- **Search**, **filters**, and the **list** are what most people use daily.  
+- **Details** for your selection appear on the **globe**, not in the sidebar.
 
 ---
 
@@ -71,7 +78,7 @@ Use this if you want to study one satellite without everything moving.
 1. Find **Object type** in the sidebar.  
 2. Open the dropdown. Examples:
    - **All objects** — everything in the catalog (busy, but complete).  
-   - **Starlink** — only Starlink satellites (needed for dish features).  
+   - **Starlink** — only Starlink satellites (needed for dish features and ground map).  
    - **Space stations** — ISS and similar.  
    - **Navigation** — GPS and related constellations.  
    - **Debris & rocket bodies** — tracked debris.  
@@ -93,11 +100,26 @@ If the app feels slow, switch back to **Optimized**.
 
 ---
 
+## Starlink gateways and PoPs (ground map)
+
+These options appear only when **Object type** is **Starlink**.
+
+1. Scroll to **Ground infrastructure** in the sidebar.  
+2. **Gateways** (on by default) — amber markers at Starlink earth station sites. Brighter = operational; dimmer = planned.  
+3. **PoPs** (off by default) — cyan markers at internet exchange points.  
+4. Turn checkboxes on or off to show or hide each layer.  
+5. **Click** a marker on the globe to open a details panel (name, type, status, coordinates, distance from you if location is on).  
+6. Purple and cyan **count pills** at the top of the globe show how many sites are visible.
+
+**Tip:** Many Starlink satellites are on screen at once. Click **on or very close to** the amber/cyan marker to select a ground site. To select a satellite instead, click a bit away from the ground marker.
+
+---
+
 ## Search for a satellite
 
 1. In **Search satellites**, type part of a **name** (e.g. `ISS`, `STARLINK`) or a **number** (NORAD ID).  
 2. The list below shrinks to matches.  
-3. Click a row to select it on the globe.
+3. Click a row to select it on the globe and open details on the globe panel.
 
 ---
 
@@ -105,25 +127,34 @@ If the app feels slow, switch back to **Optimized**.
 
 When location is allowed, the list shows up to **50** satellites **closest to you**, with distance and height when available.
 
-- Click any line to open **details** and highlight it on the globe.  
+- Click any line to open **details** on the globe and highlight the satellite.  
 - Scroll the list to browse what is passing near you.
 
 Without location, the list is still usable but not sorted by distance — allow location for the best experience.
 
 ---
 
-## Satellite details
+## Satellite and ground-station details
 
-After you select a satellite, a **details** box appears above the search field with:
+After you select something, a **details** box appears in the **upper-left of the globe** with:
+
+**Satellites**
 
 - Name and catalog id  
 - Type of object  
 - Height and distance from you (if location is on)  
-- Extra catalog notes when available  
+- Launch date and launch site when catalog metadata has loaded  
+- Extra notes when available  
 
-Click **close** or click empty space on the globe to deselect.
+**Ground sites (gateways / PoPs)**
 
-**Tip:** Selecting most satellites (except Starlink) will **turn the globe** to face that object. Starlink selections do not move the camera automatically.
+- Name and type (gateway or PoP)  
+- Operational / planned status (gateways)  
+- Coordinates and distance from you (if location is on)  
+
+Click **close** on the panel or click empty space on the globe (away from ground markers) to deselect.
+
+**Tip:** Selecting most satellites (except Starlink) will **turn the globe** to face that object. Starlink satellite selections do not move the camera automatically.
 
 ---
 
@@ -148,12 +179,15 @@ This only works when **all** of the following are true:
    - An **orange line** on the globe from your red dot to that satellite.  
 5. Tap **Servicing: …** to select that satellite like any other.
 
-### If Fetch fails
+SatX only considers Starlink satellites at least **25° above your horizon** at the dish, so low passes blocked by trees or buildings are not chosen as “servicing.”
+
+### If Fetch fails or no servicing satellite
 
 - Confirm you are on **Starlink’s Wi‑Fi**, not only “using Starlink internet” through another router.  
 - Turn off **VPN** temporarily.  
 - Wait a minute after powering the dish on and try again.  
-- Make sure you opened the **SatX app**, not a developer test page in a browser.
+- Make sure you opened the **SatX app**, not a developer test page in a browser.  
+- If the panel says no satellite is ≥25° above the horizon, wait for a higher pass or check dish alignment.
 
 Still stuck? See [Troubleshooting](#troubleshooting) below.
 
@@ -163,10 +197,11 @@ Still stuck? See [Troubleshooting](#troubleshooting) below.
 
 | Label | Meaning |
 |-------|---------|
-| **Live** | Tracking is running |
-| **Paused** | You pressed Pause |
+| **Live** / **Paused** | Tracking is running or frozen |
 | **Your location …°** | Location is on; numbers are latitude/longitude |
-| **Click object for details** | Reminder to click markers (desktop) |
+| **Gateways … op / … planned** (purple pill) | Starlink filter + gateways on — operational/planned counts |
+| **… PoPs** (cyan pill) | Starlink filter + PoPs on |
+| **Click satellite or ground site for details** | Reminder when nothing is selected (desktop) |
 
 ---
 
@@ -193,6 +228,7 @@ Still stuck? See [Troubleshooting](#troubleshooting) below.
 
 - Set **Globe set** → **Optimized (globe cap)**.  
 - Choose a narrower **Object type** (e.g. Starlink only).  
+- Turn off **PoPs** or **Gateways** if you do not need the ground map.  
 - Press **Pause** if you only need a still snapshot.
 
 ### Starlink Fetch does not work
@@ -201,6 +237,12 @@ Still stuck? See [Troubleshooting](#troubleshooting) below.
 - Enable **location**.  
 - Set filter to **Starlink**.  
 - Dish must be powered and online (check the Starlink app on your phone).
+
+### Cannot select a gateway or PoP
+
+- Set **Object type** to **Starlink** and enable **Gateways** or **PoPs**.  
+- Click directly on the **amber** or **cyan** marker (or within a small margin around it).  
+- Zoom in if many satellites crowd the same area.
 
 ### Selected satellite disappeared from the list
 
@@ -212,7 +254,8 @@ Still stuck? See [Troubleshooting](#troubleshooting) below.
 
 - **Location** stays on your device for display and sorting; it is used to compute distances and Starlink matching.  
 - **TLE / catalog data** is downloaded from public space-tracking sources over the internet.  
-- **Starlink dish** data is read only on your local network from the dish; it is not sent to a SatX cloud (there is no SatX cloud service in this app).
+- **Starlink dish** data is read only on your local network from the dish; it is not sent to a SatX cloud (there is no SatX cloud service in this app).  
+- **Ground station** locations come from a public community dataset (bundled and optionally refreshed from Hugging Face).
 
 ---
 
@@ -233,8 +276,9 @@ If someone needs to rebuild or debug the app, point them to:
 | Find ISS or a name | Search box → click result |
 | Only Starlink | Object type → Starlink |
 | Which Starlink serves me | Starlink filter → Fetch (on dish Wi‑Fi) |
+| See gateways / PoPs | Starlink filter → Ground infrastructure toggles |
+| Details for selection | Look at upper-left panel on the globe |
 | Freeze the view | Pause |
-| Less load on PC | Globe set → Optimized |
-| More satellites tracked | Globe set → Full catalog |
+| Less load on PC | Globe set → Optimized; turn off PoPs if not needed |
 
 Enjoy the view.

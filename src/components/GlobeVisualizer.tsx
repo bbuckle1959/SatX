@@ -16,7 +16,14 @@ import {
 import { GroundStationsLayer } from './GroundStationsLayer';
 import { StarlinkServicingLayer } from './StarlinkServicingLayer';
 import type { GroundStation } from '../lib/groundStationTypes';
-import { attachInstanceSphereRaycast } from '../lib/instanceSphereRaycast';
+import {
+  filterGroundStationsForPick,
+  pickGroundStationAtClientPoint,
+} from '../lib/groundStationPick';
+import {
+  attachInstanceSphereRaycast,
+  type GroundStationRaycastDefer,
+} from '../lib/instanceSphereRaycast';
 import { createSatelliteMarkerGeometry } from '../lib/satelliteMarkerGeometry';
 import earthTextureUrl from '../assets/earth_day.jpg';
 
@@ -117,8 +124,12 @@ interface SatelliteInstancesProps {
   visibleInstanceIdsRef: RefObject<string[]>;
   selectedScenePosRef: RefObject<{ x: number; y: number; z: number } | null>;
   onSelectSatelliteRef: RefObject<(id: string | null) => void>;
+  onSelectGroundStationRef: RefObject<(id: string | null) => void>;
   maxInstances: number;
   pickRadius: number;
+  groundStationsForPick: ReadonlyArray<GroundStation>;
+  groundStationRayDefer: GroundStationRaycastDefer | null;
+  groundStationScreenPickPx: number;
 }
 
 function MobileRaycasterTuning({
@@ -149,12 +160,18 @@ function EarthPlaceholder({ segments }: { segments: number }) {
 /** Texture + meshBasicMaterial so the map is always visible (not washed out by lights). */
 function EarthGlobeTextured({
   onClearSelectionRef,
+  onSelectGroundStationRef,
+  groundStationsForPick,
+  groundStationScreenPickPx,
   segments,
 }: {
   onClearSelectionRef: RefObject<() => void>;
+  onSelectGroundStationRef: RefObject<(id: string | null) => void>;
+  groundStationsForPick: ReadonlyArray<GroundStation>;
+  groundStationScreenPickPx: number;
   segments: number;
 }) {
-  const { gl } = useThree();
+  const { gl, camera } = useThree();
   const earthMap = useTexture(EARTH_TEXTURE_URL);
 
   useEffect(() => {
@@ -167,6 +184,20 @@ function EarthGlobeTextured({
     <mesh
       onClick={(e: ThreeEvent<MouseEvent>) => {
         e.stopPropagation();
+        if (groundStationsForPick.length > 0) {
+          const groundId = pickGroundStationAtClientPoint(
+            e.nativeEvent.clientX,
+            e.nativeEvent.clientY,
+            gl.domElement,
+            camera,
+            groundStationsForPick,
+            groundStationScreenPickPx,
+          );
+          if (groundId) {
+            onSelectGroundStationRef.current(groundId);
+            return;
+          }
+        }
         onClearSelectionRef.current();
       }}
     >
@@ -178,15 +209,24 @@ function EarthGlobeTextured({
 
 function EarthGlobe({
   onClearSelectionRef,
+  onSelectGroundStationRef,
+  groundStationsForPick,
+  groundStationScreenPickPx,
   segments,
 }: {
   onClearSelectionRef: RefObject<() => void>;
+  onSelectGroundStationRef: RefObject<(id: string | null) => void>;
+  groundStationsForPick: ReadonlyArray<GroundStation>;
+  groundStationScreenPickPx: number;
   segments: number;
 }) {
   return (
     <Suspense fallback={<EarthPlaceholder segments={segments} />}>
       <EarthGlobeTextured
         onClearSelectionRef={onClearSelectionRef}
+        onSelectGroundStationRef={onSelectGroundStationRef}
+        groundStationsForPick={groundStationsForPick}
+        groundStationScreenPickPx={groundStationScreenPickPx}
         segments={segments}
       />
     </Suspense>
@@ -204,9 +244,14 @@ function SatelliteInstances({
   visibleInstanceIdsRef,
   selectedScenePosRef,
   onSelectSatelliteRef,
+  onSelectGroundStationRef,
   maxInstances,
   pickRadius,
+  groundStationsForPick,
+  groundStationRayDefer,
+  groundStationScreenPickPx,
 }: SatelliteInstancesProps) {
+  const { camera, gl } = useThree();
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const meshSetupRef = useRef(false);
   const detachRaycastRef = useRef<(() => void) | null>(null);
@@ -227,6 +272,22 @@ function SatelliteInstances({
 
   const selectInstance = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
+
+    if (groundStationsForPick.length > 0) {
+      const groundId = pickGroundStationAtClientPoint(
+        e.nativeEvent.clientX,
+        e.nativeEvent.clientY,
+        gl.domElement,
+        camera,
+        groundStationsForPick,
+        groundStationScreenPickPx,
+      );
+      if (groundId) {
+        onSelectGroundStationRef.current(groundId);
+        return;
+      }
+    }
+
     const idx = e.instanceId;
     if (idx === undefined || idx < 0) return;
     const satId = visibleInstanceIdsRef.current[idx];
@@ -237,13 +298,17 @@ function SatelliteInstances({
     const mesh = meshRef.current;
     if (!mesh) return undefined;
     detachRaycastRef.current?.();
-    detachRaycastRef.current = attachInstanceSphereRaycast(mesh, pickRadius);
+    detachRaycastRef.current = attachInstanceSphereRaycast(
+      mesh,
+      pickRadius,
+      groundStationRayDefer ?? undefined,
+    );
     meshSetupRef.current = true;
     return () => {
       detachRaycastRef.current?.();
       detachRaycastRef.current = null;
     };
-  }, [pickRadius]);
+  }, [pickRadius, groundStationRayDefer]);
 
   useFrame(() => {
     const mesh = meshRef.current;
@@ -272,7 +337,11 @@ function SatelliteInstances({
         );
       }
       detachRaycastRef.current?.();
-      detachRaycastRef.current = attachInstanceSphereRaycast(mesh, pickRadius);
+      detachRaycastRef.current = attachInstanceSphereRaycast(
+        mesh,
+        pickRadius,
+        groundStationRayDefer ?? undefined,
+      );
       meshSetupRef.current = true;
     }
 
@@ -652,6 +721,28 @@ function GlobeScene({
     () => getMobileGlobeRenderProfile(isMobile),
     [isMobile],
   );
+  const infrastructurePickActive = showGateways || showPops;
+  const groundStationsForPick = useMemo(
+    () =>
+      filterGroundStationsForPick(groundStations, showGateways, showPops),
+    [groundStations, showGateways, showPops],
+  );
+  const groundStationRayDefer = useMemo((): GroundStationRaycastDefer | null => {
+    if (!infrastructurePickActive || groundStationsForPick.length === 0) {
+      return null;
+    }
+    return {
+      stations: groundStationsForPick,
+      radius: renderProfile.groundStationRayDeferRadius,
+    };
+  }, [
+    infrastructurePickActive,
+    groundStationsForPick,
+    renderProfile.groundStationRayDeferRadius,
+  ]);
+  const satellitePickRadius = infrastructurePickActive
+    ? renderProfile.satellitePickRadiusWithInfrastructure
+    : renderProfile.pickRadius;
   const visibleInstanceIdsRef = useRef<string[]>([]);
   const selectedScenePosRef = useRef<{ x: number; y: number; z: number } | null>(
     null,
@@ -685,6 +776,9 @@ function GlobeScene({
 
       <EarthGlobe
         onClearSelectionRef={onClearSelectionRef}
+        onSelectGroundStationRef={onSelectGroundStationRef}
+        groundStationsForPick={groundStationsForPick}
+        groundStationScreenPickPx={renderProfile.groundStationScreenPickPx}
         segments={renderProfile.earthSegments}
       />
       {(showGateways || showPops) && groundStations.length > 0 && (
@@ -709,8 +803,12 @@ function GlobeScene({
         visibleInstanceIdsRef={visibleInstanceIdsRef}
         selectedScenePosRef={selectedScenePosRef}
         onSelectSatelliteRef={onSelectSatelliteRef}
+        onSelectGroundStationRef={onSelectGroundStationRef}
         maxInstances={renderProfile.maxInstances}
-        pickRadius={renderProfile.pickRadius}
+        pickRadius={satellitePickRadius}
+        groundStationsForPick={groundStationsForPick}
+        groundStationRayDefer={groundStationRayDefer}
+        groundStationScreenPickPx={renderProfile.groundStationScreenPickPx}
       />
       {userLocation && (
         <UserLocationMarker location={userLocation} isMobile={isMobile} />
