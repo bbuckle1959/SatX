@@ -10,8 +10,6 @@ Built with **Tauri 2**, React, TypeScript, Three.js, and `satellite.js`.
 
 ![SatX Tracker — 3D globe and satellite sidebar](docs/images/screenshot.png)
 
-*Add `docs/images/screenshot.png` for the preview above ([capture guide](docs/images/README.md)).*
-
 ## Download
 
 **[Latest release](https://github.com/bbuckle1959/SatX/releases)** — pick the installer for your system.
