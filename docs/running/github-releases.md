@@ -4,17 +4,19 @@ GitHub Releases show a **flat list** of download files — there are no folders.
 
 ## What SatX publishes (from CI)
 
-On each `v*` tag, [`.github/workflows/release.yml`](../../.github/workflows/release.yml) attaches **at most five** renamed files:
+On each `v*` tag, [`.github/workflows/release.yml`](../../.github/workflows/release.yml) attaches **three platform archives**. Each archive contains that platform’s installer(s), plus **`README.md`**, **`LICENSE`**, **`ACKNOWLEDGMENTS.md`**, and the full **`docs/`** folder from the repository.
 
-| File | Platform |
-|------|----------|
-| `SatX-{version}-Windows-x64.msi` | Windows (recommended) |
-| `SatX-{version}-Windows-x64-Setup.exe` | Windows (NSIS alternative) |
-| `SatX-{version}-macOS.dmg` | macOS |
-| `SatX-{version}-Linux-x64.deb` | Linux (Debian/Ubuntu) |
-| `SatX-{version}-Linux-x64.AppImage` | Linux (if the build produced one) |
+| File | Platform | Format |
+|------|----------|--------|
+| `SatX-{version}-Windows-x64.zip` | Windows | ZIP (MSI + NSIS Setup.exe + README + LICENSE + docs/) |
+| `SatX-{version}-macOS.zip` | macOS | ZIP (`.dmg` + README + LICENSE + docs/) |
+| `SatX-{version}-Linux-x64.tar.gz` | Linux | gzip tar (`.deb`, optional AppImage + README + LICENSE + docs/) |
 
-The release **description** includes a table that matches these names so users are not guessing.
+Packaging is done by [`scripts/package-release-archives.sh`](../../scripts/package-release-archives.sh) in the **publish-release** job. **You must push this script and an updated `release.yml` to `main` before tagging** — older workflow runs only uploaded loose installers.
+
+After downloading, extract the archive, then run the installer inside (e.g. double-click the `.msi` or `.dmg`).
+
+The release **description** includes a table that matches these names.
 
 ## Start over (delete release + tag)
 
@@ -24,25 +26,32 @@ See **[reset-release.md](reset-release.md)** for delete steps and a clean tag pu
 
 1. Open **Releases** → select the release → **Edit**.
 2. Under **Attach binaries**, **delete** duplicate or wrong assets:
-   - Raw `satx.exe` if you already have MSI/setup (optional keep one portable with a clear name).
-   - Any file under a `.app` path or hundreds of small macOS bundle files.
+   - Loose MSI/EXE/DMG files if you now ship only the three platform archives.
+   - Raw `satx.exe` or unpacked `.app` contents.
    - Duplicate uploads from manual drag-and-drop plus CI.
-3. Replace with the staged files above (from CI artifacts or local `bundle/` builds).
-4. Replace the description with the download table from the latest workflow run (or copy from [README release template](https://github.com/bbuckle1959/SatX/blob/main/.github/workflows/release.yml) `release-notes` step).
+3. Replace with the three archives from CI artifacts or a local repack (see below).
+4. Replace the description with the download table from the latest workflow run.
 5. Turn off **“Generate release notes”** if GitHub added a long auto changelog you do not want.
 
 ## Manual upload (local Windows build)
 
-After `npm run tauri:build`, upload **only**:
+After `npm run tauri:build`, create a folder and zip it:
 
-- `src-tauri\target\release\bundle\msi\SatX_*_x64_en-US.msi` → rename to `SatX-{version}-Windows-x64.msi`
-- `src-tauri\target\release\bundle\nsis\*-setup.exe` → rename to `SatX-{version}-Windows-x64-Setup.exe`
+```powershell
+$v = "0.2.0"
+$dir = "SatX-$v-Windows-x64"
+New-Item -ItemType Directory -Force -Path $dir
+Copy-Item README.md, LICENSE, $dir
+Copy-Item src-tauri\target\release\bundle\msi\*.msi "$dir\SatX-$v-Windows-x64.msi"
+Copy-Item src-tauri\target\release\bundle\nsis\*-setup.exe "$dir\SatX-$v-Windows-x64-Setup.exe"
+Compress-Archive -Path $dir\* -DestinationPath "SatX-$v-Windows-x64.zip"
+```
 
-Skip uploading `src-tauri\target\release\satx.exe` unless you intentionally offer a portable zip with a README note.
+Upload **`SatX-{version}-Windows-x64.zip`** only (not loose installers), unless you intentionally offer both.
 
 ## Optional: fewer Windows installers
 
-To ship **only MSI** on Windows, set in `src-tauri/tauri.conf.json`:
+To ship **only MSI** inside the Windows zip, set in `src-tauri/tauri.conf.json`:
 
 ```json
 "bundle": {
@@ -51,14 +60,14 @@ To ship **only MSI** on Windows, set in `src-tauri/tauri.conf.json`:
 }
 ```
 
-Then update the Windows artifact paths in `release.yml` accordingly.
+Then remove the NSIS copy loop from `release.yml` if you drop NSIS from the build.
 
 ## README link for users
 
 Point end users to **one** place:
 
 ```markdown
-[Download the latest release](https://github.com/bbuckle1959/SatX/releases) — use the table in the release notes.
+[Download the latest release](https://github.com/bbuckle1959/SatX/releases) — download the zip/tar.gz for your OS, extract, then run the installer inside.
 ```
 
 [← Running overview](README.md)

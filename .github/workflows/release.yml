@@ -1,5 +1,5 @@
 # Build SatX desktop installers on tag push (v*).
-# Attaches a small set of renamed installers per OS (no .app internals or duplicate exes).
+# Publishes three platform archives (zip / zip / tar.gz), each with installers + README.md + LICENSE.
 name: release
 
 on:
@@ -12,7 +12,7 @@ on:
       version:
         description: 'Release tag name (e.g. v0.1.0)'
         required: true
-        default: 'v0.1.0'
+        default: 'v0.2.0'
 
 permissions:
   contents: write
@@ -142,12 +142,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-          merge-multiple: true
-
       - name: Resolve release tag
         id: tag
         run: |
@@ -157,44 +151,19 @@ jobs:
             echo "name=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Stage release assets (flat, consistent names)
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: satx-*
+          path: artifacts
+          merge-multiple: true
+
+      - name: Package platform archives (installers + docs)
         run: |
-          set -euo pipefail
-          REF="${{ steps.tag.outputs.name }}"
-          VERSION="${REF#v}"
-          OUT="release-upload"
-          rm -rf "$OUT"
-          mkdir -p "$OUT"
-
-          shopt -s nullglob globstar
-
-          for f in artifacts/**/*.msi; do
-            cp "$f" "$OUT/SatX-${VERSION}-Windows-x64.msi"
-          done
-
-          for f in artifacts/**/*-setup.exe artifacts/**/*setup.exe; do
-            cp "$f" "$OUT/SatX-${VERSION}-Windows-x64-Setup.exe"
-          done
-
-          for f in artifacts/**/*.dmg; do
-            cp "$f" "$OUT/SatX-${VERSION}-macOS.dmg"
-          done
-
-          for f in artifacts/**/*.deb; do
-            cp "$f" "$OUT/SatX-${VERSION}-Linux-x64.deb"
-          done
-
-          for f in artifacts/**/*.AppImage; do
-            cp "$f" "$OUT/SatX-${VERSION}-Linux-x64.AppImage"
-          done
-
-          echo "Staged assets:"
-          ls -la "$OUT"
-
-          if [ -z "$(ls -A "$OUT")" ]; then
-            echo "No release assets found."
-            exit 1
-          fi
+          chmod +x scripts/package-release-archives.sh
+          VERSION="${{ steps.tag.outputs.name }}"
+          VERSION="${VERSION#v}"
+          bash scripts/package-release-archives.sh "$VERSION" artifacts release-upload
 
       - name: Write release notes
         run: |
@@ -207,13 +176,13 @@ jobs:
 
           ### Downloads (pick your platform)
 
-          | Platform | File | Notes |
-          |----------|------|--------|
-          | **Windows** | \`SatX-${VERSION}-Windows-x64.msi\` | Recommended — Windows Installer |
-          | **Windows** | \`SatX-${VERSION}-Windows-x64-Setup.exe\` | Alternative NSIS setup |
-          | **macOS** | \`SatX-${VERSION}-macOS.dmg\` | Open disk image, drag app to Applications |
-          | **Linux** | \`SatX-${VERSION}-Linux-x64.deb\` | Debian / Ubuntu-style systems |
-          | **Linux** | \`SatX-${VERSION}-Linux-x64.AppImage\` | Portable AppImage (if built) |
+          Extract the archive for your OS. Each includes installers, \`README.md\`, \`LICENSE\`, \`ACKNOWLEDGMENTS.md\`, and the \`docs/\` folder (user guide, build notes).
+
+          | Platform | File | Contents |
+          |----------|------|----------|
+          | **Windows** | \`SatX-${VERSION}-Windows-x64.zip\` | MSI, NSIS Setup.exe, README, LICENSE, docs/ |
+          | **macOS** | \`SatX-${VERSION}-macOS.zip\` | \`.dmg\`, README, LICENSE, docs/ |
+          | **Linux** | \`SatX-${VERSION}-Linux-x64.tar.gz\` | \`.deb\`, AppImage (if built), README, LICENSE, docs/ |
 
           ### Requirements
 
