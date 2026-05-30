@@ -13,6 +13,13 @@ export const GLOBE_SURFACE_BIAS = 1.002;
 /** Default camera distance when framing a surface point. */
 export const DEFAULT_CAMERA_DISTANCE = 2.75;
 
+/**
+ * Farthest camera distance (globe radii). Large enough to frame high-altitude
+ * orbits: GPS/MEO sit at ~4.2 and GEO at ~6.6 globe radii from Earth's center,
+ * so the camera must be able to pull back beyond them.
+ */
+export const MAX_CAMERA_DISTANCE = 9;
+
 const DEG2RAD = Math.PI / 180;
 
 /**

@@ -11,6 +11,7 @@ import type { SatelliteLookTarget } from '../lib/starlinkPointing';
 import {
   GLOBE_RADIUS,
   GLOBE_RADIAL_BIAS,
+  MAX_CAMERA_DISTANCE,
   geodeticToCartesian,
 } from '../lib/geo';
 import { GroundStationsLayer } from './GroundStationsLayer';
@@ -645,7 +646,7 @@ function GlobeOrbitControls({
         ref={controlsRef}
         enablePan={false}
         minDistance={GLOBE_RADIUS * 1.35}
-        maxDistance={GLOBE_RADIUS * 6}
+        maxDistance={MAX_CAMERA_DISTANCE}
         rotateSpeed={0.45}
         zoomSpeed={0.9}
         dampingFactor={0.08}

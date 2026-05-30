@@ -53,7 +53,7 @@ Starlink alignment is read from the **local dish** on your network (`192.168.100
 
 ## Earth imagery
 
-The globe uses a bundled day-time Earth texture (`src/assets/earth_day.jpg`, 4096×2048 equirectangular) derived from [**NASA Visible Earth — Blue Marble**](https://visibleearth.nasa.gov/collection/1484/blue-marble), which is in the **public domain**. NASA imagery generally does not require attribution but credit is appreciated; do not imply NASA endorsement.
+The globe uses a bundled day-time Earth texture (`src/assets/earth_day.jpg`, 4096×2048 equirectangular) derived from [**NASA Visible Earth — Blue Marble**](https://visibleearth.nasa.gov/collection/1484/blue-marble), which is in the **public domain**. Use of this imagery does not imply NASA endorsement.
 
 ## Licenses
 
