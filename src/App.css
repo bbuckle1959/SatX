@@ -319,6 +319,43 @@
   background: #1a1520;
 }
 
+.satellite-list li.servicing-candidate {
+  border-color: #f59e0b;
+}
+
+.satellite-list li.servicing-candidate.selected {
+  border-color: #f59e0b;
+  background: #1a1810;
+}
+
+.servicing-link-label {
+  display: inline-block;
+  margin: 0;
+  padding: 1px 4px;
+  font-size: 9px;
+  line-height: 1.1;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-weight: 500;
+  color: #e2e8f0;
+  background: rgba(5, 8, 16, 0.88);
+  border: 1px solid;
+  border-radius: 2px;
+  white-space: nowrap;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+}
+
+.servicing-link-label:hover {
+  background: rgba(15, 23, 42, 0.95);
+  color: #fff;
+}
+
+.servicing-link-label--selected {
+  background: rgba(30, 41, 59, 0.95);
+  color: #fbbf24;
+  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.45);
+}
+
 .satellite-list li:focus-visible {
   outline: 2px solid #3d6cf5;
   outline-offset: 2px;

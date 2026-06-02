@@ -7,7 +7,6 @@ import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import type { SatelliteCoordinates } from '../hooks/useSatellitePropagation';
 import { lerpSatelliteCoordinates } from '../lib/lerpGeodetic';
 import type { UserLocation } from '../hooks/useUserLocation';
-import type { SatelliteLookTarget } from '../lib/starlinkPointing';
 import {
   GLOBE_RADIUS,
   GLOBE_RADIAL_BIAS,
@@ -15,7 +14,11 @@ import {
   geodeticToCartesian,
 } from '../lib/geo';
 import { GroundStationsLayer } from './GroundStationsLayer';
-import { StarlinkServicingLayer } from './StarlinkServicingLayer';
+import {
+  StarlinkServicingLayer,
+  SERVICING_LINK_COLORS,
+  type ServicingCandidateLink,
+} from './StarlinkServicingLayer';
 import type { GroundStation } from '../lib/groundStationTypes';
 import {
   filterGroundStationsForPick,
@@ -41,7 +44,6 @@ const MARKER_RADIAL_BIAS = GLOBE_RADIAL_BIAS;
 const MIN_MOVE_SQ = 1e-16;
 const DEFAULT_SAT_COLOR = '#5eead4';
 const SELECTED_SAT_COLOR = '#fbbf24';
-const SERVICING_STARLINK_COLOR = '#ff9500';
 
 interface MarkerFrameState {
   x: number;
@@ -98,11 +100,13 @@ interface GlobeSceneProps {
   selectedId: string | null;
   selectedIdRef: RefObject<string | null>;
   typeById: ReadonlyMap<string, ObjectType>;
-  servicingStarlinkId: string | null;
-  servicingStarlink: SatelliteLookTarget | null;
+  servicingStarlinkIds: readonly string[];
+  servicingCandidateLinks: ReadonlyArray<ServicingCandidateLink>;
   catalogPositionsRef: RefObject<SatelliteCoordinates[]>;
   userLocation: UserLocation | null;
   onSelectSatelliteRef: RefObject<(id: string | null) => void>;
+  onSelectServicingLabelRef: RefObject<(id: string) => void>;
+  globePickSuppressUntilRef: RefObject<number>;
   onRenderFps: (fps: number) => void;
   isMobile: boolean;
   groundStations: ReadonlyArray<GroundStation>;
@@ -114,6 +118,10 @@ interface GlobeSceneProps {
   onClearSelectionRef: RefObject<() => void>;
 }
 
+function isGlobePickSuppressed(suppressUntilRef: RefObject<number>): boolean {
+  return performance.now() < suppressUntilRef.current;
+}
+
 interface SatelliteInstancesProps {
   positionsRef: RefObject<SatelliteCoordinates[]>;
   targetPositionsRef: RefObject<SatelliteCoordinates[]>;
@@ -121,10 +129,11 @@ interface SatelliteInstancesProps {
   lerpStartAtRef: RefObject<number>;
   lerpDurationMs: number;
   selectedIdRef: RefObject<string | null>;
-  servicingStarlinkId: string | null;
+  servicingStarlinkIds: readonly string[];
   visibleInstanceIdsRef: RefObject<string[]>;
   selectedScenePosRef: RefObject<{ x: number; y: number; z: number } | null>;
   onSelectSatelliteRef: RefObject<(id: string | null) => void>;
+  globePickSuppressUntilRef: RefObject<number>;
   onSelectGroundStationRef: RefObject<(id: string | null) => void>;
   maxInstances: number;
   pickRadius: number;
@@ -162,12 +171,14 @@ function EarthPlaceholder({ segments }: { segments: number }) {
 function EarthGlobeTextured({
   onClearSelectionRef,
   onSelectGroundStationRef,
+  globePickSuppressUntilRef,
   groundStationsForPick,
   groundStationScreenPickPx,
   segments,
 }: {
   onClearSelectionRef: RefObject<() => void>;
   onSelectGroundStationRef: RefObject<(id: string | null) => void>;
+  globePickSuppressUntilRef: RefObject<number>;
   groundStationsForPick: ReadonlyArray<GroundStation>;
   groundStationScreenPickPx: number;
   segments: number;
@@ -185,6 +196,7 @@ function EarthGlobeTextured({
     <mesh
       onClick={(e: ThreeEvent<MouseEvent>) => {
         e.stopPropagation();
+        if (isGlobePickSuppressed(globePickSuppressUntilRef)) return;
         if (groundStationsForPick.length > 0) {
           const groundId = pickGroundStationAtClientPoint(
             e.nativeEvent.clientX,
@@ -211,12 +223,14 @@ function EarthGlobeTextured({
 function EarthGlobe({
   onClearSelectionRef,
   onSelectGroundStationRef,
+  globePickSuppressUntilRef,
   groundStationsForPick,
   groundStationScreenPickPx,
   segments,
 }: {
   onClearSelectionRef: RefObject<() => void>;
   onSelectGroundStationRef: RefObject<(id: string | null) => void>;
+  globePickSuppressUntilRef: RefObject<number>;
   groundStationsForPick: ReadonlyArray<GroundStation>;
   groundStationScreenPickPx: number;
   segments: number;
@@ -226,6 +240,7 @@ function EarthGlobe({
       <EarthGlobeTextured
         onClearSelectionRef={onClearSelectionRef}
         onSelectGroundStationRef={onSelectGroundStationRef}
+        globePickSuppressUntilRef={globePickSuppressUntilRef}
         groundStationsForPick={groundStationsForPick}
         groundStationScreenPickPx={groundStationScreenPickPx}
         segments={segments}
@@ -241,10 +256,11 @@ function SatelliteInstances({
   lerpStartAtRef,
   lerpDurationMs,
   selectedIdRef,
-  servicingStarlinkId,
+  servicingStarlinkIds,
   visibleInstanceIdsRef,
   selectedScenePosRef,
   onSelectSatelliteRef,
+  globePickSuppressUntilRef,
   onSelectGroundStationRef,
   maxInstances,
   pickRadius,
@@ -273,6 +289,7 @@ function SatelliteInstances({
 
   const selectInstance = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
+    if (isGlobePickSuppressed(globePickSuppressUntilRef)) return;
 
     if (groundStationsForPick.length > 0) {
       const groundId = pickGroundStationAtClientPoint(
@@ -347,7 +364,7 @@ function SatelliteInstances({
     }
 
     const selectedId = selectedIdRef.current;
-    const servicingId = servicingStarlinkId;
+    const servicingIds = servicingStarlinkIds;
     const visibleIds: string[] = [];
     let instanceIndex = 0;
     let selectedScenePos: { x: number; y: number; z: number } | null = null;
@@ -402,10 +419,15 @@ function SatelliteInstances({
 
       if (sat.id === selectedId) {
         color.set(SELECTED_SAT_COLOR);
-      } else if (servicingId && sat.id === servicingId) {
-        color.set(SERVICING_STARLINK_COLOR);
       } else {
-        color.set(DEFAULT_SAT_COLOR);
+        const servicingRank = servicingIds.indexOf(sat.id);
+        if (servicingRank >= 0) {
+          color.set(
+            SERVICING_LINK_COLORS[servicingRank] ?? SERVICING_LINK_COLORS[2],
+          );
+        } else {
+          color.set(DEFAULT_SAT_COLOR);
+        }
       }
       mesh.setColorAt(instanceIndex, color);
 
@@ -703,11 +725,13 @@ function GlobeScene({
   selectedId,
   selectedIdRef,
   typeById,
-  servicingStarlinkId,
-  servicingStarlink,
+  servicingStarlinkIds,
+  servicingCandidateLinks,
   catalogPositionsRef,
   userLocation,
   onSelectSatelliteRef,
+  onSelectServicingLabelRef,
+  globePickSuppressUntilRef,
   onRenderFps,
   isMobile,
   groundStations,
@@ -778,6 +802,7 @@ function GlobeScene({
       <EarthGlobe
         onClearSelectionRef={onClearSelectionRef}
         onSelectGroundStationRef={onSelectGroundStationRef}
+        globePickSuppressUntilRef={globePickSuppressUntilRef}
         groundStationsForPick={groundStationsForPick}
         groundStationScreenPickPx={renderProfile.groundStationScreenPickPx}
         segments={renderProfile.earthSegments}
@@ -800,10 +825,11 @@ function GlobeScene({
         lerpStartAtRef={lerpStartAtRef}
         lerpDurationMs={lerpDurationMs}
         selectedIdRef={selectedIdRef}
-        servicingStarlinkId={servicingStarlinkId}
+        servicingStarlinkIds={servicingStarlinkIds}
         visibleInstanceIdsRef={visibleInstanceIdsRef}
         selectedScenePosRef={selectedScenePosRef}
         onSelectSatelliteRef={onSelectSatelliteRef}
+        globePickSuppressUntilRef={globePickSuppressUntilRef}
         onSelectGroundStationRef={onSelectGroundStationRef}
         maxInstances={renderProfile.maxInstances}
         pickRadius={satellitePickRadius}
@@ -815,15 +841,16 @@ function GlobeScene({
         <UserLocationMarker location={userLocation} isMobile={isMobile} />
       )}
 
-      {userLocation && servicingStarlink && servicingStarlinkId && (
+      {userLocation && servicingCandidateLinks.length > 0 && (
         <StarlinkServicingLayer
           userLocation={userLocation}
-          servicingStarlink={servicingStarlink}
-          servicingStarlinkId={servicingStarlinkId}
+          candidates={servicingCandidateLinks}
           positionsById={positionsById}
           positionsRef={positionsRef}
           targetPositionsRef={targetPositionsRef}
           catalogPositionsRef={catalogPositionsRef}
+          onSelectServicingLabelRef={onSelectServicingLabelRef}
+          selectedId={selectedId}
         />
       )}
 
@@ -855,11 +882,13 @@ interface GlobeVisualizerProps {
   selectedId: string | null;
   selectedIdRef: RefObject<string | null>;
   typeById: ReadonlyMap<string, ObjectType>;
-  servicingStarlinkId: string | null;
-  servicingStarlink: SatelliteLookTarget | null;
+  servicingStarlinkIds: readonly string[];
+  servicingCandidateLinks: ReadonlyArray<ServicingCandidateLink>;
   catalogPositionsRef: RefObject<SatelliteCoordinates[]>;
   userLocation: UserLocation | null;
   onSelectSatellite: (id: string | null) => void;
+  onSelectServicingLabelRef: RefObject<(id: string) => void>;
+  globePickSuppressUntilRef: RefObject<number>;
   onRenderFps: (fps: number) => void;
   isMobile: boolean;
   groundStations: ReadonlyArray<GroundStation>;
@@ -880,11 +909,13 @@ export function GlobeVisualizer({
   selectedId,
   selectedIdRef,
   typeById,
-  servicingStarlinkId,
-  servicingStarlink,
+  servicingStarlinkIds,
+  servicingCandidateLinks,
   catalogPositionsRef,
   userLocation,
   onSelectSatellite,
+  onSelectServicingLabelRef,
+  globePickSuppressUntilRef,
   onRenderFps,
   isMobile,
   groundStations,
@@ -938,11 +969,13 @@ export function GlobeVisualizer({
           selectedId={selectedId}
           selectedIdRef={selectedIdRef}
           typeById={typeById}
-          servicingStarlinkId={servicingStarlinkId}
-          servicingStarlink={servicingStarlink}
+          servicingStarlinkIds={servicingStarlinkIds}
+          servicingCandidateLinks={servicingCandidateLinks}
           catalogPositionsRef={catalogPositionsRef}
           userLocation={userLocation}
           onSelectSatelliteRef={onSelectSatelliteRef}
+          onSelectServicingLabelRef={onSelectServicingLabelRef}
+          globePickSuppressUntilRef={globePickSuppressUntilRef}
           onRenderFps={onRenderFps}
           isMobile={isMobile}
           groundStations={groundStations}

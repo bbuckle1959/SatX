@@ -73,26 +73,28 @@ export function dishPointingUnitVector(
     .normalize();
 }
 
-/**
- * Pick the Starlink satellite whose direction from the observer best aligns with
- * the dish boresight (smallest angular separation). Only considers satellites at
- * least {@link MIN_SERVICING_SATELLITE_ELEVATION_DEG} above the local horizon.
- */
-export function findServicingStarlink(
+export interface ServicingCandidateMatch {
+  target: SatelliteLookTarget;
+  /** Angular separation from dish boresight (radians); lower is a better match. */
+  angleRad: number;
+}
+
+/** Default number of dish-alignment candidates to track in Starlink mode. */
+export const SERVICING_CANDIDATE_COUNT = 3;
+
+function collectServicingMatches(
   observer: GeodeticObserver,
   azimuthDeg: number,
   elevationDeg: number,
   satellites: ReadonlyArray<SatelliteLookTarget>,
   typeById: ReadonlyMap<string, ObjectType>,
-): SatelliteLookTarget | null {
+): ServicingCandidateMatch[] {
   const pointing = dishPointingUnitVector(observer, azimuthDeg, elevationDeg);
   const [ox, oy, oz] = geodeticToCartesian(observer.latitude, observer.longitude, 0);
   const observerPos = new THREE.Vector3(ox, oy, oz);
   const upAxis = observerPos.clone().normalize();
   const minElRad = MIN_SERVICING_SATELLITE_ELEVATION_DEG * DEG2RAD;
-
-  let best: SatelliteLookTarget | null = null;
-  let bestAngleRad = Infinity;
+  const matches: ServicingCandidateMatch[] = [];
 
   for (const sat of satellites) {
     if (!isStarlinkObject(sat.id, sat.name, typeById)) continue;
@@ -111,13 +113,53 @@ export function findServicingStarlink(
 
     toSat.normalize();
     const dot = THREE.MathUtils.clamp(pointing.dot(toSat), -1, 1);
-    const angle = Math.acos(dot);
-
-    if (angle < bestAngleRad) {
-      bestAngleRad = angle;
-      best = sat;
-    }
+    const angleRad = Math.acos(dot);
+    matches.push({ target: sat, angleRad });
   }
 
-  return best;
+  matches.sort((a, b) => a.angleRad - b.angleRad);
+  return matches;
+}
+
+/**
+ * Top N Starlink satellites best aligned with dish boresight (smallest angle first).
+ */
+export function findServicingStarlinkCandidates(
+  observer: GeodeticObserver,
+  azimuthDeg: number,
+  elevationDeg: number,
+  satellites: ReadonlyArray<SatelliteLookTarget>,
+  typeById: ReadonlyMap<string, ObjectType>,
+  limit = SERVICING_CANDIDATE_COUNT,
+): ServicingCandidateMatch[] {
+  if (limit <= 0) return [];
+  return collectServicingMatches(
+    observer,
+    azimuthDeg,
+    elevationDeg,
+    satellites,
+    typeById,
+  ).slice(0, limit);
+}
+
+/**
+ * Best single match (first entry from {@link findServicingStarlinkCandidates}).
+ */
+export function findServicingStarlink(
+  observer: GeodeticObserver,
+  azimuthDeg: number,
+  elevationDeg: number,
+  satellites: ReadonlyArray<SatelliteLookTarget>,
+  typeById: ReadonlyMap<string, ObjectType>,
+): SatelliteLookTarget | null {
+  return (
+    findServicingStarlinkCandidates(
+      observer,
+      azimuthDeg,
+      elevationDeg,
+      satellites,
+      typeById,
+      1,
+    )[0]?.target ?? null
+  );
 }

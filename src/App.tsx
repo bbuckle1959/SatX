@@ -9,12 +9,17 @@ import { MobileBottomSheet } from './components/MobileBottomSheet';
 import type { StarlinkAlignment } from './components/StarlinkPanel';
 import { dishObserverSite } from './lib/dishSite';
 import { MOBILE_UI_ENABLED } from './lib/features';
-import { findServicingStarlink } from './lib/starlinkPointing';
+import {
+  findServicingStarlinkCandidates,
+  SERVICING_CANDIDATE_COUNT,
+} from './lib/starlinkPointing';
+import type { ServicingCandidateLink } from './components/StarlinkServicingLayer';
 import type { GlobePopulationMode } from './lib/globeCatalog';
 import { getGlobeMaxInstances } from './lib/mobileGlobe';
 import { nearestBySlantRange } from './lib/nearestSatellites';
 import {
   findSatelliteById,
+  findSatelliteForSelection,
   getSatelliteFromMap,
 } from './lib/satelliteLookup';
 import {
@@ -67,6 +72,9 @@ function App() {
   const isMobile = MOBILE_UI_ENABLED && viewportMobile;
   const selectedIdRef = useRef<string | null>(null);
   selectedIdRef.current = selectedId;
+  /** After servicing-label click, ignore globe instance picks briefly. */
+  const globePickSuppressUntilRef = useRef(0);
+  const onSelectServicingLabelRef = useRef<(id: string) => void>(() => {});
 
   const typeById = useMemo(() => buildTypeById(tles), [tles]);
   const tleById = useMemo(() => {
@@ -76,7 +84,8 @@ function App() {
   }, [tles]);
 
   const starlinkFilterActive = objectTypeFilter === 'starlink';
-  const [servicingPinId, setServicingPinId] = useState<string | null>(null);
+  /** Stable join of servicing candidate ids for globe pinIds (avoids worker restarts). */
+  const [servicingPinIdsKey, setServicingPinIdsKey] = useState('');
   const [showGateways, setShowGateways] = useState(true);
   const [showPops, setShowPops] = useState(false);
   const [groundStations, setGroundStations] = useState(
@@ -93,10 +102,14 @@ function App() {
       };
     });
 
-  const globePinIds = useMemo(
-    () => [selectedId, starlinkFilterActive ? servicingPinId : null],
-    [selectedId, starlinkFilterActive, servicingPinId],
-  );
+  const globePinIds = useMemo(() => {
+    const pins: (string | null)[] = [selectedId];
+    if (!servicingPinIdsKey) return pins;
+    for (const id of servicingPinIdsKey.split(',')) {
+      if (id) pins.push(id);
+    }
+    return pins;
+  }, [selectedId, servicingPinIdsKey]);
 
   useEffect(() => {
     if (!starlinkFilterActive) {
@@ -194,7 +207,7 @@ function App() {
   const selectedSatellite = useMemo(() => {
     if (!selectedId) return null;
     return (
-      findSatelliteById(
+      findSatelliteForSelection(
         selectedId,
         positionsById,
         positionsRef,
@@ -213,6 +226,12 @@ function App() {
   );
 
   const handleSelectSatellite = (id: string | null) => {
+    setSelectedGroundStationId(null);
+    setSelectedId(id);
+  };
+
+  onSelectServicingLabelRef.current = (id: string) => {
+    globePickSuppressUntilRef.current = performance.now() + 400;
     setSelectedGroundStationId(null);
     setSelectedId(id);
   };
@@ -270,14 +289,15 @@ function App() {
     return out;
   }, [starlinkFilterActive, positionEpoch, typeById, catalogPositionsRef]);
 
-  const servicingStarlink = useMemo(() => {
-    if (!starlinkFilterActive || !starlinkAlignment || !dishSite) return null;
-    return findServicingStarlink(
+  const servicingStarlinkCandidates = useMemo(() => {
+    if (!starlinkFilterActive || !starlinkAlignment || !dishSite) return [];
+    return findServicingStarlinkCandidates(
       dishSite,
       starlinkAlignment.azimuth_deg,
       starlinkAlignment.elevation_deg,
       starlinkCatalog,
       typeById,
+      SERVICING_CANDIDATE_COUNT,
     );
   }, [
     starlinkFilterActive,
@@ -287,11 +307,30 @@ function App() {
     typeById,
   ]);
 
-  const servicingStarlinkId = servicingStarlink?.id ?? null;
+  const servicingStarlinkIds = useMemo(
+    () => servicingStarlinkCandidates.map((m) => m.target.id),
+    [servicingStarlinkCandidates],
+  );
 
+  const servicingStarlinkId = servicingStarlinkIds[0] ?? null;
+  const servicingStarlink = servicingStarlinkCandidates[0]?.target ?? null;
+
+  const servicingPinIdsKeyNext = starlinkFilterActive
+    ? servicingStarlinkIds.join(',')
+    : '';
   useEffect(() => {
-    setServicingPinId(servicingStarlinkId);
-  }, [servicingStarlinkId]);
+    setServicingPinIdsKey((prev) =>
+      prev === servicingPinIdsKeyNext ? prev : servicingPinIdsKeyNext,
+    );
+  }, [servicingPinIdsKeyNext]);
+
+  const servicingCandidateLinks = useMemo((): ServicingCandidateLink[] => {
+    return servicingStarlinkCandidates.map((match, rank) => ({
+      id: match.target.id,
+      name: match.target.name,
+      rank,
+    }));
+  }, [servicingStarlinkCandidates]);
 
   const listItems = useMemo(() => {
     const buildItem = (sat: SatelliteCoordinates) => ({
@@ -310,20 +349,26 @@ function App() {
       );
     }
 
-    if (!starlinkFilterActive || !servicingStarlink) return items;
+    if (!starlinkFilterActive || servicingStarlinkCandidates.length === 0) {
+      return items;
+    }
 
-    const servicingId = servicingStarlink.id;
-    const live =
-      getSatelliteFromMap(positionsById, servicingId, servicingStarlink) ??
-      servicingStarlink;
-    const servicingItem = buildItem(live);
-    const rest = items.filter((item) => item.sat.id !== servicingId);
-    return [servicingItem, ...rest].slice(0, LIST_LIMIT);
+    const candidateIds = new Set(
+      servicingStarlinkCandidates.map((m) => m.target.id),
+    );
+    const pinned = servicingStarlinkCandidates.map((match) => {
+      const id = match.target.id;
+      const live =
+        getSatelliteFromMap(positionsById, id, match.target) ?? match.target;
+      return buildItem(live);
+    });
+    const rest = items.filter((item) => !candidateIds.has(item.sat.id));
+    return [...pinned, ...rest].slice(0, LIST_LIMIT);
   }, [
     positions,
     positionsById,
     userLocation,
-    servicingStarlink,
+    servicingStarlinkCandidates,
     starlinkFilterActive,
   ]);
 
@@ -360,7 +405,8 @@ function App() {
     tlesCount: tles.length,
     starlinkAlignment,
     onAlignmentChange: setStarlinkAlignment,
-    servicingStarlinkId,
+    servicingStarlinkIds,
+    servicingCandidateLinks,
     dishSite,
     loading,
     isParsing,
@@ -397,15 +443,17 @@ function App() {
           selectedId={selectedId}
           selectedIdRef={selectedIdRef}
           typeById={typeById}
-          servicingStarlinkId={
-            starlinkFilterActive ? servicingStarlinkId : null
+          servicingStarlinkIds={
+            starlinkFilterActive ? servicingStarlinkIds : []
           }
-          servicingStarlink={
-            starlinkFilterActive ? servicingStarlink : null
+          servicingCandidateLinks={
+            starlinkFilterActive ? servicingCandidateLinks : []
           }
           catalogPositionsRef={catalogPositionsRef}
           userLocation={userLocation}
           onSelectSatellite={handleSelectSatellite}
+          onSelectServicingLabelRef={onSelectServicingLabelRef}
+          globePickSuppressUntilRef={globePickSuppressUntilRef}
           onRenderFps={setRenderFps}
           isMobile={isMobile}
           groundStations={groundStations}

@@ -20,6 +20,46 @@ export const DEFAULT_CAMERA_DISTANCE = 2.75;
  */
 export const MAX_CAMERA_DISTANCE = 9;
 
+/** OrbitControls minimum distance (matches GlobeVisualizer). */
+export const MIN_CAMERA_DISTANCE = GLOBE_RADIUS * 1.35;
+
+/** Discrete zoom bands from farthest (1) to closest ({@link CAMERA_ZOOM_BANDS}). */
+export const CAMERA_ZOOM_BANDS = 6;
+
+/** Servicing link NORAD labels appear only in this many closest zoom bands. */
+export const SERVICING_LABEL_ZOOM_BANDS = 2;
+
+/** Max camera distance (from globe center) at which servicing labels may show. */
+export function servicingLabelMaxCameraDistance(
+  bands = CAMERA_ZOOM_BANDS,
+  labelBands = SERVICING_LABEL_ZOOM_BANDS,
+): number {
+  const span = MAX_CAMERA_DISTANCE - MIN_CAMERA_DISTANCE;
+  const hiddenBands = Math.max(0, bands - labelBands);
+  return MIN_CAMERA_DISTANCE + (hiddenBands / bands) * span;
+}
+
+export function cameraZoomBand(
+  cameraDistance: number,
+  bands = CAMERA_ZOOM_BANDS,
+): number {
+  const clamped = Math.min(
+    MAX_CAMERA_DISTANCE,
+    Math.max(MIN_CAMERA_DISTANCE, cameraDistance),
+  );
+  const span = MAX_CAMERA_DISTANCE - MIN_CAMERA_DISTANCE;
+  if (span <= 0) return bands;
+  const fromClosest = (MAX_CAMERA_DISTANCE - clamped) / span;
+  return Math.min(bands, Math.max(1, 1 + Math.floor(fromClosest * bands)));
+}
+
+export function isServicingLabelZoom(cameraDistance: number): boolean {
+  return (
+    cameraZoomBand(cameraDistance) >
+    CAMERA_ZOOM_BANDS - SERVICING_LABEL_ZOOM_BANDS
+  );
+}
+
 const DEG2RAD = Math.PI / 180;
 
 /**

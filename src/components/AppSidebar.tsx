@@ -54,7 +54,12 @@ export interface AppSidebarProps {
   tlesCount: number;
   starlinkAlignment: StarlinkAlignment | null;
   onAlignmentChange: (data: StarlinkAlignment | null) => void;
-  servicingStarlinkId: string | null;
+  servicingStarlinkIds: readonly string[];
+  servicingCandidateLinks: ReadonlyArray<{
+    id: string;
+    name: string;
+    rank: number;
+  }>;
   dishSite: DishSite | null;
   loading: boolean;
   isParsing: boolean;
@@ -90,7 +95,8 @@ export function AppSidebar({
   tlesCount,
   starlinkAlignment,
   onAlignmentChange,
-  servicingStarlinkId,
+  servicingStarlinkIds,
+  servicingCandidateLinks,
   dishSite,
   loading,
   isParsing,
@@ -176,11 +182,13 @@ export function AppSidebar({
         <StarlinkPanel
           alignment={starlinkAlignment}
           onAlignmentChange={onAlignmentChange}
-          servicingSatelliteName={
-            listItems.find((item) => item.sat.id === servicingStarlinkId)?.sat
-              .name ?? null
-          }
-          servicingStarlinkId={servicingStarlinkId}
+          servicingCandidates={servicingCandidateLinks.map((link) => ({
+            id: link.id,
+            rank: link.rank,
+            name:
+              listItems.find((item) => item.sat.id === link.id)?.sat.name ??
+              link.name,
+          }))}
           onSelectServicing={onSelectSatellite}
           selectedId={selectedId}
           hasDishSite={dishSite !== null}
@@ -317,7 +325,10 @@ export function AppSidebar({
             <li
               key={sat.id}
               className={[
-                servicingStarlinkId === sat.id ? 'servicing' : '',
+                servicingStarlinkIds[0] === sat.id ? 'servicing' : '',
+                servicingStarlinkIds.indexOf(sat.id) > 0
+                  ? 'servicing-candidate'
+                  : '',
                 selectedId === sat.id ? 'selected' : '',
               ]
                 .filter(Boolean)

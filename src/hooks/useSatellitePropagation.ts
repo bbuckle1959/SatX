@@ -104,6 +104,8 @@ export function useSatellitePropagation(
   const userLocation = displayOptions?.userLocation ?? null;
   const globePopulation = displayOptions?.globePopulation ?? 'capped';
   const pinIds = displayOptions?.pinIds ?? [];
+  const pinIdsRef = useRef(pinIds);
+  pinIdsRef.current = pinIds;
   const maxInstances = getGlobeMaxInstances(isMobile);
 
   const [positions, setPositions] = useState<SatelliteCoordinates[]>([]);
@@ -172,7 +174,7 @@ export function useSatellitePropagation(
         next,
         globePopulation,
         userLocation,
-        pinIds,
+        pinIdsRef.current,
         maxInstances,
         typeById,
         getDisplayOptions(isMobile),
@@ -197,8 +199,11 @@ export function useSatellitePropagation(
       setPositionsById(new Map(catalogByIdRef.current));
       setPositionEpoch((epoch) => epoch + 1);
     },
-    [isMobile, userLocation, pinIds, maxInstances, typeById, globePopulation],
+    [isMobile, userLocation, maxInstances, typeById, globePopulation],
   );
+
+  const applyWorkerTargetsRef = useRef(applyWorkerTargets);
+  applyWorkerTargetsRef.current = applyWorkerTargets;
 
   const pinKey = pinIds
     .filter((id): id is string => typeof id === 'string' && id.length > 0)
@@ -207,8 +212,8 @@ export function useSatellitePropagation(
   useEffect(() => {
     const catalog = catalogPositionsRef.current;
     if (catalog.length === 0) return;
-    applyWorkerTargets(catalog);
-  }, [pinKey, globePopulation, applyWorkerTargets]);
+    applyWorkerTargetsRef.current(catalog);
+  }, [pinKey, globePopulation]);
 
   useEffect(() => {
     const worker = new Worker(
@@ -244,7 +249,7 @@ export function useSatellitePropagation(
           msg.coords,
           nameByIdRef.current,
         );
-        applyWorkerTargets(next);
+        applyWorkerTargetsRef.current(next);
 
         tickCountRef.current += 1;
         const elapsed = performance.now() - tickWindowStartRef.current;
@@ -276,7 +281,7 @@ export function useSatellitePropagation(
       worker.terminate();
       workerRef.current = null;
     };
-  }, [workerInitKey, applyWorkerTargets]);
+  }, [workerInitKey]);
 
   useEffect(() => {
     workerRef.current?.postMessage({ type: 'set-active-ids', ids: activeIds });

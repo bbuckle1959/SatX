@@ -14,11 +14,16 @@ function formatDegrees(value: number): string {
   return `${value.toFixed(1)}°`;
 }
 
+export interface ServicingCandidateUi {
+  id: string;
+  name: string;
+  rank: number;
+}
+
 interface StarlinkPanelProps {
   alignment: StarlinkAlignment | null;
   onAlignmentChange: (data: StarlinkAlignment | null) => void;
-  servicingSatelliteName?: string | null;
-  servicingStarlinkId?: string | null;
+  servicingCandidates?: ReadonlyArray<ServicingCandidateUi>;
   onSelectServicing?: (id: string) => void;
   selectedId?: string | null;
   hasDishSite?: boolean;
@@ -28,8 +33,7 @@ interface StarlinkPanelProps {
 export function StarlinkPanel({
   alignment,
   onAlignmentChange,
-  servicingSatelliteName,
-  servicingStarlinkId = null,
+  servicingCandidates = [],
   onSelectServicing,
   selectedId = null,
   hasDishSite = false,
@@ -159,7 +163,7 @@ export function StarlinkPanel({
         </p>
       )}
 
-      {alignment && hasDishSite && !servicingStarlinkId && (
+      {alignment && hasDishSite && servicingCandidates.length === 0 && (
         <p className="starlink-strip-hint" role="status">
           No in-beam satellite ≥{MIN_SERVICING_SATELLITE_ELEVATION_DEG}° above the
           horizon at the dish (low targets ignored for obstructions).
@@ -168,19 +172,25 @@ export function StarlinkPanel({
 
       {alignment &&
         hasDishSite &&
-        servicingSatelliteName &&
-        servicingStarlinkId && (
-          <button
-            type="button"
-            className={`starlink-strip-hint starlink-strip-servicing starlink-strip-servicing-btn${selectedId === servicingStarlinkId ? ' starlink-strip-servicing-btn--selected' : ''}`}
-            onClick={() => onSelectServicing?.(servicingStarlinkId)}
-          >
-            Servicing: {servicingSatelliteName}
-            {selectedId === servicingStarlinkId
-              ? ' · selected'
-              : ' · tap to select'}
-          </button>
-        )}
+        servicingCandidates.map((candidate) => {
+          const label =
+            candidate.rank === 0
+              ? `Servicing: ${candidate.name}`
+              : `Candidate ${candidate.rank + 1}: ${candidate.name}`;
+          return (
+            <button
+              key={candidate.id}
+              type="button"
+              className={`starlink-strip-hint starlink-strip-servicing starlink-strip-servicing-btn${selectedId === candidate.id ? ' starlink-strip-servicing-btn--selected' : ''}`}
+              onClick={() => onSelectServicing?.(candidate.id)}
+            >
+              {label}
+              {selectedId === candidate.id
+                ? ' · selected'
+                : ' · tap to select'}
+            </button>
+          );
+        })}
     </section>
   );
 }
