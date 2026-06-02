@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
 /** Scene-space marker radius (matches GlobeVisualizer dot scale). */
-export const SATELLITE_MARKER_RADIUS = 0.0035;
+export const SATELLITE_MARKER_RADIUS = 0.00175;
 
 const ARROW_LENGTH = SATELLITE_MARKER_RADIUS * 1.1;
 const ARROW_RADIUS = SATELLITE_MARKER_RADIUS * 0.425;
