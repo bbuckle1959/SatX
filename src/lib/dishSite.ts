@@ -1,7 +1,7 @@
 import type { UserLocation } from '../hooks/useUserLocation';
 import type { GeodeticObserver } from './starlinkPointing';
 
-/** Observer site for dish boresight — always browser geolocation, never a default. */
+/** Observer site for dish boresight — device GPS/Wi‑Fi only (never IP geolocation). */
 export type DishSite = GeodeticObserver;
 
 /** Dish boresight math uses browser geolocation only (red ground marker). */
