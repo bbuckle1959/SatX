@@ -497,14 +497,19 @@ function App() {
               {userLocation.longitude.toFixed(1)}°
             </span>
           )}
-          {isMobile && !userLocation && locationStatus === 'pending' && (
+          {!userLocation && locationStatus === 'pending' && (
             <span className="overlay-pill overlay-pill--location-warn">
-              Locating…
+              Locating… (GPS / Wi‑Fi)
             </span>
           )}
-          {isMobile && !userLocation && locationStatus === 'denied' && (
+          {!userLocation && locationStatus === 'denied' && (
             <span className="overlay-pill overlay-pill--location-warn">
-              Location off — enable in settings
+              Location off — enable precise location in settings
+            </span>
+          )}
+          {!userLocation && locationStatus === 'unsupported' && (
+            <span className="overlay-pill overlay-pill--location-warn">
+              Location not available in this browser
             </span>
           )}
           {starlinkFilterActive && showGateways && (

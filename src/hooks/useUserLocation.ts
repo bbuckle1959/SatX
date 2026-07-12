@@ -1,18 +1,35 @@
 import { useEffect, useState } from 'react';
 
-import { useIsMobileViewport } from './useMediaQuery';
+/**
+ * Reject network / IP-style fixes. Wi‑Fi and GPS are typically well under this;
+ * coarse IP geolocation is often tens of km or more.
+ */
+const MAX_ACCEPTABLE_ACCURACY_M = 5_000;
 
 export interface UserLocation {
   latitude: number;
   longitude: number;
+  /** Horizontal accuracy radius in metres (from Geolocation API). */
+  accuracyMeters: number;
 }
 
 export type LocationStatus = 'pending' | 'ready' | 'denied' | 'unsupported';
 
+function isPreciseDeviceFix(coords: GeolocationCoordinates): boolean {
+  const { accuracy } = coords;
+  if (accuracy == null || !Number.isFinite(accuracy)) return false;
+  return accuracy <= MAX_ACCEPTABLE_ACCURACY_M;
+}
+
+const GEO_OPTIONS: PositionOptions = {
+  enableHighAccuracy: true,
+  maximumAge: 0,
+  timeout: 30_000,
+};
+
 export function useUserLocation() {
   const [location, setLocation] = useState<UserLocation | null>(null);
   const [status, setStatus] = useState<LocationStatus>('pending');
-  const isMobile = useIsMobileViewport();
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -21,35 +38,34 @@ export function useUserLocation() {
     }
 
     const onSuccess = (position: GeolocationPosition) => {
+      if (!isPreciseDeviceFix(position.coords)) return;
+
       setLocation({
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,
+        accuracyMeters: position.coords.accuracy!,
       });
       setStatus('ready');
     };
 
-    const onError = () => {
-      setStatus('denied');
+    const onError = (err: GeolocationPositionError) => {
+      if (err.code === err.PERMISSION_DENIED) {
+        setStatus('denied');
+      }
     };
 
-    const options: PositionOptions = {
-      enableHighAccuracy: isMobile,
-      timeout: isMobile ? 20_000 : 12_000,
-      maximumAge: isMobile ? 60_000 : 600_000,
-    };
-
-    navigator.geolocation.getCurrentPosition(onSuccess, onError, options);
+    navigator.geolocation.getCurrentPosition(onSuccess, onError, GEO_OPTIONS);
 
     const watchId = navigator.geolocation.watchPosition(
       onSuccess,
-      undefined,
-      options,
+      onError,
+      GEO_OPTIONS,
     );
 
     return () => {
       navigator.geolocation.clearWatch(watchId);
     };
-  }, [isMobile]);
+  }, []);
 
   return { location, status };
 }
